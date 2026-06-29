@@ -7,30 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2D4A3E;
-            --primary-light: #3D6B5A;
-            --primary-bg: #E8EDE6;
-            --secondary-brown: #8B6914;
-            --secondary-warm: #C8956C;
-            --bg-primary: #F5F0E8;
-            --bg-card: #FDFBF7;
-            --text-primary: #1C1C1C;
-            --text-secondary: #5A5A52;
-            --text-hint: #8C8C82;
-            --color-like: #C0392B;
-            --radius-sm: 0px;
-            --radius-md: 0px;
-            --radius-lg: 0px;
-            --radius-xl: 0px;
-            --shadow-card: none;
-            --shadow-float: 0 2px 8px rgba(0,0,0,0.1);
-            --border: 1px solid #D4CFC4;
+            --primary: #1A6B4F;
+            --primary-light: #2E9B6E;
+            --primary-bg: #EEFBF4;
+            --secondary-brown: #B8860B;
+            --secondary-warm: #FF8C42;
+            --bg-primary: #F7F8FA;
+            --bg-card: #ffffff;
+            --text-primary: #1A1A2E;
+            --text-secondary: #4A4A5A;
+            --text-hint: #9A9AAE;
+            --color-like: #FF4757;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-float: 0 8px 32px rgba(0,0,0,0.12);
+            --border: none;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'DM Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #2D4A3E;
+            background: #1A1A2E;
             display: flex; justify-content: center; align-items: center;
             letter-spacing: 0.01em;
         }
@@ -40,14 +40,14 @@
             overflow: hidden; position: relative;
             display: flex; flex-direction: column;
         }
-        @media (min-height: 845px) { .phone-frame { border-radius: var(--radius-xl); box-shadow: 0 20px 60px rgba(0,0,0,0.5); } }
+        @media (min-height: 845px) { .phone-frame { border-radius: 32px; box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1); } }
         @media (max-width: 390px) { .phone-frame { width: 100vw; } }
 
         .status-bar {
-            height: 44px; background: var(--primary);
+            height: 44px; background: linear-gradient(135deg, #1A6B4F 0%, #2E9B6E 100%);
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 24px; font-size: 11px; font-weight: 500; flex-shrink: 0; z-index: 100;
-            color: #E8EDE6;
+            color: #fff;
         }
         .content-wrapper { flex: 1; position: relative; overflow: hidden; min-height: 0; }
         .tab-page {
@@ -56,34 +56,43 @@
             opacity: 0; pointer-events: none;
             background: var(--bg-primary);
             z-index: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
         }
-        .tab-page.active { opacity: 1; pointer-events: auto; z-index: 1; }
+        .tab-page.active { opacity: 1; pointer-events: auto; z-index: 1; transform: translateY(0); }
         .tab-page::-webkit-scrollbar { display: none; }
 
         /* Tab Bar */
         .tab-bar {
-            height: 56px; background: var(--bg-card);
+            height: 60px; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             display: flex; align-items: center; justify-content: space-around;
-            border-top: var(--border); flex-shrink: 0; z-index: 9999;
+            border-top: none; flex-shrink: 0; z-index: 9999;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.04);
         }
         .tab-item {
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
-            cursor: pointer; padding: 6px 14px; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            cursor: pointer; padding: 8px 18px; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            border-radius: 14px; position: relative;
         }
-        .tab-item .ti { font-size: 18px; }
-        .tab-item .tl { font-size: 9px; color: var(--text-hint); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-        .tab-item.active { border-top: 2px solid var(--primary); margin-top: -2px; }
+        .tab-item .ti { font-size: 20px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        .tab-item .tl { font-size: 10px; color: var(--text-hint); font-weight: 500; letter-spacing: 0.02em; transition: color 0.2s; }
+        .tab-item.active { background: transparent; }
+        .tab-item.active .ti { transform: scale(1.2) translateY(-2px); }
         .tab-item.active .tl { color: var(--primary); font-weight: 700; }
+        .tab-item.active::after { content:''; position:absolute; bottom:4px; width:5px; height:5px; border-radius:50%; background:var(--primary); }
+        .tab-item:active { transform: scale(0.9); }
 
         /* ===== MAP PAGE ===== */
         .map-page { display: flex; flex-direction: column; overflow: hidden !important; }
         .map-header {
-            padding: 12px 20px; background: var(--bg-card);
+            padding: 14px 20px; background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0; border-bottom: var(--border);
+            flex-shrink: 0; border-bottom: none;
         }
-        .map-header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; }
-        .map-title-sub { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.05em; }
+        .map-header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; color: var(--text-primary); }
+        .map-title-sub { font-size: 10px; color: var(--text-hint); letter-spacing: 0.02em; }
         .map-scroll {
             flex: 1; overflow: hidden; position: relative;
             background: #D4DFCB;
@@ -128,9 +137,10 @@
         .pin-dot.pin-empty::after { border-top-color: #ccc; }
         .pin-dot.pin-empty span { color: #999; font-weight: 700; }
         .pin-label {
-            margin-top: 4px; padding: 2px 6px; background: rgba(255,255,255,0.92);
-            border-radius:0; font-size: 9px; font-weight: 600; color: var(--text-primary);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1); white-space: nowrap;
+            margin-top: 4px; padding: 3px 8px; background: rgba(255,255,255,0.95);
+            border-radius: 10px; font-size: 9px; font-weight: 600; color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); white-space: nowrap;
+            backdrop-filter: blur(4px);
         }
         .pin-hot { position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background: #FF6B6B; border-radius: 50%; border: 2px solid white; }
         .pin-pulse {
@@ -150,7 +160,7 @@
         .legend-items { display: flex; flex-wrap: wrap; gap: 8px; }
         .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-secondary); }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .legend-line { width: 16px; height: 3px; border-radius:0; }
+        .legend-line { width: 16px; height: 3px; border-radius: 2px; }
 
         /* Spot detail overlay */
         .spot-overlay {
@@ -162,20 +172,22 @@
         .spot-overlay.show { opacity: 1; visibility: visible; }
         .spot-inner { background: var(--bg-primary); max-height: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
         .spot-inner::-webkit-scrollbar { display: none; }
-        .spot-header { background: var(--primary); flex-shrink: 0; }
+        .spot-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); flex-shrink: 0; }
         .spot-header {
-            padding: 16px 20px 12px; display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 20px 14px; display: flex; justify-content: space-between; align-items: center;
         }
-        .spot-header h3 { font-size: 16px; font-weight: 700; color: white; }
-        .spot-header .spot-loc { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
-        .close-btn { width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; color: white; }
+        .spot-header h3 { font-size: 17px; font-weight: 800; color: white; }
+        .spot-header .spot-loc { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+        .close-btn { width: 30px; height: 30px; background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: white; transition: transform 0.2s; }
+        .close-btn:active { transform: scale(0.85); }
         .spot-panel {
             padding: 0 16px 0;
         }
         .spot-panel > .bird-card:last-child { margin-bottom: 0; }
         .bird-card {
             background: var(--bg-card); border-radius: var(--radius-lg);
-            margin-bottom: 14px; overflow: hidden; border: var(--border);
+            margin-bottom: 10px; overflow: hidden; border: none;
+            box-shadow: var(--shadow-card);
         }
         .bird-card-top { display: flex; align-items: center; padding: 14px 16px 10px; gap: 12px; }
         .bird-card-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
@@ -183,7 +195,7 @@
         .bird-card-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
         .bird-card-latin { font-size: 11px; color: var(--text-hint); font-style: italic; }
         .bird-card-taxonomy { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
-        .bird-card-count { font-size: 10px; color: var(--primary); background: var(--primary-bg); padding: 2px 7px; border-radius:0; font-weight: 600; white-space: nowrap; }
+        .bird-card-count { font-size: 10px; color: var(--primary); background: var(--primary-bg); padding: 3px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
         .bird-sighting-scroll {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -193,13 +205,13 @@
             min-width: 100%; scroll-snap-align: start; padding: 0 16px 14px;
         }
         .bird-sighting-photo {
-            width: 100%; height: 160px; border-radius: var(--radius-md);
+            width: 100%; height: 160px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             font-size: 48px; position: relative; overflow: hidden;
         }
         .bird-sighting-photo::after {
-            content: '📷'; position: absolute; bottom: 8px; right: 10px; font-size: 16px;
-            background: rgba(0,0,0,0.4); border-radius:0; padding: 2px 6px;
+            content: '📷'; position: absolute; bottom: 8px; right: 10px; font-size: 14px;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border-radius: 12px; padding: 3px 8px;
         }
         .bird-sighting-meta {
             display: flex; align-items: center; justify-content: space-between;
@@ -217,22 +229,22 @@
         .bird-sighting-dots .dot {
             width: 5px; height: 5px; border-radius: 50%; background: #ddd;
         }
-        .bird-sighting-dots .dot.active { background: var(--primary); width: 14px; border-radius:0; }
+        .bird-sighting-dots .dot.active { background: var(--primary); width: 14px; border-radius: 4px; }
         .btn-row { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 11px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-outline { background: var(--primary-bg); color: var(--primary); }
 
         /* ===== COMMUNITY ===== */
-        .page-header { padding: 14px 20px 10px; background: var(--bg-card); border-bottom: var(--border); }
-        .page-header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; }
-        .page-header .sub { font-size: 10px; color: var(--text-hint); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
-        .loc-tabs { display: flex; gap: 8px; padding: 10px 20px; overflow-x: auto; background: var(--bg-card); border-bottom: var(--border); }
+        .page-header { padding: 16px 20px 12px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: none; }
+        .page-header h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; color: var(--text-primary); }
+        .page-header .sub { font-size: 10px; color: var(--text-hint); margin-top: 2px; letter-spacing: 0.02em; }
+        .loc-tabs { display: flex; gap: 8px; padding: 10px 20px; overflow-x: auto; background: transparent; border-bottom: none; }
         .loc-tabs::-webkit-scrollbar { display: none; }
-        .loc-tab { padding: 5px 12px; font-size: 11px; white-space: nowrap; cursor: pointer; background: transparent; color: var(--text-secondary); font-weight: 500; border: var(--border); }
-        .loc-tab.active { background: var(--primary); color: #F5F0E8; border-color: var(--primary); }
+        .loc-tab { padding: 7px 16px; font-size: 12px; white-space: nowrap; cursor: pointer; background: #fff; color: var(--text-secondary); font-weight: 500; border: none; border-radius: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; }
+        .loc-tab.active { background: var(--primary); color: #fff; box-shadow: 0 3px 12px rgba(26,107,79,0.3); transform: scale(1.02); }
         .post-feed { padding: 12px 16px; }
-        .post-card { background: var(--bg-card); margin-bottom: 14px; overflow: hidden; border: var(--border); cursor: pointer; }
+        .post-card { background: var(--bg-card); margin-bottom: 6px; overflow: hidden; border: none; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
         .post-card-top { display: flex; align-items: center; padding: 14px 16px 10px; gap: 12px; }
         .post-av { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
         .post-card-info { flex: 1; min-width: 0; }
@@ -263,12 +275,13 @@
         /* 照片墙瀑布流 */
         .photo-wall-tabs { display: flex; gap: 6px; padding: 10px 16px; overflow-x: auto; flex-wrap: nowrap; }
         .photo-wall-tabs::-webkit-scrollbar { display: none; }
-        .pw-tab { padding: 4px 10px; font-size: 10px; white-space: nowrap; cursor: pointer; border: var(--border); color: var(--text-secondary); font-weight: 500; }
-        .pw-tab.active { background: var(--primary); color: #F5F0E8; border-color: var(--primary); }
-        .photo-wall { column-count: 2; column-gap: 8px; padding: 0 12px 12px; }
-        .pw-item { break-inside: avoid; margin-bottom: 8px; background: var(--bg-card); border: var(--border); overflow: hidden; cursor: pointer; }
+        .pw-tab { padding: 4px 10px; font-size: 10px; white-space: nowrap; cursor: pointer; border: none; background: #f5f5f5; color: var(--text-secondary); font-weight: 500; border-radius: 12px; }
+        .pw-tab.active { background: var(--primary); color: #fff; }
+        .photo-wall { column-count: 2; column-gap: 4px; padding: 0 4px 4px; }
+        .pw-item { break-inside: avoid; margin-bottom: 6px; background: var(--bg-card); border: none; overflow: hidden; cursor: pointer; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
         .pw-item img { width: 100%; height: auto; display: block; }
         .pw-item-info { padding: 6px 8px; }
+        .pw-item-note { font-size: 10px; color: var(--text-primary); line-height: 1.4; margin-bottom: 4px; font-style: italic; }
         .pw-item-user { font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
         .pw-item-likes { font-size: 9px; color: var(--text-hint); margin-top: 2px; }
         .pw-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; }
@@ -297,7 +310,7 @@
         .cal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
         .cal-day {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 11px; border-radius:0; cursor: pointer; position: relative; color: var(--text-secondary);
+            font-size: 11px; border-radius: 8px; cursor: pointer; position: relative; color: var(--text-secondary);
         }
         .cal-day.today { background: var(--primary-bg); color: var(--primary); font-weight: 700; }
         .cal-day.has-event::after {
@@ -307,63 +320,178 @@
         .cal-day.other-month { color: #ddd; }
         .cal-day:active { background: #f0f0f0; }
         .cal-event-tip {
-            margin-top: 8px; padding: 8px 10px; background: #F5EFE0; border-radius:0;
+            margin-top: 8px; padding: 8px 12px; background: #F5EFE0; border-radius: 10px;
             font-size: 11px; color: #8B6914; display: none; line-height: 1.5;
         }
         .cal-event-tip.show { display: block; }
 
-        /* ===== GUIDE ===== */
-        .guide-progress { padding: 14px 20px; background: var(--bg-card); }
-        .progress-text { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-        .progress-text b { color: var(--primary); font-size: 16px; }
-        .pbar { height: 7px; background: #e8e8e8; border-radius:0; overflow: hidden; }
-        .pfill { height: 100%; background: linear-gradient(90deg, var(--primary-light), var(--primary)); border-radius:0; }
-        .gfilter { display: flex; gap: 8px; padding: 10px 20px; background: var(--bg-card); border-bottom: 1px solid #f0f0f0; }
-        .gf-btn { padding: 5px 12px; font-size: 10px; cursor: pointer; background: transparent; color: var(--text-secondary); font-weight: 500; border: var(--border); text-transform: uppercase; letter-spacing: 0.03em; }
-        .gf-btn.active { background: var(--primary); color: #F5F0E8; border-color: var(--primary); }
-        .guide-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 14px; }
-        .gcard { background: var(--bg-card); border-radius: var(--radius-sm); overflow: hidden; border: var(--border); cursor: pointer; }
-        .gcard:active { transform: scale(0.95); }
-        .gcard-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; overflow: hidden; border-radius: var(--radius-md) var(--radius-md) 0 0; }
-        .gcard-img.y { background: linear-gradient(135deg, #E8EDE6, #D4CFC4); }
-        .gcard-img.n { background: #f0f0f0; }
-        .gcard-img.n::after { content: '?'; position: absolute; font-size: 24px; color: #ccc; font-weight: 700; }
-        .gcard-info { padding: 6px; text-align: center; }
-        .gcard-name { font-size: 10px; font-weight: 600; }
-        .gcard-name.unk { color: var(--text-hint); }
-        .gcard-star { font-size: 9px; color: var(--secondary-warm); }
+        /* ===== GUIDE: MUSEUM BOOK ===== */
+        /* ===== GUIDE: Flip Book + Quest ===== */
+        .guide-book {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            min-height: 240px; position: relative;
+            margin: 10px 12px; border-radius: 16px;
+            background: #3B2617;
+            box-shadow:
+                0 4px 20px rgba(59,38,23,0.3),
+                inset 0 0 0 1px rgba(196,164,116,0.3);
+            transition: all 0.35s cubic-bezier(0.32,0.72,0,1);
+        }
+        .guide-book.expanded {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            margin: 0; border-radius: 0; z-index: 999;
+        }
+        .guide-book-spine {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 10px; z-index: 3;
+            background: linear-gradient(90deg, #1a0e08 0%, #3B2617 40%, #5C4033 70%, #3B2617 100%);
+            border-radius: 4px 0 0 4px;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.2);
+        }
+        .guide-book-header {
+            padding: 10px 16px 10px 22px;
+            background: linear-gradient(135deg, #3B2617 0%, #5C4033 100%);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+            border-bottom: 2px solid #7B5B3A;
+            position: relative; z-index: 2;
+        }
+        .guide-book-title { font-size: 14px; font-weight: 700; color: #E8D5B7; letter-spacing: 0.06em; }
+        .guide-book-sub { font-size: 9px; color: #B8A080; margin-top: 1px; }
+        .guide-book-profile {
+            width: 26px; height: 26px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            background: rgba(196,164,116,0.2); font-size: 13px;
+            border: 1px solid rgba(196,164,116,0.3);
+        }
+        .guide-book-viewport {
+            flex: 1; position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #FFFEF9 0%, #FBF6EE 100%);
+            touch-action: pan-y;
+            margin-left: 10px;
+            border-left: 1px solid #f0ebe3;
+            border-radius: 0 0 12px 0;
+        }
+        .guide-page {
+            position: absolute; inset: 0; overflow-y: auto;
+            padding: 0; transition: transform 0.35s ease, opacity 0.35s ease;
+            will-change: transform;
+        }
+        .guide-page::-webkit-scrollbar { display: none; }
+        .guide-page.prev { transform: translateX(-100%); opacity: 0; }
+        .guide-page.current { transform: translateX(0); opacity: 1; }
+        .guide-page.next { transform: translateX(100%); opacity: 0; }
+        .guide-nav {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            padding: 5px 14px;
+            background: rgba(59,38,23,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px; z-index: 5;
+            margin-left: 5px;
+        }
+        .guide-nav-btn { display: none; }
+        .guide-nav-info { font-size: 9px; color: #E8D5B7; text-align: center; white-space: nowrap; }
+        .guide-quest {
+            flex-shrink: 1; padding: 16px; background: #FAFAF7;
+            border-top: none; overflow-y: auto; min-height: 0;
+        }
+        .guide-quest::-webkit-scrollbar { display: none; }
+        .quest-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .quest-level { font-size: 14px; font-weight: 800; color: var(--primary); }
+        .quest-progress { font-size: 10px; color: var(--text-hint); }
+        .quest-birds { display: flex; gap: 10px; }
+        .quest-bird {
+            flex: 1; text-align: center; padding: 14px 6px;
+            background: #fff; border-radius: 16px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: cardFadeIn 0.4s ease backwards;
+        }
+        .quest-bird:nth-child(1) { animation-delay: 0s; transform: rotate(-1deg); }
+        .quest-bird:nth-child(2) { animation-delay: 0.08s; transform: rotate(0.5deg); }
+        .quest-bird:nth-child(3) { animation-delay: 0.16s; transform: rotate(-0.5deg); }
+        .quest-bird:active { transform: scale(0.93) rotate(0deg); }
+        .quest-bird.done { background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); }
+        .quest-bird.done::after {
+            content: '✓'; position: absolute; top: 8px; right: 8px;
+            font-size: 10px; color: #2E7D32; font-weight: 700;
+            background: #fff; border-radius: 50%; width: 16px; height: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.95); }
+            to { opacity: 1; }
+        }
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-60px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes shakeWrong {
+            0%,100% { transform: translateX(0); }
+            20%,60% { transform: translateX(-4px); }
+            40%,80% { transform: translateX(4px); }
+        }
+        .knowledge-opt { transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .knowledge-opt:active { transform: scale(0.97); }
+        .confetti-wrap { position: absolute; top: 50%; left: 50%; pointer-events: none; }
+        .confetti-wrap span {
+            position: absolute; width: 6px; height: 6px; border-radius: 50%;
+            animation: confetti 0.8s ease-out forwards;
+        }
+        .quest-bird-img {
+            width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; overflow: hidden; background: #eee;
+            border: 3px solid #e0e0e0;
+            transition: border-color 0.3s;
+        }
+        .quest-bird.done .quest-bird-img { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,107,79,0.15); }
+        .quest-bird-img img { width: 100%; height: 100%; object-fit: cover; }
+        .quest-bird-name { font-size: 11px; font-weight: 700; color: var(--text-primary); }
+        .quest-bird-hint { font-size: 9px; color: var(--text-hint); margin-top: 2px; }
+        .quest-bird-status { font-size: 8px; color: var(--text-hint); margin-top: 3px; }
+        .quest-bird-loc { font-size: 8px; color: var(--primary); margin-top: 4px; padding: 3px 6px; background: var(--primary-bg); border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
+        .quest-bird-loc:active { transform: scale(0.95); }
+        .quest-next-btn {
+            margin-top: 14px; width: 100%; padding: 12px; text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; font-size: 13px; font-weight: 700;
+            border: none; border-radius: 14px; cursor: pointer; font-family: inherit;
+            box-shadow: 0 4px 12px rgba(26,107,79,0.25); transition: transform 0.2s;
+        }
+        .quest-next-btn:active { transform: scale(0.97); }
+        .quest-next-btn:disabled { background: #ccc; color: #999; cursor: default; }
 
-        /* Guide shelves */
-        .shelf-section { margin-bottom: 16px; }
-        .shelf-section-title { font-size: 10px; font-weight: 600; color: var(--text-hint); margin-bottom: 8px; padding-left: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
-        .shelf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .shelf-card {
-            background: linear-gradient(145deg, #5C4033 0%, #3B2617 100%);
-            padding: 14px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;
-            transition: transform 0.15s; position: relative; overflow: hidden;
-            border: 1px solid #7B5B3A; border-radius: 4px;
-            box-shadow: 2px 3px 6px rgba(59,38,23,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        .shelf-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
-            background: linear-gradient(90deg, #2B1810 0%, #4A3020 40%, #3B2617 100%);
-            border-right: 1px solid #7B5B3A;
-        }
-        .shelf-card::after {
-            content: ''; position: absolute; inset: 3px; border: 1px solid rgba(196,164,116,0.25);
-            border-radius: 2px; pointer-events: none;
-        }
-        .shelf-card:active { transform: scale(0.97); }
-        .shelf-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: rgba(255,255,255,0.08); border: 1px solid rgba(196,164,116,0.3); border-radius: 3px; }
-        .shelf-info { flex: 1; min-width: 0; }
-        .shelf-name { font-size: 11px; font-weight: 600; color: #E8D5B7; letter-spacing: 0.02em; }
-        .shelf-meta { font-size: 9px; color: #B8A080; margin-top: 2px; }
-        .shelf-badge { font-size: 9px; color: #E8D5B7; background: rgba(196,164,116,0.2); padding: 2px 6px; font-weight: 600; border: 1px solid rgba(196,164,116,0.3); }
+        /* ===== MAGAZINE ===== */
+        .mag-tabs { display: flex; gap: 8px; padding: 10px 16px; border-bottom: none; }
+        .mag-tab { padding: 7px 16px; font-size: 12px; cursor: pointer; background: #fff; color: var(--text-secondary); font-weight: 500; border: none; border-radius: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.2s; }
+        .mag-tab.active { background: var(--primary); color: #fff; box-shadow: 0 3px 12px rgba(26,107,79,0.3); transform: scale(1.02); }
+        .mag-content { padding: 16px; flex: 1; overflow-y: auto; }
+        .quiz-card { background: #fff; padding: 18px; margin-bottom: 14px; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        .quiz-img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; filter: blur(0); }
+        .quiz-img.blurred { filter: blur(6px); }
+        .quiz-img.cropped { object-position: center; }
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+        .quiz-opt { padding: 12px 14px; background: #f5f7f6; border-radius: 12px; font-size: 12px; cursor: pointer; text-align: center; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); border: 1.5px solid transparent; }
+        .quiz-opt:active { transform: scale(0.96); }
+        .quiz-opt.correct { background: #E8F5E9; color: #2E7D32; font-weight: 600; border-color: #66BB6A; }
+        .quiz-opt.wrong { background: #FFEBEE; color: #C62828; border-color: #EF5350; animation: shake 0.4s; }
+        .quiz-hint { font-size: 10px; color: var(--text-hint); margin-top: 10px; text-align: center; }
+        .meme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .meme-item { border-radius: 8px; overflow: hidden; cursor: pointer; }
+        .meme-item img { width: 100%; height: auto; display: block; }
+        .meme-upload { padding: 24px; border: 2px dashed #d0d5dd; border-radius: 16px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #fafbfc; transition: all 0.2s; }
+        .meme-upload:active { background: #f0f4f0; border-color: var(--primary); transform: scale(0.98); }
 
         /* Bird modal */
         .modal-ov { position: absolute; inset: 0; background: rgba(28,28,28,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s; }
         .modal-ov.show { opacity: 1; visibility: visible; }
-        .modal-box { background: var(--bg-card); width: 100%; max-width: 300px; overflow: hidden; transform: scale(0.9); transition: transform 0.3s; border: var(--border); }
+        .modal-box { background: var(--bg-card); width: 100%; max-width: 300px; overflow: hidden; transform: scale(0.9); transition: transform 0.3s; border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
         .modal-ov.show .modal-box { transform: scale(1); }
         .modal-img { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; font-size: 56px; overflow: hidden; }
         .modal-bd { padding: 16px; }
@@ -374,7 +502,8 @@
         .modal-r:last-child { border-bottom: none; }
         .modal-r .k { color: var(--text-hint); text-transform: uppercase; font-size: 9px; letter-spacing: 0.04em; }
         .modal-r .v { font-weight: 500; color: var(--text-primary); }
-        .modal-cls { display: block; width: calc(100% - 32px); margin: 10px 16px 16px; padding: 9px; background: #f5f5f5; border: none; border-radius:0; font-size: 13px; cursor: pointer; font-family: inherit; }
+        .modal-cls { display: block; width: calc(100% - 32px); margin: 10px 16px 16px; padding: 10px; background: #f5f5f5; border: none; border-radius: 12px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+        .modal-cls:active { background: #eee; }
         .modal-box { max-height: 80vh; overflow-y: auto; }
         .bird-wiki { margin: 0 16px 6px; padding: 12px; background: #F5EFE0; border: 1px solid #EDE8E0; }
         .bird-wiki-title { font-size: 11px; font-weight: 700; color: var(--secondary-brown); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -384,12 +513,12 @@
         .bird-wiki-section-title { font-size: 10px; font-weight: 600; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
         .bird-wiki-section-content { font-size: 11px; color: var(--text-secondary); line-height: 1.7; }
         .bird-wiki-loading { text-align: center; padding: 12px; font-size: 11px; color: var(--text-hint); }
-        .bird-id-preview { width: 100%; max-height: 180px; object-fit: cover; margin-bottom: 12px; border: var(--border); }
+        .bird-id-preview { width: 100%; max-height: 180px; object-fit: cover; margin-bottom: 12px; border: none; border-radius: 8px; }
         .bird-id-result-card { padding: 12px; background: #F5EFE0; border: 1px solid #EDE8E0; margin-bottom: 10px; }
         .bird-id-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
         .bird-id-score { font-size: 10px; color: var(--primary); margin-top: 2px; }
         .bird-id-list { display: flex; flex-direction: column; gap: 8px; }
-        .bird-id-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--bg-card); border: var(--border); cursor: pointer; }
+        .bird-id-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #f9f9f9; border: none; border-radius: 8px; cursor: pointer; }
         .bird-id-item:first-child { background: #F5EFE0; border-color: var(--primary); }
         .bird-id-rank { font-size: 12px; font-weight: 700; color: var(--primary); width: 20px; }
         .bird-id-info { flex: 1; }
@@ -412,48 +541,52 @@
         .chat-msg.bird { align-self: flex-start; }
         .chat-msg.user { align-self: flex-end; }
         .chat-bubble { padding: 10px 14px; font-size: 13px; line-height: 1.6; }
-        .chat-msg.bird .chat-bubble { background: var(--bg-card); border: var(--border); color: var(--text-primary); }
+        .chat-msg.bird .chat-bubble { background: #f5f5f5; border: none; color: var(--text-primary); }
         .chat-msg.user .chat-bubble { background: var(--primary); color: #E8EDE6; }
         .chat-time { font-size: 9px; color: var(--text-hint); margin-top: 3px; }
         .chat-msg.user .chat-time { text-align: right; }
-        .chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; background: var(--bg-card); border: var(--border); align-self: flex-start; }
+        .chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; background: #f5f5f5; border: none; border-radius: 16px; align-self: flex-start; }
         .chat-typing span { width: 5px; height: 5px; background: var(--text-hint); border-radius: 50%; animation: typeDot 1.2s ease-in-out infinite; }
         .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
         .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typeDot { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-4px);opacity:1} }
-        .chat-input-bar { display: flex; gap: 8px; padding: 12px 16px; background: var(--bg-card); border-top: var(--border); flex-shrink: 0; }
-        .chat-input { flex: 1; padding: 10px 14px; border: var(--border); background: var(--bg-primary); font-size: 13px; color: var(--text-primary); outline: none; font-family: inherit; resize: none; height: 38px; }
-        .chat-send { width: 38px; height: 38px; background: var(--primary); border: none; color: #E8EDE6; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .chat-send:active { opacity: 0.8; }
+        .chat-input-bar { display: flex; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: none; flex-shrink: 0; }
+        .chat-input { flex: 1; padding: 10px 16px; border: 1.5px solid #eee; background: #f9fafb; font-size: 13px; color: var(--text-primary); outline: none; font-family: inherit; resize: none; height: 40px; border-radius: 20px; transition: border-color 0.2s; }
+        .chat-input:focus { border-color: var(--primary); }
+        .chat-send { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border: none; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; box-shadow: 0 2px 8px rgba(26,107,79,0.3); transition: transform 0.2s; }
+        .chat-send:active { transform: scale(0.9); }
         .chat-suggestions { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 16px 10px; flex-shrink: 0; }
-        .chat-sug { padding: 5px 10px; border: var(--border); background: var(--bg-card); font-size: 10px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+        .chat-sug { padding: 5px 10px; border: 1px solid #e8e8e8; background: #f9f9f9; font-size: 10px; color: var(--text-secondary); cursor: pointer; font-family: inherit; border-radius: 12px; }
         .chat-sug:active { background: var(--primary-bg); }
         /* Bottom modal */
-        .bmodal { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: flex-end; opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .bmodal { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: flex-end; opacity: 0; visibility: hidden; transition: all 0.3s; }
         .bmodal.show { opacity: 1; visibility: visible; }
-        .bmodal-panel { background: var(--bg-card); border-radius: var(--radius-lg) var(--radius-lg) 0 0; width: 100%; padding: 18px; max-height: 65%; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s; }
+        .bmodal-panel { background: var(--bg-card); border-radius: 20px 20px 0 0; width: 100%; padding: 20px; max-height: 70%; overflow-y: auto; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
         .bmodal.show .bmodal-panel { transform: translateY(0); }
         .bm-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .bm-hd h3 { font-size: 15px; font-weight: 700; }
 
         /* Toast */
-        .toast { position: absolute; top: 54px; left: 50%; transform: translateX(-50%) translateY(-70px); background: var(--primary); color: #F5F0E8; padding: 8px 18px; font-size: 11px; z-index: 9999; transition: transform 0.3s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2); }
+        .toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%) translateY(-80px); background: rgba(26,26,46,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #fff; padding: 10px 20px; font-size: 12px; font-weight: 500; z-index: 9999; transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); white-space: nowrap; border: none; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .toast.show { transform: translateX(-50%) translateY(0); }
 
         /* FAB */
         .fab-wrap { position: sticky; bottom: 0; height: 0; width: 100%; pointer-events: none; z-index: 18; }
-        .fab { position: absolute; bottom: 14px; right: 14px; width: 42px; height: 42px; background: var(--secondary-warm); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: #1C1C1C; font-weight: 700; border: 2px solid #1C1C1C; pointer-events: auto; }
+        .fab { position: absolute; bottom: 20px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 22px; color: #fff; font-weight: 700; border: none; border-radius: 50%; pointer-events: auto; box-shadow: 0 4px 16px rgba(26,107,79,0.35); transition: transform 0.2s; }
+        .fab:active { transform: scale(0.9); }
 
         /* Secondary page */
-        .sec-page { position: absolute; inset: 0; background: var(--bg-primary); z-index: 150; transform: translateX(100%); transition: transform 0.3s; overflow-y: auto; display: flex; flex-direction: column; }
+        .sec-page { position: absolute; inset: 0; background: var(--bg-primary); z-index: 150; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); overflow-y: auto; display: flex; flex-direction: column; }
         .sec-page.show { transform: translateX(0); }
-        .sec-hd { position: sticky; top: 0; background: var(--bg-card); padding: 12px 20px; display: flex; align-items: center; gap: 10px; z-index: 10; border-bottom: 1px solid #f0f0f0; }
-        .sec-back { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; background: #f5f5f5; font-size: 14px; }
+        .sec-hd { position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 14px 20px; display: flex; align-items: center; gap: 12px; z-index: 10; border-bottom: none; }
+        .sec-back { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; background: var(--primary-bg); font-size: 15px; transition: transform 0.2s; }
+        .sec-back:active { transform: scale(0.9); }
 
         /* Form */
-        .form-input { width: 100%; padding: 9px 11px; border: var(--border); font-size: 12px; font-family: inherit; outline: none; margin-bottom: 10px; background: #FDFBF7; }
-        .form-input:focus { border-color: var(--primary); }
-        .submit-btn { width: 100%; padding: 11px; background: var(--primary); color: #F5F0E8; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-input { width: 100%; padding: 11px 14px; border: 1.5px solid #eee; font-size: 13px; font-family: inherit; outline: none; margin-bottom: 10px; background: #f9fafb; border-radius: 12px; transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,107,79,0.1); }
+        .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; letter-spacing: 0.02em; border-radius: 14px; box-shadow: 0 4px 12px rgba(26,107,79,0.25); transition: transform 0.2s; }
+        .submit-btn:active { transform: scale(0.97); }
     </style>
 </head>
 <body>
@@ -466,7 +599,7 @@
             <div class="map-header">
                 <div>
                     <h1>鸟有地图</h1>
-                    <div class="map-title-sub">奥森公园 · 北京</div>
+                    <div class="map-title-sub">安静地看鸟，认真地记录 · 奥森公园</div>
                 </div>
                 <div style="font-size:11px;color:var(--primary);font-weight:600;cursor:pointer" onclick="showToast('🔜 更多公园开发中...')">切换公园 ▾</div>
             </div>
@@ -475,11 +608,9 @@
                     <!-- SVG map drawn by JS -->
                 </div>
                 <div class="map-legend">
-                    <div class="legend-title">🐦 观鸟地图图例</div>
+                    <div class="legend-title">🐦 观鸟公约</div>
                     <div class="legend-items">
-                        <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div>观鸟点</div>
-                        <div class="legend-item"><div class="legend-dot" style="background:#FF6B6B"></div>热门鸟点</div>
-                        <div class="legend-item" style="font-size:9px;color:var(--text-hint)">点击图钉查看详情 · 双指缩放</div>
+                        <div class="legend-item" style="font-size:9px;color:var(--text-secondary)">保持距离 · 不惊扰 · 不投喂 · 不公开敏感鸟点</div>
                     </div>
                 </div>
                 <div class="zoom-controls">
@@ -500,20 +631,86 @@
                     <div class="spot-panel" id="spotPanel"></div>
                 </div>
             </div>
+        </section>
+
+
+        <!-- ===== TAB 3: GUIDE (图鉴书+关卡) ===== -->
+        <section class="tab-page" id="page-guide" style="display:flex;flex-direction:column">
+            <!-- 个人主页 -->
+            <div class="sec-page" id="profilePage">
+                <div class="sec-hd"><div class="sec-back" onclick="document.getElementById('profilePage').classList.remove('show')">←</div><span style="font-size:15px;font-weight:600">个人主页</span></div>
+                <div id="profileContent" style="padding:20px 16px"></div>
+            </div>
+            <!-- 上半：图鉴翻页书 -->
+            <div class="guide-book" id="guideBook">
+                <div class="guide-book-spine"></div>
+                <div class="guide-book-header">
+                    <div><div class="guide-book-title">观鸟图鉴</div><div class="guide-book-sub" id="guideBookSub">已收录 0 / 386 种</div></div>
+                    <div style="display:flex;align-items:center;gap:6px">
+                        <div class="guide-book-profile" id="guideExpandBtn" onclick="toggleBookExpand()" title="展开">⛶</div>
+                        <div class="guide-book-profile" onclick="openProfile()">👤</div>
+                    </div>
+                </div>
+                <div class="guide-book-viewport" id="guideBookViewport">
+                    <div class="guide-page current" id="guidePage"></div>
+                    <div class="guide-nav">
+                        <div class="guide-nav-info" id="guideNavInfo">1 / 28</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 下半：当前关卡 -->
+            <div class="guide-quest" id="guideQuest"></div>
+            <!-- 鸟种弹窗（用于未收录鸟种） -->
+            <div class="modal-ov" id="birdModal" onclick="if(event.target===this)hideM('birdModal')">
+                <div class="modal-box" id="birdBox" style="max-height:80vh;overflow-y:auto"></div>
+            </div>
+            <!-- AI识鸟 -->
+            <div class="fab-wrap"><div class="fab" onclick="showM('birdIdModal')" style="font-size:18px">🔍</div></div>
+            <div class="bmodal" id="birdIdModal" onclick="if(event.target===this)hideM('birdIdModal')">
+                <div class="bmodal-panel">
+                    <div class="bm-hd"><h3>AI识鸟</h3><div class="close-btn" onclick="hideM('birdIdModal')">✕</div></div>
+                    <div id="birdIdContent">
+                        <div style="text-align:center;padding:20px 0">
+                            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">选择一张鸟类照片，AI 帮你识别鸟种</div>
+                            <label style="display:inline-block;padding:12px 24px;background:var(--primary);color:#E8EDE6;font-size:13px;cursor:pointer;font-family:inherit;border-radius:8px">
+                                📷 选择照片
+                                <input type="file" accept="image/*" capture="environment" onchange="identifyBird(this)" style="display:none">
+                            </label>
+                        </div>
+                    </div>
+                    <div id="birdIdResult"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TAB 4: 杂志 ===== -->
+        <section class="tab-page" id="page-mag">
+            <div class="page-header"><h1>鸟有乐</h1><div class="sub">BIRD FUN</div></div>
+            <div class="mag-tabs" id="magTabs"></div>
+            <div class="mag-content" id="magContent"></div>
+        </section>
+
+        <!-- ===== TAB 4: BIRD MAIL / AI CHAT ===== -->
+        <section class="tab-page" id="page-nest">
+            <div class="page-header"><h1>鸟有来信</h1><div class="sub">BIRD MAIL</div></div>
+            <!-- 子tab：明信片 / 写信 / 对话 -->
+            <div class="loc-tabs" id="nestTabs"></div>
+            <!-- 内容区 -->
+            <div id="nestContent"></div>
             <!-- Upload modal -->
             <div class="bmodal" id="uploadModal" onclick="if(event.target===this)hideM('uploadModal')">
                 <div class="bmodal-panel" style="max-height:80%">
-                    <div class="bm-hd"><h3>📍 上传观鸟记录</h3><div class="close-btn" onclick="hideM('uploadModal')">✕</div></div>
+                    <div class="bm-hd"><h3>📝 上传观鸟笔记</h3><div class="close-btn" onclick="hideM('uploadModal')">✕</div></div>
                     <!-- 定位 -->
-                    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--primary-bg);border-radius:0;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--primary-bg);border-radius:12px;margin-bottom:8px">
                         <span style="font-size:18px">📍</span>
                         <div style="flex:1">
                             <div style="font-size:12px;font-weight:600;color:var(--primary)" id="uploadLocStatus">点击获取当前位置</div>
                             <div style="font-size:10px;color:var(--text-hint)" id="uploadLocCoord"></div>
                         </div>
-                        <button style="padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:0;font-size:11px;cursor:pointer" onclick="getUploadLocation()">定位</button>
+                        <button style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:11px;cursor:pointer;font-weight:600" onclick="getUploadLocation()">定位</button>
                     </div>
-                    <div id="uploadAreaTag" style="display:none;font-size:11px;color:#2D4A3E;background:#E8EDE6;padding:5px 10px;border-radius:0;margin-bottom:8px;font-weight:500"></div>
+                    <div id="uploadAreaTag" style="display:none;font-size:11px;color:#2D4A3E;background:#E8EDE6;padding:6px 12px;border-radius:10px;margin-bottom:8px;font-weight:500"></div>
                     <input class="form-input" placeholder="地点名称（定位后自动填充）" id="uploadName"/>
                     <!-- 观测时间 -->
                     <div style="font-size:11px;color:var(--primary);font-weight:600;margin:6px 0 6px">🕐 观测时间</div>
@@ -521,16 +718,28 @@
                     <!-- 上传照片 -->
                     <div style="font-size:11px;color:var(--primary);font-weight:600;margin:8px 0 6px">📷 上传照片</div>
                     <div style="display:flex;gap:8px;margin-bottom:8px">
-                        <label style="flex:1;height:80px;border:2px dashed #ccc;border-radius:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafafa" id="uploadPhotoBtn">
+                        <label style="flex:1;height:80px;border:2px dashed #d0d5dd;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafbfc" id="uploadPhotoBtn">
                             <span style="font-size:22px">＋</span>
                             <span style="font-size:10px;color:var(--text-hint);margin-top:2px">上传照片</span>
                             <input type="file" accept="image/*" capture="environment" onchange="handleUploadPhoto(this)" style="display:none">
                         </label>
-                        <div id="uploadPhotoThumb" style="flex:1;height:80px;border-radius:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-hint);background:#f5f5f5;position:relative">
+                        <div id="uploadPhotoThumb" style="flex:1;height:80px;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-hint);background:#f5f5f5;position:relative">
                             <span>参考图</span>
                         </div>
                     </div>
-                    <button style="width:100%;padding:8px;background:#F5EFE0;color:#8B6914;border:1px solid #E0D8C8;border-radius:0;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:12px" onclick="simulatePhotoRecognize()">🔍 一键识别鸟种</button>
+                    <!-- 上传语音 -->
+                    <div style="font-size:11px;color:var(--primary);font-weight:600;margin:8px 0 6px">🎙️ 上传语音（选填）</div>
+                    <div style="display:flex;gap:8px;margin-bottom:12px">
+                        <label style="flex:1;height:50px;border:2px dashed #d0d5dd;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafbfc" id="uploadAudioBtn">
+                            <span style="font-size:18px">🎵</span>
+                            <span style="font-size:10px;color:var(--text-hint);margin-top:2px">上传鸟叫录音</span>
+                            <input type="file" accept="audio/*" capture="microphone" onchange="handleUploadAudio(this)" style="display:none">
+                        </label>
+                        <div id="uploadAudioStatus" style="flex:1;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-hint);background:#f5f5f5">
+                            <span>未选择音频</span>
+                        </div>
+                    </div>
+                    <button style="width:100%;padding:10px;background:linear-gradient(135deg,#FFF8E7,#F5E6C8);color:#8B6914;border:1px solid #E0D8C8;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:12px;box-shadow:0 2px 8px rgba(139,105,20,0.1)" onclick="simulatePhotoRecognize()">🔍 一键识别鸟种</button>
                     <!-- 鸟种选择 -->
                     <div style="font-size:11px;color:var(--primary);font-weight:600;margin:6px 0 6px">🐦 鸟种信息（选择或识别）</div>
                     <select class="form-input" id="uploadBirdSelect" onchange="onBirdSelect(this.value)" style="appearance:auto">
@@ -574,20 +783,17 @@
                         <input class="form-input" style="flex:1;background:#f9f9f9;margin-bottom:0" placeholder="拉丁名" id="uploadBirdLatin" readonly/>
                         <input class="form-input" style="flex:1;background:#f9f9f9;margin-bottom:0" placeholder="目 / 科" id="uploadBirdTaxon" readonly/>
                     </div>
-                    <!-- 拍摄设备 -->
-                    <div style="font-size:11px;color:var(--primary);font-weight:600;margin:8px 0 6px">📸 拍摄设备（选填）</div>
+                    <!-- 观察方式 -->
+                    <div style="font-size:11px;color:var(--primary);font-weight:600;margin:8px 0 6px">🔭 观察方式（选填）</div>
                     <select class="form-input" id="uploadCamera" style="appearance:auto">
-                        <option value="">-- 选填拍摄设备 --</option>
-                        <option value="iPhone">iPhone</option>
-                        <option value="华为手机">华为手机</option>
-                        <option value="其他手机">其他手机</option>
-                        <option value="Canon 单反">Canon 单反</option>
-                        <option value="Nikon 单反">Nikon 单反</option>
-                        <option value="Sony 微单">Sony 微单</option>
-                        <option value="富士 微单">富士 微单</option>
-                        <option value="长焦相机">长焦相机</option>
-                        <option value="望远镜+手机">望远镜+手机</option>
-                        <option value="其他设备">其他设备</option>
+                        <option value="">-- 选填观察方式 --</option>
+                        <option value="肉眼">肉眼</option>
+                        <option value="双筒望远镜">双筒望远镜</option>
+                        <option value="单筒望远镜">单筒望远镜</option>
+                        <option value="望远镜+手机">望远镜+手机拍记录照</option>
+                        <option value="手机">手机记录</option>
+                        <option value="相机">相机记录</option>
+                        <option value="听声辨鸟">听声辨鸟</option>
                     </select>
                     <!-- 观测记录 -->
                     <div style="font-size:11px;color:var(--primary);font-weight:600;margin:8px 0 6px">📝 观测记录</div>
@@ -596,81 +802,6 @@
                 </div>
             </div>
             <div class="fab-wrap"><div class="fab" onclick="showM('uploadModal')">＋</div></div>
-        </section>
-
-        <!-- ===== TAB 2: COMMUNITY ===== -->
-        <section class="tab-page" id="page-community">
-            <div class="page-header"><h1>鸟有社区</h1><div class="sub">BIRDER COMMUNITY</div></div>
-            <div class="loc-tabs" id="commTabs"></div>
-            <div id="calendarWrap"></div>
-            <div class="post-feed" id="postFeed"></div>
-            <div class="fab-wrap"><div class="fab" onclick="showM('postModal')">✏️</div></div>
-            <div class="bmodal" id="postModal" onclick="if(event.target===this)hideM('postModal')">
-                <div class="bmodal-panel">
-                    <div class="bm-hd"><h3>发布动态</h3><div class="close-btn" onclick="hideM('postModal')">✕</div></div>
-                    <div style="display:flex;gap:6px;margin-bottom:10px" id="typePills"></div>
-                    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap" id="areaPills"></div>
-                    <textarea class="form-input" style="height:80px;resize:none" placeholder="分享你的观鸟发现..." id="postContent"></textarea>
-                    <input class="form-input" placeholder="标签（用空格分隔，如：翠鸟 南园）" id="postTags"/>
-                    <button class="submit-btn" onclick="submitPost()">发布</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== TAB 3: GUIDE ===== -->
-        <section class="tab-page" id="page-guide">
-            <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
-                <div><h1>鸟有图鉴</h1><div class="sub">FIELD GUIDE</div></div>
-                <div onclick="openProfile()" style="width:32px;height:32px;background:var(--primary-bg);border:var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-                </div>
-            </div>
-            <!-- 个人主页 -->
-            <div class="sec-page" id="profilePage">
-                <div class="sec-hd"><div class="sec-back" onclick="document.getElementById('profilePage').classList.remove('show')">←</div><span style="font-size:15px;font-weight:600">个人主页</span></div>
-                <div id="profileContent" style="padding:20px 16px"></div>
-            </div>
-            <div class="guide-progress" id="guideProgress">
-                <div class="progress-text">总计收集 <b id="guideCount">0</b> / 386 种</div>
-                <div class="pbar"><div class="pfill" id="guideFill" style="width:0%"></div></div>
-            </div>
-            <!-- 分类柜子入口 -->
-            <div id="guideShelves" style="padding:12px 14px"></div>
-            <!-- 柜子内部页面 -->
-            <div class="sec-page" id="guideInner">
-                <div class="sec-hd"><div class="sec-back" onclick="document.getElementById('guideInner').classList.remove('show')">←</div><span style="font-size:15px;font-weight:600" id="guideInnerTitle">图鉴</span></div>
-                <div class="gfilter" id="gFilter"></div>
-                <div class="guide-grid" id="gGrid"></div>
-            </div>
-            <div class="modal-ov" id="birdModal" onclick="if(event.target===this)hideM('birdModal')">
-                <div class="modal-box" id="birdBox"></div>
-            </div>
-            <div class="fab-wrap"><div class="fab" onclick="showM('birdIdModal')" style="font-size:18px">📷</div></div>
-            <!-- 识鸟弹窗 -->
-            <div class="bmodal" id="birdIdModal" onclick="if(event.target===this)hideM('birdIdModal')">
-                <div class="bmodal-panel">
-                    <div class="bm-hd"><h3>拍照识鸟</h3><div class="close-btn" onclick="hideM('birdIdModal')">✕</div></div>
-                    <div id="birdIdContent">
-                        <div style="text-align:center;padding:20px 0">
-                            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">拍摄或选择一张鸟类照片，AI 帮你识别</div>
-                            <label style="display:inline-block;padding:12px 24px;background:var(--primary);color:#E8EDE6;font-size:13px;cursor:pointer;font-family:inherit">
-                                📷 选择照片
-                                <input type="file" accept="image/*" capture="environment" onchange="identifyBird(this)" style="display:none">
-                            </label>
-                        </div>
-                    </div>
-                    <div id="birdIdResult"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== TAB 4: BIRD MAIL / AI CHAT ===== -->
-        <section class="tab-page" id="page-nest">
-            <div class="page-header"><h1>鸟有来信</h1><div class="sub">BIRD MAIL</div></div>
-            <!-- 子tab：明信片 / 写信 / 对话 -->
-            <div class="loc-tabs" id="nestTabs"></div>
-            <!-- 内容区 -->
-            <div id="nestContent"></div>
             <!-- AI对话界面（单独全屏） -->
             <div class="sec-page" id="chatPage">
                 <div class="sec-hd"><div class="sec-back" onclick="document.getElementById('chatPage').classList.remove('show')">←</div><span style="font-size:15px;font-weight:600" id="chatPartnerName">和翠鸟聊天</span></div>
@@ -695,9 +826,9 @@
     <!-- TAB BAR -->
     <nav class="tab-bar">
         <div class="tab-item active" onclick="switchTab('map')"><span class="ti">🗺️</span><span class="tl">地图</span></div>
-        <div class="tab-item" onclick="switchTab('community')"><span class="ti">🐦</span><span class="tl">社区</span></div>
-        <div class="tab-item" onclick="switchTab('nest')"><span class="ti">✉️</span><span class="tl">来信</span></div>
         <div class="tab-item" onclick="switchTab('guide')"><span class="ti">📖</span><span class="tl">图鉴</span></div>
+        <div class="tab-item" onclick="switchTab('nest')"><span class="ti">✉️</span><span class="tl">来信</span></div>
+        <div class="tab-item" onclick="switchTab('mag')"><span class="ti">🎪</span><span class="tl">杂志</span></div>
     </nav>
     <div class="toast" id="toast"></div>
 </div>
@@ -725,137 +856,137 @@ const birdSightings = {
     1: [ // 南园湖心岛
         { name:"翠鸟", latin:"Alcedo atthis", order:"佛法僧目", family:"翠鸟科", genus:"翠鸟属",
           sightings:[
-            {photo:"linear-gradient(135deg,#00BCD4,#006064)", user:"鸟有小李", time:"2026-06-25 06:32", note:"清晨捕鱼中，停在湖心岛东侧枯枝上 | 600mm f/6.3 1/2000s ISO800 连拍模式"},
-            {photo:"linear-gradient(135deg,#0097A7,#004D40)", user:"奥森观鸟队", time:"2026-06-20 07:15", note:"一对翠鸟育雏，洞口在北岸土坡 | 500mm f/5.6 1/1600s ISO640 隐蔽伪装拍摄"},
-            {photo:"linear-gradient(135deg,#00ACC1,#00695C)", user:"望远镜达人", time:"2026-06-18 16:40", note:"傍晚从水面低飞而过 | 600mm f/6.3 1/3200s ISO1600 追焦AF-C模式"},
+            {photo:"linear-gradient(135deg,#00BCD4,#006064)", user:"鸟有小李", time:"近期", note:"清晨捕鱼中，停在湖心岛东侧枯枝上。入水频率约每3分钟一次，成功率很高"},
+            {photo:"linear-gradient(135deg,#0097A7,#004D40)", user:"奥森观鸟队", time:"近期", note:"一对翠鸟正在育雏，洞口在北岸土坡。亲鸟轮流喂食，幼鸟约4只"},
+            {photo:"linear-gradient(135deg,#00ACC1,#00695C)", user:"望远镜达人", time:"近期", note:"傍晚低飞掠过水面觅食，飞行路线固定沿岸边"},
           ]},
         { name:"苍鹭", latin:"Ardea cinerea", order:"鹈形目", family:"鹭科", genus:"鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#78909C,#37474F)", user:"湿地守望者", time:"2026-06-24 05:50", note:"站在浅水区一动不动等鱼 | 400mm f/5.6 1/1000s ISO400 三脚架稳拍"},
-            {photo:"linear-gradient(135deg,#607D8B,#263238)", user:"鸟有小李", time:"2026-06-22 17:30", note:"飞到岛上大树顶端休息 | 200-600mm f/6.3 1/2500s ISO1000 逆光剪影"},
+            {photo:"linear-gradient(135deg,#78909C,#37474F)", user:"湿地守望者", time:"近期", note:"浅水区静止站立等鱼，一动不动超过20分钟。捕到一条约15cm的鲫鱼"},
+            {photo:"linear-gradient(135deg,#607D8B,#263238)", user:"鸟有小李", time:"近期", note:"傍晚飞到岛上大树顶端夜栖，翼展非常大，飞行姿态颈部回缩呈S形"},
           ]},
         { name:"白鹭", latin:"Egret garzetta", order:"鹈形目", family:"鹭科", genus:"白鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#ECEFF1,#90A4AE)", user:"自然笔记", time:"2026-06-23 08:10", note:"3只白鹭在湖边浅滩觅食 | 400mm f/5.6 1/1600s ISO320 曝光补偿+0.7"},
-            {photo:"linear-gradient(135deg,#F5F5F5,#BDBDBD)", user:"奥森观鸟队", time:"2026-06-19 06:45", note:"展翅飞翔，非常优雅 | 600mm f/6.3 1/4000s ISO800 高速快门定格翅膀"},
+            {photo:"linear-gradient(135deg,#ECEFF1,#90A4AE)", user:"自然笔记", time:"近期", note:"3只白鹭在浅滩同时觅食，彼此保持约5米间距，疑似非繁殖期小群"},
+            {photo:"linear-gradient(135deg,#F5F5F5,#BDBDBD)", user:"奥森观鸟队", time:"近期", note:"观察到展翅晾羽行为，持续约2分钟，可能刚完成一次捕鱼"},
           ]},
         { name:"夜鹭", latin:"Nycticorax nycticorax", order:"鹈形目", family:"鹭科", genus:"夜鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#455A64,#1a1a2e)", user:"夜观小组", time:"2026-06-21 19:30", note:"黄昏出动，树冠上发现5只 | 200mm f/2.8 1/200s ISO6400 高感夜拍"},
+            {photo:"linear-gradient(135deg,#455A64,#1a1a2e)", user:"夜观小组", time:"近期", note:"黄昏时分从树冠出动，共计5只成鸟。白天在同一棵大柳树上集群日栖"},
           ]},
     ],
     2: [ // 北园天境湖
         { name:"鸳鸯", latin:"Aix galericulata", order:"雁形目", family:"鸭科", genus:"鸳鸯属",
           sightings:[
-            {photo:"linear-gradient(135deg,#FF8F00,#4E342E)", user:"天境湖常客", time:"2026-06-26 06:00", note:"一对鸳鸯带着4只幼鸟在湖面游 | 400mm f/5.6 1/1250s ISO500 顺光拍色彩最佳"},
-            {photo:"linear-gradient(135deg,#F57C00,#3E2723)", user:"鸟有阿华", time:"2026-06-23 07:20", note:"雄鸟羽毛在晨光中非常艳丽 | 600mm f/6.3 1/2000s ISO640 金色侧光"},
+            {photo:"linear-gradient(135deg,#FF8F00,#4E342E)", user:"天境湖常客", time:"近期", note:"一对鸳鸯带4只幼鸟觅食，幼鸟已能独立游泳但仍紧跟母鸟"},
+            {photo:"linear-gradient(135deg,#F57C00,#3E2723)", user:"鸟有阿华", time:"近期", note:"雄鸟繁殖羽完整，正处于配对期。在湖面固定区域巡游领地"},
           ]},
         { name:"绿头鸭", latin:"Anas platyrhynchos", order:"雁形目", family:"鸭科", genus:"鸭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#2E7D32,#1B5E20)", user:"北园巡逻员", time:"2026-06-25 09:00", note:"约20只聚集在湖西侧 | 200mm f/4 1/800s ISO320 广角收群"},
-            {photo:"linear-gradient(135deg,#388E3C,#004D40)", user:"自然笔记", time:"2026-06-22 16:50", note:"母鸭带一群小鸭在芦苇丛 | 400mm f/5.6 1/1000s ISO500 低角度贴水面拍"},
-            {photo:"linear-gradient(135deg,#43A047,#006064)", user:"鸟有小李", time:"2026-06-20 08:30", note:"雄鸭绿头在阳光下很闪 | 500mm f/6.3 1/1600s ISO400 偏振镜减反光"},
+            {photo:"linear-gradient(135deg,#2E7D32,#1B5E20)", user:"北园巡逻员", time:"近期", note:"约20只聚集在湖西侧浅水区，多为非繁殖羽个体，可能是留居群"},
+            {photo:"linear-gradient(135deg,#388E3C,#004D40)", user:"自然笔记", time:"近期", note:"母鸭带8只小鸭穿行芦苇丛，小鸭已有飞羽萌出，约3周龄"},
+            {photo:"linear-gradient(135deg,#43A047,#006064)", user:"鸟有小李", time:"近期", note:"观察到雄鸭头部绿色金属光泽，正值换羽前最后的繁殖羽期"},
           ]},
         { name:"小鸊鷉", latin:"Tachybaptus ruficollis", order:"鸊鷉目", family:"鸊鷉科", genus:"小鸊鷉属",
           sightings:[
-            {photo:"linear-gradient(135deg,#5D4037,#3E2723)", user:"天境湖常客", time:"2026-06-24 07:45", note:"反复潜水捕鱼，浮出水面位置很随机 | 600mm f/6.3 1/2500s ISO800 预判对焦点守株待兔"},
+            {photo:"linear-gradient(135deg,#5D4037,#3E2723)", user:"天境湖常客", time:"近期", note:"反复潜水捕鱼，每次潜水约10-15秒，浮出位置距入水点约3-5米"},
           ]},
         { name:"白骨顶鸡", latin:"Fulica atra", order:"鹤形目", family:"秧鸡科", genus:"骨顶属",
           sightings:[
-            {photo:"linear-gradient(135deg,#212121,#000000)", user:"奥森观鸟队", time:"2026-06-23 10:00", note:"白色额板很显眼，在水草间活动 | 400mm f/5.6 1/1000s ISO400 点测光对准白色额板"},
-            {photo:"linear-gradient(135deg,#424242,#1a1a1a)", user:"北园巡逻员", time:"2026-06-21 08:15", note:"一家五口游过开阔水面 | 300mm f/5 1/1250s ISO320 留足空间拍全家福"},
+            {photo:"linear-gradient(135deg,#212121,#000000)", user:"奥森观鸟队", time:"近期", note:"在水草间活动觅食，偶尔与绿头鸭争夺食物，具有明显领域行为"},
+            {photo:"linear-gradient(135deg,#424242,#1a1a1a)", user:"北园巡逻员", time:"近期", note:"一家五口（2成鸟+3幼鸟）游过开阔水面，幼鸟头部红色裸皮明显"},
           ]},
     ],
     3: [ // 生态廊道桥
         { name:"灰喜鹊", latin:"Cyanopica cyanus", order:"雀形目", family:"鸦科", genus:"灰喜鹊属",
           sightings:[
-            {photo:"linear-gradient(135deg,#90A4AE,#546E7A)", user:"桥上观鸟人", time:"2026-06-26 08:30", note:"成群在树间跳跃，叫声响亮 | 200mm f/4 1/1000s ISO400 快门优先抓飞行"},
-            {photo:"linear-gradient(135deg,#78909C,#455A64)", user:"自然笔记", time:"2026-06-24 15:20", note:"抓到一只大青虫在吃 | 400mm f/5.6 1/1600s ISO500 特写捕食瞬间"},
+            {photo:"linear-gradient(135deg,#90A4AE,#546E7A)", user:"桥上观鸟人", time:"近期", note:"约8只成群活动，在树间跳跃传递食物信息。叫声为短促的\"嘎嘎\"声"},
+            {photo:"linear-gradient(135deg,#78909C,#455A64)", user:"自然笔记", time:"近期", note:"观察到捕食行为：从树枝上俯冲抓到一只大青虫，叼回枝头摔打后吞食"},
           ]},
         { name:"珠颈斑鸠", latin:"Spilopelia chinensis", order:"鸽形目", family:"鸠鸽科", genus:"斑鸠属",
           sightings:[
-            {photo:"linear-gradient(135deg,#A1887F,#5D4037)", user:"鸟有阿华", time:"2026-06-25 09:10", note:"一对在地面走动找食 | 300mm f/5.6 1/500s ISO200 柔和散射光"},
+            {photo:"linear-gradient(135deg,#A1887F,#5D4037)", user:"鸟有阿华", time:"近期", note:"一对在地面走动觅食，颈部珠纹清晰可辨。对行人警觉距离约5米"},
           ]},
         { name:"乌鸫", latin:"Turdus mandarinus", order:"雀形目", family:"鸫科", genus:"鸫属",
           sightings:[
-            {photo:"linear-gradient(135deg,#37474F,#000000)", user:"桥上观鸟人", time:"2026-06-24 06:50", note:"雄鸟在枝头高歌，黄色眼圈明显 | 500mm f/6.3 1/1250s ISO640 仰拍蓝天背景简洁"},
-            {photo:"linear-gradient(135deg,#263238,#1a1a1a)", user:"夜观小组", time:"2026-06-22 18:40", note:"黄昏前最后一波鸣叫 | 400mm f/4 1/400s ISO3200 暖色调黄金时刻"},
+            {photo:"linear-gradient(135deg,#37474F,#000000)", user:"桥上观鸟人", time:"近期", note:"雄鸟晨鸣，黄色眼圈和喙非常明显。鸣唱持续约15分钟，音节变化丰富"},
+            {photo:"linear-gradient(135deg,#263238,#1a1a1a)", user:"夜观小组", time:"近期", note:"黄昏前最后一波鸣叫，似乎在宣示领地边界。叫声比晨鸣更急促"},
           ]},
     ],
     4: [ // 奥海湿地
         { name:"白鹡鸰", latin:"Motacilla alba", order:"雀形目", family:"鹡鸰科", genus:"鹡鸰属",
           sightings:[
-            {photo:"linear-gradient(135deg,#ECEFF1,#455A64)", user:"湿地守望者", time:"2026-06-26 07:00", note:"在栈道栏杆上不停点头翘尾 | 300mm f/5.6 1/1600s ISO400 近距离手持快拍"},
-            {photo:"linear-gradient(135deg,#CFD8DC,#37474F)", user:"鸟有小李", time:"2026-06-23 08:45", note:"追着蚊虫在水面低飞 | 400mm f/5.6 1/3200s ISO1000 追焦连拍"},
+            {photo:"linear-gradient(135deg,#ECEFF1,#455A64)", user:"湿地守望者", time:"近期", note:"在栈道栏杆上不停点头翘尾，典型的鹡鸰行为。对人类非常不敏感，约1米距离不飞"},
+            {photo:"linear-gradient(135deg,#CFD8DC,#37474F)", user:"鸟有小李", time:"近期", note:"在水面低飞捕食蚊虫，飞行路线呈波浪形。栖息地与白鹭有重叠但互不干扰"},
           ]},
         { name:"鸬鹚", latin:"Phalacrocorax carbo", order:"鲣鸟目", family:"鸬鹚科", genus:"鸬鹚属",
           sightings:[
-            {photo:"linear-gradient(135deg,#1B5E20,#000000)", user:"奥森观鸟队", time:"2026-06-25 10:30", note:"展翅晾干羽毛，站在木桩上 | 500mm f/6.3 1/2000s ISO400 经典展翅姿态"},
+            {photo:"linear-gradient(135deg,#1B5E20,#000000)", user:"奥森观鸟队", time:"近期", note:"捕鱼后展翅晾干羽毛，站在固定木桩上。鸬鹚羽毛不防水，这是它们必须的行为"},
           ]},
         { name:"苍鹭", latin:"Ardea cinerea", order:"鹈形目", family:"鹭科", genus:"鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#78909C,#37474F)", user:"湿地守望者", time:"2026-06-24 06:20", note:"芦苇荡边静候猎物 | 600mm f/6.3 1/800s ISO320 前景虚化芦苇框架构图"},
+            {photo:"linear-gradient(135deg,#78909C,#37474F)", user:"湿地守望者", time:"近期", note:"芦苇荡边静候猎物，完全静止站立。这种\"守株待兔\"是苍鹭典型的捕食策略"},
           ]},
     ],
     5: [ // 北园东侧林地
         { name:"大斑啄木鸟", latin:"Dendrocopos major", order:"鴷形目", family:"啄木鸟科", genus:"啄木鸟属",
           sightings:[
-            {photo:"linear-gradient(135deg,#B71C1C,#1a1a1a)", user:"林地探索者", time:"2026-06-25 09:40", note:"连续敲击枯木，红色后脑很鲜艳 | 500mm f/6.3 1/2000s ISO800 仰拍避免天空过曝"},
-            {photo:"linear-gradient(135deg,#D32F2F,#212121)", user:"鸟有阿华", time:"2026-06-22 10:15", note:"在白杨树干上寻找虫子 | 400mm f/5.6 1/1250s ISO640 对焦眼睛锁定头部"},
+            {photo:"linear-gradient(135deg,#B71C1C,#1a1a1a)", user:"林地探索者", time:"近期", note:"连续敲击枯木觅食，频率约每秒15-20次。红色后枕羽说明是雄鸟"},
+            {photo:"linear-gradient(135deg,#D32F2F,#212121)", user:"鸟有阿华", time:"近期", note:"在白杨树干上螺旋上升寻找虫子，这是啄木鸟典型的搜索模式"},
           ]},
         { name:"红嘴蓝鹊", latin:"Urocissa erythroryncha", order:"雀形目", family:"鸦科", genus:"蓝鹊属",
           sightings:[
-            {photo:"linear-gradient(135deg,#1565C0,#B71C1C)", user:"林地探索者", time:"2026-06-24 08:00", note:"长尾巴在树间穿梭，非常壮观 | 200-600mm f/6.3 1/1600s ISO1000 留长尾空间构图"},
+            {photo:"linear-gradient(135deg,#1565C0,#B71C1C)", user:"林地探索者", time:"近期", note:"2只结伴在树间穿梭，尾羽极长。叫声沙哑似\"嘎-嘎-嘎\"，飞行姿态滑翔为主"},
           ]},
         { name:"猫头鹰", latin:"Strix aluco", order:"鸮形目", family:"鸱鸮科", genus:"林鸮属",
           sightings:[
-            {photo:"linear-gradient(135deg,#4E342E,#1a1a1a)", user:"夜观小组", time:"2026-06-21 21:00", note:"树洞中发现一只灰林鸮，眼睛在手电中反光 | 200mm f/2.8 1/60s ISO12800 红光手电辅助对焦勿用闪光"},
+            {photo:"linear-gradient(135deg,#4E342E,#1a1a1a)", user:"夜观小组", time:"近期", note:"⚠️ 敏感物种 · 树洞日栖，请勿靠近打扰。仅远距离确认存在，未做详细观察"},
           ]},
     ],
     6: [ // 花田野趣
         { name:"戴胜", latin:"Upupa epops", order:"犀鸟目", family:"戴胜科", genus:"戴胜属",
           sightings:[
-            {photo:"linear-gradient(135deg,#FF8F00,#8B6914)", user:"草地漫步者", time:"2026-06-26 07:50", note:"在草地上用长嘴翻找虫子，冠羽竖起来了 | 500mm f/6.3 1/1600s ISO500 平视低机位拍草地"},
-            {photo:"linear-gradient(135deg,#FFA000,#BF360C)", user:"自然笔记", time:"2026-06-23 16:30", note:"飞起来翅膀黑白相间很好看 | 400mm f/5.6 1/3200s ISO1000 高速快门拍飞版"},
+            {photo:"linear-gradient(135deg,#FF8F00,#8B6914)", user:"草地漫步者", time:"近期", note:"在草地上用长喙探入土中翻找虫子，冠羽竖起表示警觉。夏候鸟，秋季将南迁"},
+            {photo:"linear-gradient(135deg,#FFA000,#BF360C)", user:"自然笔记", time:"近期", note:"受惊起飞时翅膀黑白相间的斑纹非常醒目，这是一种警示色"},
           ]},
         { name:"喜鹊", latin:"Pica pica", order:"雀形目", family:"鸦科", genus:"鹊属",
           sightings:[
-            {photo:"linear-gradient(135deg,#212121,#ECEFF1)", user:"鸟有小李", time:"2026-06-25 08:00", note:"在路灯顶部的巢里进进出出 | 300mm f/5.6 1/1000s ISO320 逆光曝光补偿+1"},
+            {photo:"linear-gradient(135deg,#212121,#ECEFF1)", user:"鸟有小李", time:"近期", note:"在路灯顶部筑巢育雏，频繁进出喂食。巢结构粗大，由树枝搭建，顶部有盖"},
           ]},
         { name:"灰椋鸟", latin:"Spodiopsar cineraceus", order:"雀形目", family:"椋鸟科", genus:"椋鸟属",
           sightings:[
-            {photo:"linear-gradient(135deg,#78909C,#455A64)", user:"草地漫步者", time:"2026-06-24 17:00", note:"一大群在草坪上集体觅食 | 200mm f/4 1/800s ISO320 广角拍群体行为"},
-            {photo:"linear-gradient(135deg,#607D8B,#37474F)", user:"奥森观鸟队", time:"2026-06-20 07:30", note:"树上停了至少30只 | 400mm f/5.6 1/1250s ISO500 大光圈虚化背景突出个体"},
+            {photo:"linear-gradient(135deg,#78909C,#455A64)", user:"草地漫步者", time:"近期", note:"约30只大群在草坪集体觅食，典型的群聚行为。个体间保持约0.5米间距"},
+            {photo:"linear-gradient(135deg,#607D8B,#37474F)", user:"奥森观鸟队", time:"近期", note:"傍晚集群栖息前在树上聚集鸣叫，声音嘈杂。这是椋鸟的集群夜栖习性"},
           ]},
     ],
     7: [ // 南园西侧水系
         { name:"翠鸟", latin:"Alcedo atthis", order:"佛法僧目", family:"翠鸟科", genus:"翠鸟属",
           sightings:[
-            {photo:"linear-gradient(135deg,#00BCD4,#006064)", user:"溪边等待者", time:"2026-06-25 06:50", note:"蓝色闪电从水面掠过 | 600mm f/6.3 1/4000s ISO1600 预设对焦点蹲拍"},
-            {photo:"linear-gradient(135deg,#0097A7,#004D40)", user:"鸟有小李", time:"2026-06-21 07:30", note:"叼着小鱼飞回巢穴方向 | 500mm f/5.6 1/2500s ISO800 连拍捕捉叼鱼特写"},
+            {photo:"linear-gradient(135deg,#00BCD4,#006064)", user:"溪边等待者", time:"近期", note:"沿溪流低飞觅食，有固定的巡回路线。每隔5-10分钟经过同一停歇点"},
+            {photo:"linear-gradient(135deg,#0097A7,#004D40)", user:"鸟有小李", time:"近期", note:"叼鱼飞向北侧土坡方向，推测巢穴位于该区域。正值育雏期"},
           ]},
         { name:"白鹭", latin:"Egret garzetta", order:"鹈形目", family:"鹭科", genus:"白鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#ECEFF1,#90A4AE)", user:"湿地守望者", time:"2026-06-23 09:00", note:"溪水浅处单脚站立 | 400mm f/5.6 1/1000s ISO250 倒影构图水面平静时拍"},
+            {photo:"linear-gradient(135deg,#ECEFF1,#90A4AE)", user:"湿地守望者", time:"近期", note:"溪水浅处单脚站立休息，这是鹭科的节能姿态。繁殖羽已退化"},
           ]},
         { name:"池鹭", latin:"Ardeola bacchus", order:"鹈形目", family:"鹭科", genus:"池鹭属",
           sightings:[
-            {photo:"linear-gradient(135deg,#8D6E63,#ECEFF1)", user:"溪边等待者", time:"2026-06-24 08:20", note:"繁殖羽很漂亮，头部栗红色 | 400mm f/5.6 1/1250s ISO400 侧光拍出羽毛层次"},
+            {photo:"linear-gradient(135deg,#8D6E63,#ECEFF1)", user:"溪边等待者", time:"近期", note:"繁殖羽期头部栗红色、背部深蓝色，与非繁殖期判若两鸟。夏候鸟"},
           ]},
     ],
     8: [ // 大鸣泉
         { name:"乌鸫", latin:"Turdus mandarinus", order:"雀形目", family:"鸫科", genus:"鸫属",
           sightings:[
-            {photo:"linear-gradient(135deg,#37474F,#000000)", user:"泉边听鸟人", time:"2026-06-25 06:30", note:"天不亮就开始鸣唱，声音婉转 | 400mm f/4 1/500s ISO3200 弱光下大光圈优先"},
+            {photo:"linear-gradient(135deg,#37474F,#000000)", user:"泉边听鸟人", time:"近期", note:"天不亮即开始晨鸣，音节丰富有变化。乌鸫是北京城市鸟类中鸣声最婉转的"},
           ]},
         { name:"北红尾鸲", latin:"Phoenicurus auroreus", order:"雀形目", family:"鹟科", genus:"红尾鸲属",
           sightings:[
-            {photo:"linear-gradient(135deg,#8B6914,#37474F)", user:"泉边听鸟人", time:"2026-06-24 07:10", note:"雄鸟橙红色胸腹，在石头上抖尾巴 | 500mm f/6.3 1/1600s ISO640 暖调白平衡突出橙色"},
-            {photo:"linear-gradient(135deg,#BF360C,#455A64)", user:"鸟有阿华", time:"2026-06-22 16:50", note:"幼鸟跟着亲鸟学捕虫 | 400mm f/5.6 1/1250s ISO800 耐心等待互动瞬间"},
+            {photo:"linear-gradient(135deg,#8B6914,#37474F)", user:"泉边听鸟人", time:"近期", note:"雄鸟橙红色胸腹，频繁抖动尾羽（红尾鸲属的标志行为）。在石头上守候伏击昆虫"},
+            {photo:"linear-gradient(135deg,#BF360C,#455A64)", user:"鸟有阿华", time:"近期", note:"观察到亲鸟带幼鸟学习捕虫，幼鸟胸部有鳞斑纹，尚未换成鸟羽"},
           ]},
         { name:"黄眉柳莺", latin:"Phylloscopus inornatus", order:"雀形目", family:"柳莺科", genus:"柳莺属",
           sightings:[
-            {photo:"linear-gradient(135deg,#8BC34A,#33691E)", user:"奥森观鸟队", time:"2026-06-20 08:00", note:"秋季过境鸟，在灌木丛中快速移动 | 300mm f/4 1/2000s ISO1000 高速快门+区域AF抓小型鸟"},
+            {photo:"linear-gradient(135deg,#8BC34A,#33691E)", user:"奥森观鸟队", time:"近期", note:"过境旅鸟，在灌木丛中快速移动觅食。体型极小(约10cm)，眉纹淡黄色是辨识要点"},
           ]},
     ],
 };
@@ -866,34 +997,34 @@ const postData = [
     { id:3, user:"城市生态官", av:"🦊", bg:"#F5EFE0", area:"奥森公园", type:"charity", ct:"廊道桥附近发现一个灰喜鹊巢穴被风吹歪，有人周末一起去加固吗？需要带干草和绳子", imgs:["url(birds/huixique.jpg) center/cover","url(birds/huixique2.jpg) center/cover"], emo:["",""], tags:["灰喜鹊","护巢"], likes:45, comments:23, time:"昨天", liked:true },
     { id:4, user:"圆明园观鸟人", av:"📷", bg:"#E8EDE6", area:"圆明园", type:"record", ct:"圆明园福海今天来了一群鸬鹚！大概有20多只，在水面上列队捕鱼，还有几只苍鹭在岸边看热闹", imgs:["url(birds/luci.jpg) center/cover","url(birds/luci2.jpg) center/cover","url(birds/canglv2.jpg) center/cover"], emo:["","",""], tags:["鸬鹚","福海"], likes:56, comments:15, time:"昨天", liked:false },
     { id:5, user:"天坛早起鸟", av:"🌅", bg:"#F5EFE0", area:"天坛公园", type:"record", ct:"天坛长廊旁边的柏树林里发现了一对大斑啄木鸟在筑巢！每天早上6点准时开工凿树，声音很有节奏感", imgs:["url(birds/dabanzhuomuniao.jpg) center/cover","url(birds/dabanzhuomuniao2.jpg) center/cover","url(birds/dabanzhuomuniao3.jpg) center/cover"], emo:["","",""], tags:["啄木鸟","天坛"], likes:41, comments:9, time:"昨天", liked:false },
-    { id:6, user:"鸟类摄影新手", av:"🔭", bg:"#E8EDE6", area:"圆明园", type:"discuss", ct:"请问圆明园哪个区域最容易看到翠鸟？新手一枚，想拍翠鸟入水的瞬间🙏", imgs:[], emo:[], tags:["翠鸟","求助"], likes:5, comments:15, time:"2天前", liked:false },
+    { id:6, user:"观鸟新手", av:"🔭", bg:"#E8EDE6", area:"圆明园", type:"discuss", ct:"请问圆明园哪个区域最容易看到翠鸟？新手一枚，想观察翠鸟捕鱼的完整过程🙏", imgs:[], emo:[], tags:["翠鸟","求助"], likes:5, comments:15, time:"2天前", liked:false },
     { id:7, user:"湿地漫步者", av:"🚶", bg:"#E8EDE6", area:"奥森公园", type:"record", ct:"奥海湿地今天遇到一群鸬鹚在集体捕鱼，场面壮观！还有苍鹭在旁边等着捡漏哈哈", imgs:["url(birds/luci3.jpg) center/cover","url(birds/canglv3.jpg) center/cover","url(birds/canglv.jpg) center/cover"], emo:["","",""], tags:["鸬鹚","苍鹭","奥海"], likes:67, comments:19, time:"3天前", liked:false },
     { id:8, user:"颐和园守望者", av:"🏯", bg:"#EDE8E0", area:"颐和园", type:"rally", ct:"下周日颐和园昆明湖环湖观鸟活动！重点寻找凤头鸊鷉和各种雁鸭类，欢迎报名~", imgs:["url(birds/fengtoupiti.jpg) center/cover","url(birds/fengtoupiti2.jpg) center/cover","url(birds/fengtoupiti3.jpg) center/cover"], emo:["","",""], tags:["观鸟活动","颐和园"], likes:23, comments:18, time:"3天前", liked:false, rally:{time:"周日 7:00",spot:"颐和园东宫门",count:12} },
 ];
 
 const guideData = [
-    { id:1, name:"翠鸟", eng:"Common Kingfisher", sci:"Alcedo atthis", order:"佛法僧目", family:"翠鸟科", star:4, got:true, first:"2024-05-10", park:"奥森公园", spot:"南园湖心岛", count:8, emoji:"💎", color:"#E8EDE6", season:"留鸟" },
-    { id:2, name:"苍鹭", eng:"Grey Heron", sci:"Ardea cinerea", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-03-15", park:"奥森公园", spot:"奥海湿地", count:12, emoji:"🦩", color:"#CFD8DC", season:"留鸟" },
-    { id:3, name:"白鹭", eng:"Little Egret", sci:"Egretta garzetta", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-04-02", park:"奥森公园", spot:"南园湖心岛", count:6, emoji:"🦢", color:"#E8EDE6", season:"夏候鸟" },
-    { id:4, name:"鸳鸯", eng:"Mandarin Duck", sci:"Aix galericulata", order:"雁形目", family:"鸭科", star:4, got:true, first:"2024-10-15", park:"奥森公园", spot:"北园天境湖", count:4, emoji:"🦆", color:"#F5EFE0", season:"冬候鸟" },
-    { id:5, name:"灰喜鹊", eng:"Azure-winged Magpie", sci:"Cyanopica cyanus", order:"雀形目", family:"鸦科", star:2, got:true, first:"2024-02-20", park:"奥森公园", spot:"生态廊道桥", count:20, emoji:"🐦‍⬛", color:"#ECEFF1", season:"留鸟" },
-    { id:6, name:"戴胜", eng:"Eurasian Hoopoe", sci:"Upupa epops", order:"犀鸟目", family:"戴胜科", star:4, got:true, first:"2024-04-22", park:"奥森公园", spot:"花田野趣", count:3, emoji:"🐦", color:"#F5EFE0", season:"夏候鸟" },
-    { id:7, name:"大斑啄木鸟", eng:"Gt. Spotted Woodpecker", sci:"Dendrocopos major", order:"鴷形目", family:"啄木鸟科", star:3, got:true, first:"2024-06-18", park:"奥森公园", spot:"北园东侧林地", count:4, emoji:"🪶", color:"#FFCDD2", season:"留鸟" },
-    { id:8, name:"绿头鸭", eng:"Mallard", sci:"Anas platyrhynchos", order:"雁形目", family:"鸭科", star:2, got:true, first:"2024-02-14", park:"奥森公园", spot:"北园天境湖", count:15, emoji:"🦆", color:"#E8EDE6", season:"冬候鸟" },
-    { id:9, name:"珠颈斑鸠", eng:"Spotted Dove", sci:"Spilopelia chinensis", order:"鸽形目", family:"鸠鸽科", star:1, got:true, first:"2024-01-20", park:"圆明园", spot:"福海", count:25, emoji:"🕊️", color:"#EFEBE9", season:"留鸟" },
-    { id:10, name:"猫头鹰", eng:"Long-eared Owl", sci:"Asio otus", order:"鸮形目", family:"鸱鸮科", star:5, got:true, first:"2024-11-20", park:"奥森公园", spot:"北园东侧林地", count:1, emoji:"🦉", color:"#4E342E", season:"冬候鸟" },
-    { id:11, name:"喜鹊", eng:"Eurasian Magpie", sci:"Pica pica", order:"雀形目", family:"鸦科", star:1, got:true, first:"2024-01-05", park:"天坛公园", spot:"柏树林", count:30, emoji:"🐦‍⬛", color:"#FAFAFA", season:"留鸟" },
-    { id:12, name:"乌鸫", eng:"Common Blackbird", sci:"Turdus merula", order:"雀形目", family:"鸫科", star:2, got:true, first:"2024-02-10", park:"奥森公园", spot:"大鸣泉", count:8, emoji:"⚫", color:"#37474F", season:"留鸟" },
-    { id:13, name:"白鹡鸰", eng:"White Wagtail", sci:"Motacilla alba", order:"雀形目", family:"鹡鸰科", star:2, got:true, first:"2024-03-01", park:"奥森公园", spot:"奥海湿地", count:10, emoji:"🐧", color:"#F5F5F5", season:"留鸟" },
-    { id:14, name:"夜鹭", eng:"Black-crowned Night Heron", sci:"Nycticorax nycticorax", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-07-30", park:"圆明园", spot:"长春园", count:4, emoji:"🌙", color:"#1A237E", season:"夏候鸟" },
-    { id:15, name:"鸬鹚", eng:"Great Cormorant", sci:"Phalacrocorax carbo", order:"鲣鸟目", family:"鸬鹚科", star:3, got:true, first:"2024-09-08", park:"圆明园", spot:"福海", count:6, emoji:"🦅", color:"#263238", season:"冬候鸟" },
-    { id:16, name:"红嘴蓝鹊", eng:"Red-billed Blue Magpie", sci:"Urocissa erythroryncha", order:"雀形目", family:"鸦科", star:4, got:true, first:"2024-07-12", park:"颐和园", spot:"后山", count:2, emoji:"🔵", color:"#E8EDE6", season:"留鸟" },
-    { id:17, name:"麻雀", eng:"Tree Sparrow", sci:"Passer montanus", order:"雀形目", family:"麻雀科", star:1, got:true, first:"2024-01-01", park:"天坛公园", spot:"祈年殿", count:50, emoji:"🐦", color:"#D7CCC8", season:"留鸟" },
-    { id:18, name:"小鸊鷉", eng:"Little Grebe", sci:"Tachybaptus ruficollis", order:"鸊鷉目", family:"鸊鷉科", star:3, got:true, first:"2024-05-20", park:"颐和园", spot:"昆明湖", count:5, emoji:"🐥", color:"#F5EFE0", season:"留鸟" },
-    { id:19, name:"凤头鸊鷉", eng:"Great Crested Grebe", sci:"Podiceps cristatus", order:"鸊鷉目", family:"鸊鷉科", star:4, got:true, first:"2024-06-10", park:"颐和园", spot:"昆明湖", count:3, emoji:"🦩", color:"#B2EBF2", season:"夏候鸟" },
-    { id:20, name:"家燕", eng:"Barn Swallow", sci:"Hirundo rustica", order:"雀形目", family:"燕科", star:2, got:true, first:"2024-04-15", park:"天坛公园", spot:"回音壁", count:12, emoji:"✈️", color:"#E8EDE6", season:"夏候鸟" },
-    { id:21, name:"北红尾鸲", eng:"Daurian Redstart", sci:"Phoenicurus auroreus", order:"雀形目", family:"鹟科", star:3, got:true, first:"2024-10-20", park:"奥森公园", spot:"大鸣泉", count:6, emoji:"🔥", color:"#F0EBE3", season:"旅鸟" },
-    { id:22, name:"黄眉柳莺", eng:"Yellow-browed Warbler", sci:"Phylloscopus inornatus", order:"雀形目", family:"柳莺科", star:3, got:true, first:"2024-09-25", park:"奥森公园", spot:"大鸣泉", count:3, emoji:"🌿", color:"#EDE8E0", season:"旅鸟" },
+    { id:1, name:"翠鸟", eng:"Common Kingfisher", sci:"Alcedo atthis", order:"佛法僧目", family:"翠鸟科", star:4, got:true, first:"2024-05-10", park:"奥森公园", spot:"南园湖心岛", count:8, emoji:"💎", color:"#E8EDE6", season:"留鸟", behaviors:["捕鱼","育雏","领地巡飞"] },
+    { id:2, name:"苍鹭", eng:"Grey Heron", sci:"Ardea cinerea", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-03-15", park:"奥森公园", spot:"奥海湿地", count:12, emoji:"🦩", color:"#CFD8DC", season:"留鸟", behaviors:["觅食","夜栖","飞行"] },
+    { id:3, name:"白鹭", eng:"Little Egret", sci:"Egretta garzetta", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-04-02", park:"奥森公园", spot:"南园湖心岛", count:6, emoji:"🦢", color:"#E8EDE6", season:"夏候鸟", behaviors:["觅食","晾羽","小群活动"] },
+    { id:4, name:"鸳鸯", eng:"Mandarin Duck", sci:"Aix galericulata", order:"雁形目", family:"鸭科", star:4, got:true, first:"2024-10-15", park:"奥森公园", spot:"北园天境湖", count:4, emoji:"🦆", color:"#F5EFE0", season:"冬候鸟", behaviors:["配对","育雏","领地巡游"] },
+    { id:5, name:"灰喜鹊", eng:"Azure-winged Magpie", sci:"Cyanopica cyanus", order:"雀形目", family:"鸦科", star:2, got:true, first:"2024-02-20", park:"奥森公园", spot:"生态廊道桥", count:20, emoji:"🐦‍⬛", color:"#ECEFF1", season:"留鸟", behaviors:["群聚觅食","捕虫","鸣叫"] },
+    { id:6, name:"戴胜", eng:"Eurasian Hoopoe", sci:"Upupa epops", order:"犀鸟目", family:"戴胜科", star:4, got:true, first:"2024-04-22", park:"奥森公园", spot:"花田野趣", count:3, emoji:"🐦", color:"#F5EFE0", season:"夏候鸟", behaviors:["翻土觅虫","竖冠羽警觉","飞行"] },
+    { id:7, name:"大斑啄木鸟", eng:"Gt. Spotted Woodpecker", sci:"Dendrocopos major", order:"鴷形目", family:"啄木鸟科", star:3, got:true, first:"2024-06-18", park:"奥森公园", spot:"北园东侧林地", count:4, emoji:"🪶", color:"#FFCDD2", season:"留鸟", behaviors:["敲击觅食","螺旋攀树","鸣叫"] },
+    { id:8, name:"绿头鸭", eng:"Mallard", sci:"Anas platyrhynchos", order:"雁形目", family:"鸭科", star:2, got:true, first:"2024-02-14", park:"奥森公园", spot:"北园天境湖", count:15, emoji:"🦆", color:"#E8EDE6", season:"冬候鸟", behaviors:["集群","育雏","换羽"] },
+    { id:9, name:"珠颈斑鸠", eng:"Spotted Dove", sci:"Spilopelia chinensis", order:"鸽形目", family:"鸠鸽科", star:1, got:true, first:"2024-01-20", park:"圆明园", spot:"福海", count:25, emoji:"🕊️", color:"#EFEBE9", season:"留鸟", behaviors:["地面觅食","对鸣","晨昏活跃"] },
+    { id:10, name:"猫头鹰", eng:"Long-eared Owl", sci:"Asio otus", order:"鸮形目", family:"鸱鸮科", star:5, got:true, first:"2024-11-20", park:"奥森公园", spot:"北园东侧林地", count:1, emoji:"🦉", color:"#4E342E", season:"冬候鸟", behaviors:["日栖"], sensitive:true },
+    { id:11, name:"喜鹊", eng:"Eurasian Magpie", sci:"Pica pica", order:"雀形目", family:"鸦科", star:1, got:true, first:"2024-01-05", park:"天坛公园", spot:"柏树林", count:30, emoji:"🐦‍⬛", color:"#FAFAFA", season:"留鸟", behaviors:["筑巢","觅食","鸣叫"] },
+    { id:12, name:"乌鸫", eng:"Common Blackbird", sci:"Turdus merula", order:"雀形目", family:"鸫科", star:2, got:true, first:"2024-02-10", park:"奥森公园", spot:"大鸣泉", count:8, emoji:"⚫", color:"#37474F", season:"留鸟", behaviors:["晨鸣","翻落叶觅食","领地宣示"] },
+    { id:13, name:"白鹡鸰", eng:"White Wagtail", sci:"Motacilla alba", order:"雀形目", family:"鹡鸰科", star:2, got:true, first:"2024-03-01", park:"奥森公园", spot:"奥海湿地", count:10, emoji:"🐧", color:"#F5F5F5", season:"留鸟", behaviors:["翘尾","水面捕虫","波浪飞行"] },
+    { id:14, name:"夜鹭", eng:"Black-crowned Night Heron", sci:"Nycticorax nycticorax", order:"鹈形目", family:"鹭科", star:3, got:true, first:"2024-07-30", park:"圆明园", spot:"长春园", count:4, emoji:"🌙", color:"#1A237E", season:"夏候鸟", behaviors:["集群日栖","黄昏出动","夜间觅食"] },
+    { id:15, name:"鸬鹚", eng:"Great Cormorant", sci:"Phalacrocorax carbo", order:"鲣鸟目", family:"鸬鹚科", star:3, got:true, first:"2024-09-08", park:"圆明园", spot:"福海", count:6, emoji:"🦅", color:"#263238", season:"冬候鸟", behaviors:["潜水捕鱼","展翅晾羽","集群捕食"] },
+    { id:16, name:"红嘴蓝鹊", eng:"Red-billed Blue Magpie", sci:"Urocissa erythroryncha", order:"雀形目", family:"鸦科", star:4, got:true, first:"2024-07-12", park:"颐和园", spot:"后山", count:2, emoji:"🔵", color:"#E8EDE6", season:"留鸟", behaviors:["结伴穿梭","滑翔","鸣叫"] },
+    { id:17, name:"麻雀", eng:"Tree Sparrow", sci:"Passer montanus", order:"雀形目", family:"麻雀科", star:1, got:true, first:"2024-01-01", park:"天坛公园", spot:"祈年殿", count:50, emoji:"🐦", color:"#D7CCC8", season:"留鸟", behaviors:["群聚","沙浴","争夺食物"] },
+    { id:18, name:"小鸊鷉", eng:"Little Grebe", sci:"Tachybaptus ruficollis", order:"鸊鷉目", family:"鸊鷉科", star:3, got:true, first:"2024-05-20", park:"颐和园", spot:"昆明湖", count:5, emoji:"🐥", color:"#F5EFE0", season:"留鸟", behaviors:["潜水","浮巢","鸣叫"] },
+    { id:19, name:"凤头鸊鷉", eng:"Great Crested Grebe", sci:"Podiceps cristatus", order:"鸊鷉目", family:"鸊鷉科", star:4, got:true, first:"2024-06-10", park:"颐和园", spot:"昆明湖", count:3, emoji:"🦩", color:"#B2EBF2", season:"夏候鸟", behaviors:["求偶舞","潜水","背载幼鸟"] },
+    { id:20, name:"家燕", eng:"Barn Swallow", sci:"Hirundo rustica", order:"雀形目", family:"燕科", star:2, got:true, first:"2024-04-15", park:"天坛公园", spot:"回音壁", count:12, emoji:"✈️", color:"#E8EDE6", season:"夏候鸟", behaviors:["飞行捕虫","筑巢","集群迁飞"] },
+    { id:21, name:"北红尾鸲", eng:"Daurian Redstart", sci:"Phoenicurus auroreus", order:"雀形目", family:"鹟科", star:3, got:true, first:"2024-10-20", park:"奥森公园", spot:"大鸣泉", count:6, emoji:"🔥", color:"#F0EBE3", season:"旅鸟", behaviors:["抖尾","伏击捕虫","亲鸟育幼"] },
+    { id:22, name:"黄眉柳莺", eng:"Yellow-browed Warbler", sci:"Phylloscopus inornatus", order:"雀形目", family:"柳莺科", star:3, got:true, first:"2024-09-25", park:"奥森公园", spot:"大鸣泉", count:3, emoji:"🌿", color:"#EDE8E0", season:"旅鸟", behaviors:["灌丛觅食","过境停歇"] },
     // Uncollected
     { id:23, name:"???", order:"鹰形目", family:"鹰科", star:5, got:false, emoji:"", color:"#eee", park:"奥森公园", season:"冬候鸟" },
     { id:24, name:"???", order:"雀形目", family:"燕科", star:2, got:false, emoji:"", color:"#eee", park:"圆明园", season:"夏候鸟" },
@@ -960,7 +1091,7 @@ const birdReplies = {
         '等等你说完了吗？？你还没说完我就想回答了哈哈哈不好意思我就是这样！！我觉得你挺好的不用担心！！对了你明天有空吗我组了个局三十多只鸟一起去南园你来不来！！',
     ],
 };
-let curNestTab = 'mailbox';
+let curNestTab = 'diary';
 let curChatBird = null;
 let chatHistory = {};
 
@@ -973,8 +1104,9 @@ function switchTab(t) {
     document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-'+t).classList.add('active');
     document.querySelectorAll('.tab-item').forEach((el,i)=>{
-        el.classList.toggle('active', ['map','community','nest','guide'][i]===t);
+        el.classList.toggle('active', ['map','guide','nest','mag'][i]===t);
     });
+    if(t === 'guide') setTimeout(initGraph, 50);
 }
 
 // ===== MAP: SVG Vector Map + Coordinate Mapping =====
@@ -3701,6 +3833,7 @@ function initMap() {
             `;
             pin.onclick = () => openEmptySpot(s);
         } else {
+            const hasSensitiveBird = s.birds.some(name => { const g = guideData.find(d=>d.name===name); return g && g.sensitive; });
             const dotColor = s.iconColor || 'var(--primary)';
             pin.innerHTML = `
                 <div class="pin-dot" style="background:${dotColor};color:${dotColor}">
@@ -3708,7 +3841,7 @@ function initMap() {
                     ${s.hot ? '<div class="pin-hot"></div>' : ''}
                     <span style="font-size:14px">${s.icon || '🐦'}</span>
                 </div>
-                <div class="pin-label">${s.name}</div>
+                <div class="pin-label">${s.name}${hasSensitiveBird?' 🔒':''}</div>
             `;
             pin.onclick = () => openSpot(s.id);
         }
@@ -3891,10 +4024,11 @@ function showMyLocation(pos) {
 }
 
 function openEmptySpot(s) {
-    // 点击空地点 → 直接打开上传面板并预填位置
+    // 点击空地点 → 切换到来信tab并打开上传面板
     uploadLat = s.lat; uploadLng = s.lng;
     const pz = detectParkZone(s.lat, s.lng);
     uploadPark = pz.park; uploadZone = pz.zone;
+    switchTab('nest');
     showM('uploadModal');
     document.getElementById('uploadLocStatus').textContent = '✅ 已选择地点';
     document.getElementById('uploadLocCoord').textContent = `${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}`;
@@ -3954,16 +4088,24 @@ async function fetchSpotWeather(lat, lng) {
 function openSpot(id) {
     const s = birdSpots.find(x=>x.id===id);
     const birds = birdSightings[id] || [];
+    // 检查是否包含敏感物种
+    const hasSensitive = s.birds.some(name => {
+        const g = guideData.find(d=>d.name===name);
+        return g && g.sensitive;
+    });
     document.getElementById('spotTitle').textContent = '🐦 ' + s.name;
-    document.getElementById('spotLoc').textContent = '📍 ' + s.area + ' · ' + s.lat + ', ' + s.lng;
+    document.getElementById('spotLoc').textContent = hasSensitive ? '📍 ' + s.area + ' · 坐标已隐藏（含敏感物种）' : '📍 ' + s.area + ' · ' + s.lat + ', ' + s.lng;
 
     // 天气 + 导航按钮
+    const navBtn = hasSensitive
+        ? `<span style="padding:5px 12px;background:#BDBDBD;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;gap:4px">🔒 导航已禁用</span>`
+        : `<a href="https://uri.amap.com/marker?position=${s.lng},${s.lat}&name=${encodeURIComponent(s.name)}" target="_blank" style="padding:5px 12px;background:var(--primary);color:#E8EDE6;font-size:11px;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:4px">📍 导航到这里</a>`;
     document.getElementById('spotMeta').innerHTML = `
         <div style="flex:1;display:flex;align-items:center;gap:6px" id="spotWeather">
             <span style="font-size:14px">⛅</span>
             <span style="font-size:11px;color:var(--text-secondary)">加载天气中...</span>
         </div>
-        <a href="https://uri.amap.com/marker?position=${s.lng},${s.lat}&name=${encodeURIComponent(s.name)}" target="_blank" style="padding:5px 12px;background:var(--primary);color:#E8EDE6;font-size:11px;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:4px">📍 导航到这里</a>
+        ${navBtn}
     `;
     // 获取天气
     fetchSpotWeather(s.lat, s.lng);
@@ -3980,7 +4122,8 @@ function openSpot(id) {
         ${coverPhotos.map(url=>`<img src="${url}" style="width:80px;height:60px;object-fit:cover;flex-shrink:0;border:var(--border)">`).join('')}
     </div>` : '';
 
-    document.getElementById('spotPanel').innerHTML = coverHtml + birds.map(bird => {
+    const sensitiveWarning = hasSensitive ? `<div style="padding:8px 12px;background:#FFF3E0;border-left:3px solid #E65100;margin-bottom:8px;font-size:10px;color:#BF360C">⚠️ 此点位含敏感物种，请勿公开精确位置。保持距离、安静观察、不使用闪光灯。</div>` : '';
+    document.getElementById('spotPanel').innerHTML = sensitiveWarning + coverHtml + birds.map(bird => {
         const count = bird.sightings.length;
         const dots = count > 1 ? `<div class="bird-sighting-dots">${bird.sightings.map((_,i)=>`<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>` : '';
         const refUrl = birdRefPhotos[bird.name];
@@ -3997,7 +4140,6 @@ function openSpot(id) {
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
                     <div class="bird-card-count">${count}条记录</div>
-                    <div onclick="jumpToPhotoWall('${bird.name}')" style="padding:2px 8px;background:var(--secondary-brown);color:#F5F0E8;font-size:9px;font-weight:500;cursor:pointer;white-space:nowrap">🖼 照片墙</div>
                 </div>
             </div>
             <div class="bird-sighting-scroll" onscroll="handleSightingScroll(this)">
@@ -4041,17 +4183,14 @@ function handlePostImgScroll(el) {
 }
 
 function goComm(name) {
-    curCommTab = 'nearby';
-    switchTab('community');
-    renderCommTabs();
-    renderCommunityContent();
+    // community removed
 }
 
 // ===== CALENDAR =====
 const birdEvents = [
     {date:'2026-06-28', title:'🔭 奥森北园晨观', desc:'周六6:00 北园东门集合，天境湖拍鸳鸯'},
     {date:'2026-06-29', title:'🦅 颐和园环湖观鸟', desc:'周日7:00 东宫门集合，寻找凤头鸊鷉'},
-    {date:'2026-07-02', title:'📷 翠鸟摄影分享会', desc:'线上活动 20:00，分享翠鸟拍摄技巧'},
+    {date:'2026-07-02', title:'📝 翠鸟观察笔记分享', desc:'线上活动 20:00，分享翠鸟行为观察心得'},
     {date:'2026-07-05', title:'🌿 圆明园生态观察', desc:'周六7:30 南门集合，福海+长春园路线'},
     {date:'2026-07-06', title:'🪹 奥森护巢志愿者', desc:'周日14:00 廊道桥南侧，修复灰喜鹊巢穴'},
     {date:'2026-07-12', title:'🦉 夜观猫头鹰', desc:'周六19:30 奥森北园东侧林地，限10人'},
@@ -4123,7 +4262,7 @@ function showCalEvent(dateStr) {
 
 // ===== COMMUNITY =====
 function renderCommTabs() {
-    const tabs = [{key:'nearby', label:'鸟有照片'}, {key:'events', label:'鸟有活动'}, {key:'qa', label:'鸟有问答'}, {key:'gear', label:'鸟有装备'}];
+    const tabs = [{key:'nearby', label:'鸟有记录'}, {key:'events', label:'鸟有活动'}, {key:'qa', label:'鸟有问答'}, {key:'gear', label:'鸟有装备'}];
     document.getElementById('commTabs').innerHTML = tabs.map(t =>
         `<div class="loc-tab ${curCommTab===t.key?'active':''}" onclick="curCommTab='${t.key}';renderCommTabs();renderCommunityContent()">${t.label}</div>`
     ).join('');
@@ -4160,13 +4299,13 @@ function renderPhotoWall() {
             bird.sightings.forEach((sg, idx) => {
                 const photoUrl = getBirdPhoto(bird.name, idx);
                 if(photoUrl) {
-                    allPhotos.push({ src: photoUrl, bird: bird.name, user: sg.user, av: '', bg: '#E8EDE6', likes: Math.floor(Math.random()*30+5), postId: null, area: '' });
+                    allPhotos.push({ src: photoUrl, bird: bird.name, user: sg.user, av: '', bg: '#E8EDE6', likes: Math.floor(Math.random()*30+5), postId: null, area: '', note: sg.note });
                 }
             });
         });
     });
     // 补充：把 birdMultiPhotos 中所有照片都加入照片墙
-    const pwUsers = ['鸟有小李','望远镜达人','奥森观鸟队','自然笔记','林间鸟语','湿地守望者','林地探索者','溪边等待者','草地漫步者','摄影老法师'];
+    const pwUsers = ['鸟有小李','望远镜达人','奥森观鸟队','自然笔记','林间鸟语','湿地守望者','林地探索者','溪边等待者','草地漫步者','野外观察员'];
     Object.entries(birdMultiPhotos).forEach(([bird, photos]) => {
         photos.forEach((src, i) => {
             allPhotos.push({ src, bird, user: pwUsers[i % pwUsers.length], av: '', bg: '#E8EDE6', likes: Math.floor(Math.random()*50+10), postId: null, area: '' });
@@ -4192,8 +4331,9 @@ function renderPhotoWall() {
             ${filtered.map((p, i) => `<div class="pw-item" onclick="openPhotoViewer(${i})">
                 <img src="${p.src}" loading="lazy">
                 <div class="pw-item-info">
+                    ${p.note ? `<div class="pw-item-note">${p.note.length>30?p.note.slice(0,30)+'...':p.note}</div>` : ''}
                     <div class="pw-item-user"><span style="font-size:10px">${p.av||'📷'}</span> ${p.user}</div>
-                    <div class="pw-item-likes">♥ ${p.likes}${p.area?' · '+p.area:''}</div>
+                    <div class="pw-item-likes">👍 有用 ${p.likes}${p.area?' · '+p.area:''}</div>
                 </div>
             </div>`).join('')}
         </div>
@@ -4217,8 +4357,9 @@ function openPhotoViewer(startIdx) {
                 <img src="${p.src}">
                 <div class="pw-viewer-info">
                     <div class="bird-name">${p.bird}</div>
-                    <div>📷 ${p.user}${p.area?' · '+p.area:''}</div>
-                    <div style="margin-top:4px">♥ ${p.likes}</div>
+                    <div>👤 ${p.user}${p.area?' · '+p.area:''}</div>
+                    ${p.note?`<div style="margin-top:4px;font-size:11px;font-style:italic;opacity:0.9">${p.note}</div>`:''}
+                    <div style="margin-top:4px">👍 ${p.likes}</div>
                 </div>
             </div>`).join('')}
         </div>
@@ -4241,36 +4382,36 @@ function handleViewerScroll(el) {
 
 // 鸟有问答数据
 const qaData = [
-    {id:1, user:'鸟类摄影新手', av:'🔭', bg:'#E8EDE6', q:'请问这是什么鸟？在圆明园拍到的，灰色身体黄色嘴', tags:['求鉴定','圆明园'], answers:5, time:'3小时前', solved:true, answer:'这是灰椋鸟（White-cheeked Starling），冬季常见于北京各大公园。'},
+    {id:1, user:'观鸟新手', av:'🔭', bg:'#E8EDE6', q:'请问这是什么鸟？在圆明园看到的，灰色身体黄色嘴', tags:['求鉴定','圆明园'], answers:5, time:'3小时前', solved:true, answer:'这是灰椋鸟（White-cheeked Starling），冬季常见于北京各大公园。'},
     {id:2, user:'观鸟入门者', av:'🌱', bg:'#EDE8E0', q:'新手第一次去奥森观鸟，需要准备什么装备？有推荐的路线吗？', tags:['新手','装备','奥森'], answers:8, time:'昨天', solved:true, answer:'建议带8x42双筒望远镜+手机。路线推荐：南门→湖心岛→奥海湿地，清晨6-8点最佳。'},
     {id:3, user:'夜观爱好者', av:'🌙', bg:'#E8EDE6', q:'奥森北园的猫头鹰最近还在吗？想去夜观但怕扑空', tags:['猫头鹰','夜观','奥森'], answers:3, time:'2天前', solved:false, answer:''},
-    {id:4, user:'摄影老法师', av:'📷', bg:'#F0EBE3', q:'拍翠鸟入水瞬间，快门速度至少要多少？用什么对焦模式？', tags:['摄影技巧','翠鸟'], answers:6, time:'3天前', solved:true, answer:'快门至少1/2000s，用连续追踪对焦(AF-C)，预判入水点提前半按快门。'},
+    {id:4, user:'观鸟笔记控', av:'📝', bg:'#F0EBE3', q:'大家观鸟时怎么做记录？手写还是用app？有什么好的记录模板推荐吗？', tags:['记录方法','工具'], answers:6, time:'3天前', solved:true, answer:'推荐随身带小本速记：时间+地点+鸟种+行为+数量。回来后整理到eBird或手机备忘录，养成习惯很重要。'},
     {id:5, user:'带娃观鸟', av:'👶', bg:'#F5EFE0', q:'有没有适合带5岁小朋友的观鸟活动？不想走太远', tags:['亲子','活动'], answers:4, time:'4天前', solved:false, answer:''},
 ];
 
 // 鸟有装备数据 - 虎扑评分模式
 let curGearCat = '全部';
 let curGearSort = 'rating';
-const gearCategories = ['全部','望远镜','相机','镜头','三脚架','配件'];
+const gearCategories = ['全部','望远镜','图鉴书','配件','三脚架','记录工具'];
 const gearDimLabels = {
     '望远镜': ['光学素质','视野','便携性','做工','对焦','性价比'],
-    '相机': ['画质','对焦','连拍','视频','操控','性价比'],
-    '镜头': ['锐度','对焦速度','防抖','做工','重量','性价比'],
+    '图鉴书': ['内容覆盖','插图质量','便携性','纸张','检索性','性价比'],
+    '记录工具': ['实用性','便携性','耐用','设计','防水','性价比'],
     '三脚架': ['稳定性','便携性','承重','做工','操作','性价比'],
     '配件': ['实用性','便携性','耐用','做工','舒适','性价比'],
 };
 const gearData = [
-    {id:1, name:'尼康 Monarch M5 8x42', cat:'望远镜', price:'¥2,280', rating:4.8, users:47, reviews:23, dims:[92,85,78,88,90,95], desc:'入门级观鸟望远镜首选，视野宽广，对焦快速', topReview:{user:'望远镜达人',av:'🔭',bg:'#E8EDE6',ct:'用了两年，对焦手感丝滑，42mm口径通光量够用，唯一缺点略重',sample:'奥森南园湖心岛拍摄'}, img:'🔭'},
-    {id:2, name:'索尼 A7R5', cat:'相机', price:'¥22,000', rating:4.9, users:18, reviews:8, dims:[98,96,88,95,85,72], desc:'6100万像素+AI鸟眼追焦，裁切空间巨大', topReview:{user:'摄影老法师',av:'📷',bg:'#F0EBE3',ct:'鸟眼识别率极高，配合200-600拍翠鸟入水成功率90%以上',sample:'圆明园翠鸟入水'}, img:'📷'},
+    {id:1, name:'尼康 Monarch M5 8x42', cat:'望远镜', price:'¥2,280', rating:4.8, users:47, reviews:23, dims:[92,85,78,88,90,95], desc:'入门级观鸟望远镜首选，视野宽广，对焦快速', topReview:{user:'望远镜达人',av:'🔭',bg:'#E8EDE6',ct:'用了两年，对焦手感丝滑，42mm口径通光量够用，唯一缺点略重',sample:'奥森南园湖心岛实测'}, img:'🔭'},
+    {id:2, name:'《中国鸟类野外手册》马敬能', cat:'图鉴书', price:'¥128', rating:4.9, users:89, reviews:42, dims:[98,85,92,90,88,97], desc:'中国观鸟人的圣经，覆盖1400+鸟种，手绘插图精美', topReview:{user:'自然笔记',av:'🌿',bg:'#E8EDE6',ct:'野外必带，分类清晰插图精美，纸质版翻阅比手机方便太多',sample:''}, img:'📖'},
     {id:3, name:'施华洛世奇 EL 10x42', cat:'望远镜', price:'¥18,500', rating:5.0, users:8, reviews:5, dims:[99,88,80,97,92,55], desc:'顶级光学体验，色彩还原极致', topReview:{user:'器材党',av:'⚙️',bg:'#EDE8E0',ct:'用过就回不去了，暗光环境下优势明显，值得存钱入',sample:''}, img:'🔭'},
-    {id:4, name:'索尼 FE 200-600mm F5.6-6.3', cat:'镜头', price:'¥14,200', rating:4.8, users:31, reviews:11, dims:[93,95,88,92,65,85], desc:'内变焦防尘设计，打鸟性价比之王', topReview:{user:'鸟类摄影新手',av:'🌱',bg:'#EDE8E0',ct:'新手第一支长焦选这个准没错，对焦快画质好，就是有点重',sample:'天坛啄木鸟'}, img:'🔭'},
+    {id:4, name:'国家地理观鸟笔记本', cat:'记录工具', price:'¥68', rating:4.6, users:35, reviews:18, dims:[85,90,95,82,92,88], desc:'防水纸张，预印观鸟记录表格，含鸟种速查索引', topReview:{user:'自然笔记',av:'🌿',bg:'#E8EDE6',ct:'下雨天也能写，格式设计合理，记录日期天气鸟种行为一目了然',sample:''}, img:'📓'},
     {id:5, name:'奥林巴斯 8x25 WP II', cat:'望远镜', price:'¥680', rating:4.2, users:63, reviews:31, dims:[70,72,98,75,78,97], desc:'口袋望远镜，防水轻便，入门首选', topReview:{user:'带娃观鸟',av:'👶',bg:'#F5EFE0',ct:'带小朋友出门必备，轻到可以挂脖子上一天不累',sample:''}, img:'🔭'},
-    {id:6, name:'思锐 R-2004 碳纤维三脚架', cat:'三脚架', price:'¥1,580', rating:4.6, users:22, reviews:12, dims:[85,92,82,88,87,93], desc:'碳纤维轻量，承重8kg，长焦标配', topReview:{user:'摄影老法师',av:'📷',bg:'#F0EBE3',ct:'背一天不累，稳定性够600mm焦段使用',sample:''}, img:'📐'},
-    {id:7, name:'佳能 EOS R7', cat:'相机', price:'¥9,800', rating:4.7, users:26, reviews:14, dims:[82,92,97,80,88,93], desc:'APS-C 1.6x裁切加成，连拍30fps打鸟利器', topReview:{user:'器材党',av:'⚙️',bg:'#EDE8E0',ct:'配100-400等效160-640，连拍30fps抓飞版成功率极高',sample:'奥森北园苍鹭起飞'}, img:'📷'},
-    {id:8, name:'适马 150-600mm Sport', cat:'镜头', price:'¥8,900', rating:4.5, users:19, reviews:9, dims:[88,78,75,93,60,90], desc:'做工扎实，长焦端画质锐利', topReview:{user:'野外观察员',av:'🌿',bg:'#E8EDE6',ct:'比索尼200-600便宜5000，画质差距不大，就是对焦声音略响',sample:'颐和园灰鹤'}, img:'🔭'},
+    {id:6, name:'思锐 R-2004 碳纤维三脚架', cat:'三脚架', price:'¥1,580', rating:4.6, users:22, reviews:12, dims:[85,92,82,88,87,93], desc:'碳纤维轻量，承重8kg，单筒望远镜搭配佳', topReview:{user:'野外观察员',av:'🔭',bg:'#F0EBE3',ct:'背一天不累，搭单筒很稳，观察水鸟特别方便',sample:''}, img:'📐'},
+    {id:7, name:'《北京鸟类图鉴》赵欣如', cat:'图鉴书', price:'¥86', rating:4.7, users:52, reviews:28, dims:[90,82,95,85,90,96], desc:'聚焦北京地区常见鸟种，按栖息地分类，新手友好', topReview:{user:'观鸟入门者',av:'🌱',bg:'#EDE8E0',ct:'内容精练，专为北京地区设计，不用在1400种里大海捞针',sample:''}, img:'📖'},
+    {id:8, name:'观鸟计数器（四连）', cat:'记录工具', price:'¥45', rating:4.3, users:28, reviews:14, dims:[80,95,70,75,88,92], desc:'四通道手动计数，适合同时统计多个鸟种数量', topReview:{user:'湿地守望者',av:'🌊',bg:'#E8EDE6',ct:'水鸟调查必备，比手机记录方便多了，单手操作不影响举望远镜',sample:''}, img:'🔢'},
     {id:9, name:'蔡司 Conquest HD 8x42', cat:'望远镜', price:'¥8,800', rating:4.9, users:14, reviews:9, dims:[96,90,82,95,88,78], desc:'T*多层镀膜，色彩还原极佳', topReview:{user:'望远镜达人',av:'🔭',bg:'#E8EDE6',ct:'中端天花板，比施华洛世奇便宜一半效果接近八成',sample:''}, img:'🔭'},
-    {id:10, name:'曼富图 MVH502AH 云台', cat:'三脚架', price:'¥2,100', rating:4.6, users:11, reviews:6, dims:[94,68,90,92,95,80], desc:'液压视频云台，追拍飞鸟顺滑', topReview:{user:'摄影老法师',av:'📷',bg:'#F0EBE3',ct:'拍飞版必备，阻尼手感一流，就是略重出门要考虑体力',sample:''}, img:'📐'},
-    {id:11, name:'迪卡侬 伪装观鸟帐', cat:'配件', price:'¥299', rating:4.3, users:35, reviews:15, dims:[90,75,82,72,70,95], desc:'轻便伪装帐，蹲点拍摄利器', topReview:{user:'野外观察员',av:'🌿',bg:'#E8EDE6',ct:'在奥森蹲翠鸟用的，鸟明显不怕人了，出片率翻倍',sample:''}, img:'⛺'},
+    {id:10, name:'曼富图 MVH502AH 云台', cat:'三脚架', price:'¥2,100', rating:4.6, users:11, reviews:6, dims:[94,68,90,92,95,80], desc:'液压云台，跟踪飞鸟顺滑', topReview:{user:'野外观察员',av:'🔭',bg:'#F0EBE3',ct:'搭配单筒追踪飞行中的鸟很顺畅，阻尼手感一流',sample:''}, img:'📐'},
+    {id:11, name:'迪卡侬 伪装观鸟帐', cat:'配件', price:'¥299', rating:4.3, users:35, reviews:15, dims:[90,75,82,72,70,95], desc:'轻便伪装帐，近距离观察利器', topReview:{user:'野外观察员',av:'🌿',bg:'#E8EDE6',ct:'在奥森蹲翠鸟用的，鸟明显不怕人了，观察距离近了很多',sample:''}, img:'⛺'},
     {id:12, name:'观鸟马甲多口袋款', cat:'配件', price:'¥189', rating:4.1, users:52, reviews:26, dims:[88,95,80,70,92,97], desc:'多口袋解放双手，观鸟徒步必备', topReview:{user:'带娃观鸟',av:'👶',bg:'#F5EFE0',ct:'手机望远镜图鉴笔记本都能塞进去，再也不用背包了',sample:''}, img:'🦺'},
 ];
 
@@ -4492,7 +4633,7 @@ function renderPosts() {
                     <div class="post-mt">${p.time} · ${p.area}</div>
                     <div class="post-card-type">${bl[p.type]}</div>
                 </div>
-                <div class="post-card-count">♥ ${p.likes}</div>
+                <div class="post-card-count">👍 ${p.likes}</div>
             </div>
             <div class="post-content">
                 ${imgs}
@@ -4502,7 +4643,7 @@ function renderPosts() {
             </div>
             ${getBirdComment(p.id)}
             <div class="post-card-acts">
-                <span class="post-act ${p.liked?'liked':''}" onclick="event.stopPropagation();toggleLike(${p.id})">${p.liked?'❤️':'🤍'} ${p.likes}</span>
+                <span class="post-act ${p.liked?'liked':''}" onclick="event.stopPropagation();toggleLike(${p.id})">${p.liked?'👍':'👍🏻'} 有用 ${p.likes}</span>
                 <span class="post-act">💬 ${p.comments}</span>
                 <span class="post-act" onclick="event.stopPropagation();showToast('分享链接已复制')">📤</span>
             </div>
@@ -4542,7 +4683,7 @@ const postComments = {
     2: [
         {user:"鸟有小李", av:"🧢", bg:"#DDD8CE", ct:"报名+1！需要带什么装备吗", time:"4小时前"},
         {user:"望远镜里的世界", av:"👩‍🔬", bg:"#EDE8E0", ct:"@鸟有小李 带个帽子和水就行，望远镜我这边有多的可以借", time:"3小时前"},
-        {user:"北园巡逻员", av:"👮", bg:"#E8EDE6", ct:"周六早上天境湖边有晨雾，拍照超美", time:"2小时前"},
+        {user:"北园巡逻员", av:"👮", bg:"#E8EDE6", ct:"周六早上天境湖边有晨雾，观鸟体验特别好", time:"2小时前"},
     ],
     3: [
         {user:"林间鸟语", av:"🧑‍🌾", bg:"#D4CFC4", ct:"我周末有空，可以来帮忙！", time:"昨天"},
@@ -4558,7 +4699,7 @@ const postComments = {
     6: [
         {user:"圆明园观鸟人", av:"📷", bg:"#E8EDE6", ct:"推荐凤麟洲附近的小河，翠鸟经常在那边捕鱼，早上7点前去最好", time:"2天前"},
         {user:"林间鸟语", av:"🧑‍🌾", bg:"#D4CFC4", ct:"长春园的海岳开襟也行，水浅的地方翠鸟爱去", time:"2天前"},
-        {user:"鸟类摄影新手", av:"🔭", bg:"#E8EDE6", ct:"谢谢各位！这周末去试试🙏", time:"1天前"},
+        {user:"观鸟新手", av:"🔭", bg:"#E8EDE6", ct:"谢谢各位！这周末去试试🙏", time:"1天前"},
     ],
     7: [
         {user:"奥森观鸟队", av:"🦜", bg:"#D4CFC4", ct:"奥海那边鸬鹚最近确实多了，是不是鱼多了", time:"2天前"},
@@ -4575,7 +4716,7 @@ function openPost(id) {
     const bc = {record:'background:#E8EDE6;color:#2D4A3E',rally:'background:#F5EFE0;color:#8B6914',charity:'background:#E8EDE6;color:#1565C0',discuss:'background:#F5F5F5;color:#616161'};
     const bl = {record:'📷 记录',rally:'📢 召集',charity:'🏠 公益',discuss:'💬 讨论'};
     const comments = postComments[id] || [];
-    let imgs = p.imgs.length ? `<div class="post-imgs" style="margin-bottom:12px">${p.imgs.map((c,i)=>`<div class="post-img" style="background:${c};width:120px;height:120px;border-radius:0">${p.emo[i]||''}</div>`).join('')}</div>` : '';
+    let imgs = p.imgs.length ? `<div class="post-imgs" style="margin-bottom:12px">${p.imgs.map((c,i)=>`<div class="post-img" style="background:${c};width:120px;height:120px;border-radius:12px">${p.emo[i]||''}</div>`).join('')}</div>` : '';
     let rally = '';
     if(p.type==='rally') rally=`<div class="rally-box" style="margin:12px 0"><strong>🕐 ${p.rally.time}</strong><br>📍 ${p.rally.spot} · 已报名 ${p.rally.count} 人<br><span class="rally-join" onclick="if(!this.classList.contains('joined')){this.classList.add('joined');this.textContent='已报名 ✓';showToast('🎉 报名成功')}">我要参加</span></div>`;
 
@@ -4592,7 +4733,7 @@ function openPost(id) {
         ${imgs}${rally}
         <div class="post-tgs" style="margin-bottom:14px">${p.tags.map(t=>`<span class="post-tg">#${t}</span>`).join('')}</div>
         <div class="post-acts" style="padding:12px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;margin-bottom:16px">
-            <span class="post-act ${p.liked?'liked':''}" onclick="toggleLike(${p.id});openPost(${p.id})">${p.liked?'❤️':'🤍'} ${p.likes}</span>
+            <span class="post-act ${p.liked?'liked':''}" onclick="toggleLike(${p.id});openPost(${p.id})">${p.liked?'👍':'👍🏻'} 有用 ${p.likes}</span>
             <span class="post-act">💬 ${p.comments}</span>
             <span class="post-act" onclick="showToast('📤 分享链接已复制')">📤</span>
         </div>
@@ -4608,7 +4749,7 @@ function openPost(id) {
         `).join('') : '<div style="text-align:center;padding:20px;color:var(--text-hint);font-size:12px">暂无评论，快来抢沙发～</div>'}
         <div style="position:sticky;bottom:0;background:var(--bg-primary);padding:10px 0 4px;display:flex;gap:8px">
             <input class="form-input" style="margin:0;flex:1" placeholder="写评论..." id="commentInput"/>
-            <button style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap" onclick="addComment(${p.id})">发送</button>
+            <button style="padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap" onclick="addComment(${p.id})">发送</button>
         </div>
     `;
     document.getElementById('postDetail').classList.add('show');
@@ -4824,6 +4965,16 @@ function handleUploadPhoto(input) {
     reader.readAsDataURL(file);
 }
 
+let uploadedAudioFile = null;
+function handleUploadAudio(input) {
+    const file = input.files[0];
+    if(!file) return;
+    uploadedAudioFile = file;
+    const status = document.getElementById('uploadAudioStatus');
+    status.innerHTML = `<div style="text-align:center"><div style="font-size:14px">🎵</div><div style="font-size:9px;color:var(--primary);font-weight:500">${file.name.slice(0,20)}</div><div style="font-size:8px;color:var(--text-hint)">${(file.size/1024).toFixed(0)}KB</div></div>`;
+    showToast('🎙️ 语音已上传');
+}
+
 async function simulatePhotoRecognize() {
     if(!photoUploaded || !uploadedPhotoBase64) {
         showToast('请先上传照片');
@@ -4941,60 +5092,797 @@ function submitSpot() {
     document.getElementById('uploadAreaTag').style.display = 'none';
     photoUploaded = false;
     uploadLat = null; uploadLng = null; uploadPark = ''; uploadZone = '';
+    // 保存到日记时间线
+    const userUploads = JSON.parse(localStorage.getItem('userDiaryUploads') || '[]');
+    userUploads.push({bird: birdName, date: timeStr.split(' ')[0], spot: spotName, note: noteWithCamera, key: 'upload_'+Date.now()});
+    localStorage.setItem('userDiaryUploads', JSON.stringify(userUploads));
+
     hideM('uploadModal');
     showToast('✅ 观鸟记录已上传！地图已更新');
 }
 
-// ===== GUIDE =====
-// Shelf definitions
-const guideShelves = {
-    byPark: [
-        {key:'奥森公园', name:'奥森公园全鸟图鉴', icon:'🌲', iconBg:'#E8EDE6'},
-        {key:'圆明园', name:'圆明园全鸟图鉴', icon:'🏛️', iconBg:'#F5EFE0'},
-        {key:'天坛公园', name:'天坛公园全鸟图鉴', icon:'🏯', iconBg:'#F0EBE3'},
-        {key:'颐和园', name:'颐和园全鸟图鉴', icon:'⛩️', iconBg:'#E8EDE6'},
+// 个人观察日志（图鉴用）
+const birdObservations = {
+    '翠鸟': [
+        {date:'2024-05-10', spot:'南园湖心岛', note:'首次发现！枯枝上停留，入水捕鱼成功'},
+        {date:'2024-06-03', spot:'南园湖心岛', note:'一对育雏中，洞口在北岸土坡'},
+        {date:'2024-07-21', spot:'南园西侧水系', note:'沿溪流低飞巡回觅食，约5分钟一圈'},
+        {date:'2025-03-15', spot:'南园湖心岛', note:'开春后首次目击，恢复固定枝头'},
     ],
-    byOrder: [
-        {key:'雀形目', name:'雀形目', icon:'🐦', iconBg:'#EDE8E0', desc:'鸣禽类'},
-        {key:'鹈形目', name:'鹈形目', icon:'🦩', iconBg:'#E8EDE6', desc:'鹭、鹮类'},
-        {key:'雁形目', name:'雁形目', icon:'🦆', iconBg:'#E8EDE6', desc:'雁鸭类'},
-        {key:'鸮形目', name:'鸮形目', icon:'🦉', iconBg:'#EFEBE9', desc:'猫头鹰类'},
-        {key:'佛法僧目', name:'佛法僧目', icon:'💎', iconBg:'#E8EDE6', desc:'翠鸟类'},
-        {key:'其他', name:'其他目', icon:'🪶', iconBg:'#F5F5F5', desc:'犀鸟目、鴷形目等'},
+    '苍鹭': [
+        {date:'2024-03-15', spot:'奥海湿地', note:'首次发现，浅水区站立等鱼'},
+        {date:'2024-05-20', spot:'南园湖心岛', note:'傍晚飞到大树夜栖，翼展惊人'},
+        {date:'2024-09-10', spot:'奥海湿地', note:'捕到约15cm鲫鱼，吞咽用时30秒'},
     ],
-    bySeason: [
-        {key:'留鸟', name:'留鸟图鉴', icon:'🏠', iconBg:'#E8EDE6', desc:'全年可见'},
-        {key:'夏候鸟', name:'夏候鸟图鉴', icon:'☀️', iconBg:'#F5EFE0', desc:'春夏到来'},
-        {key:'冬候鸟', name:'冬候鸟图鉴', icon:'❄️', iconBg:'#E8EDE6', desc:'秋冬到来'},
-        {key:'旅鸟', name:'旅鸟图鉴', icon:'✈️', iconBg:'#EDE8E0', desc:'迁徙途经'},
+    '白鹭': [
+        {date:'2024-04-02', spot:'南园湖心岛', note:'3只浅滩觅食，保持5米间距'},
+        {date:'2024-06-15', spot:'南园西侧水系', note:'展翅晾羽行为，持续2分钟'},
+    ],
+    '鸳鸯': [
+        {date:'2024-10-15', spot:'北园天境湖', note:'首次发现，一对在湖面游弋'},
+        {date:'2024-11-08', spot:'北园天境湖', note:'繁殖羽完整的雄鸟，巡游领地'},
+        {date:'2025-04-20', spot:'北园天境湖', note:'母鸟带4只幼鸟觅食'},
+    ],
+    '灰喜鹊': [
+        {date:'2024-02-20', spot:'生态廊道桥', note:'首次记录，8只成群在树间跳跃'},
+        {date:'2024-06-10', spot:'生态廊道桥', note:'捕食大青虫，摔打后吞食'},
+    ],
+    '戴胜': [
+        {date:'2024-04-22', spot:'花田野趣', note:'草地翻土觅虫，冠羽竖起警觉'},
+        {date:'2024-05-18', spot:'花田野趣', note:'受惊起飞，翅膀黑白斑纹醒目'},
+        {date:'2025-04-28', spot:'花田野趣', note:'今年首次回归确认，夏候鸟准时'},
+    ],
+    '大斑啄木鸟': [
+        {date:'2024-06-18', spot:'北园东侧林地', note:'连续敲击枯木，频率15-20次/秒'},
+        {date:'2024-08-05', spot:'北园东侧林地', note:'在白杨树干螺旋上升搜索'},
+    ],
+    '绿头鸭': [
+        {date:'2024-02-14', spot:'北园天境湖', note:'约20只聚集湖西侧浅水区'},
+        {date:'2024-06-01', spot:'北园天境湖', note:'母鸭带8只小鸭穿行芦苇丛'},
+        {date:'2025-01-10', spot:'北园天境湖', note:'雄鸭头部绿色金属光泽明显'},
+    ],
+    '珠颈斑鸠': [
+        {date:'2024-01-20', spot:'生态廊道桥', note:'一对地面走动觅食，颈部珠纹清晰'},
+    ],
+    '猫头鹰': [
+        {date:'2024-11-20', spot:'北园东侧林地', note:'⚠️ 远距离确认日栖，未做详细观察'},
+    ],
+    '喜鹊': [
+        {date:'2024-01-05', spot:'花田野趣', note:'路灯顶部筑巢育雏，频繁进出'},
+    ],
+    '乌鸫': [
+        {date:'2024-02-10', spot:'大鸣泉', note:'天不亮晨鸣，音节丰富婉转'},
+        {date:'2024-09-20', spot:'生态廊道桥', note:'黄昏前领地鸣叫，比晨鸣更急促'},
+    ],
+    '白鹡鸰': [
+        {date:'2024-03-01', spot:'奥海湿地', note:'栈道栏杆上翘尾点头，1米距离不飞'},
+        {date:'2024-07-15', spot:'奥海湿地', note:'水面低飞捕蚊虫，波浪形飞行'},
+    ],
+    '夜鹭': [
+        {date:'2024-07-30', spot:'南园湖心岛', note:'黄昏出动，5只成鸟。白天集群日栖'},
+    ],
+    '鸬鹚': [
+        {date:'2024-09-08', spot:'奥海湿地', note:'捕鱼后木桩上展翅晾羽'},
+    ],
+    '红嘴蓝鹊': [
+        {date:'2024-07-12', spot:'北园东侧林地', note:'2只结伴穿梭，尾羽极长，滑翔飞行'},
+    ],
+    '麻雀': [
+        {date:'2024-01-01', spot:'花田野趣', note:'到处都是，群聚沙浴'},
+    ],
+    '小鸊鷉': [
+        {date:'2024-05-20', spot:'北园天境湖', note:'反复潜水，每次10-15秒'},
+    ],
+    '凤头鸊鷉': [
+        {date:'2024-06-10', spot:'北园天境湖', note:'求偶舞蹈！双鸟面对面摆头'},
+    ],
+    '家燕': [
+        {date:'2024-04-15', spot:'花田野趣', note:'飞行捕虫，速度极快'},
+    ],
+    '北红尾鸲': [
+        {date:'2024-10-20', spot:'大鸣泉', note:'橙红色胸腹，频繁抖尾，石上伏击捕虫'},
+        {date:'2025-04-05', spot:'大鸣泉', note:'亲鸟带幼鸟学习捕虫'},
+    ],
+    '黄眉柳莺': [
+        {date:'2024-09-25', spot:'大鸣泉', note:'过境旅鸟，灌木中快速移动，极小体型'},
     ],
 };
 
-function renderRanking() {
-    // 本周热门鸟种排行
-    const rankBirds = [
-        {name:'翠鸟', count:34, trend:'↑'},
-        {name:'苍鹭', count:28, trend:'—'},
-        {name:'戴胜', count:19, trend:'↑'},
-        {name:'鸳鸯', count:15, trend:'↓'},
-        {name:'大斑啄木鸟', count:12, trend:'↑'},
-    ];
-    document.getElementById('birdRanking').innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <span style="font-size:10px;font-weight:600;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.05em">本周热门鸟种</span>
-            <span style="font-size:9px;color:var(--text-hint)">观测次数</span>
+// 鸟种关系引导（"下一站"推荐）
+const birdNextGuide = {
+    '翠鸟': { next:'苍鹭', reason:'同在湖心岛捕鱼，翠鸟俯冲 vs 苍鹭守株待兔，两种截然不同的捕食策略', type:'行为对比' },
+    '苍鹭': { next:'白鹭', reason:'同为鹭科，苍鹭体大独行，白鹭纤细成群。同一片水域的两种风格', type:'同科对比' },
+    '白鹭': { next:'夜鹭', reason:'白鹭白天活动，夜鹭黄昏出动——鹭科的日夜交替值班制', type:'物候节律' },
+    '夜鹭': { next:'猫头鹰', reason:'都是夜行性鸟类，但一个在水边一个在树林——夜晚的两个世界', type:'生态位对比' },
+    '鸳鸯': { next:'绿头鸭', reason:'同在天境湖，同为鸭科。鸳鸯成对游弋，绿头鸭大群聚集，社交策略截然不同', type:'同科对比' },
+    '绿头鸭': { next:'小鸊鷉', reason:'都在天境湖，绿头鸭水面觅食，小鸊鷉频繁潜水——水面上下的不同生活', type:'行为对比' },
+    '小鸊鷉': { next:'凤头鸊鷉', reason:'同为鸊鷉科，小鸊鷉害羞潜水，凤头鸊鷉高调跳舞求偶——同科不同性格', type:'同科对比' },
+    '凤头鸊鷉': { next:'鸳鸯', reason:'都有华丽的求偶仪式：鸊鷉水上芭蕾 vs 鸳鸯并肩游弋', type:'繁殖行为' },
+    '灰喜鹊': { next:'喜鹊', reason:'"鸠占鹊巢"——斑鸠会占喜鹊的巢。灰喜鹊成群而喜鹊独行，同为鸦科两种社会结构', type:'生态关系' },
+    '喜鹊': { next:'珠颈斑鸠', reason:'鸠占鹊巢的主角！斑鸠不自己筑巢，专门"借住"喜鹊的旧巢', type:'生态关系' },
+    '珠颈斑鸠': { next:'家燕', reason:'斑鸠全年可见，家燕夏天才来——留鸟和候鸟的不同生存策略', type:'物候对比' },
+    '戴胜': { next:'大斑啄木鸟', reason:'都用嘴在硬物中觅食：戴胜翻土找虫，啄木鸟凿木找虫——工具相似，工作面不同', type:'行为对比' },
+    '大斑啄木鸟': { next:'红嘴蓝鹊', reason:'同在北园东侧林地，啄木鸟独来独往，蓝鹊结伴穿行——林地的两种性格', type:'同域对比' },
+    '红嘴蓝鹊': { next:'灰喜鹊', reason:'都是鸦科长尾鸟，蓝鹊尾长如飘带，灰喜鹊尾短而群聚——鸦科的南北差异', type:'同科对比' },
+    '猫头鹰': { next:'乌鸫', reason:'猫头鹰天敌，乌鸫猎物。乌鸫的晨鸣开始时，正是猫头鹰收工回巢的时刻', type:'食物链' },
+    '乌鸫': { next:'北红尾鸲', reason:'都在大鸣泉活动，乌鸫翻落叶，北红尾鸲石头上伏击——地面觅食的两种流派', type:'同域对比' },
+    '北红尾鸲': { next:'黄眉柳莺', reason:'都是秋季大鸣泉的过客，但北红尾鸲停留越冬，柳莺只是路过——旅鸟vs冬候鸟', type:'物候对比' },
+    '黄眉柳莺': { next:'翠鸟', reason:'柳莺走了翠鸟还在——留鸟是公园的常驻居民，回到第一页重新开始', type:'物候对比' },
+    '鸬鹚': { next:'苍鹭', reason:'都是大型水鸟，鸬鹚潜水追鱼，苍鹭岸边等鱼——主动出击vs被动等待', type:'行为对比' },
+    '麻雀': { next:'灰喜鹊', reason:'麻雀无处不在，灰喜鹊固定在廊道桥——城市鸟类的泛化vs特化', type:'生态位' },
+    '家燕': { next:'戴胜', reason:'同为夏候鸟，家燕在天上飞着吃虫，戴胜在地上翻土找虫——空中vs地面', type:'物候同步' },
+};
+
+// ===== GUIDE: Network Graph + Quest =====
+
+// 进化链数据：每只鸟从化石祖先到现代鸟
+const birdEvolution = {
+    '翠鸟': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'最早的鸟形恐龙，仍有牙齿和爪翼', icon:'🦕', fossil:'北京·北京自然博物馆·始祖鸟化石复制品'},
+        {era:'6600万年前', name:'鱼鸟类祖先', desc:'白垩纪末灭绝事件后幸存的水边捕食者', icon:'🪨', fossil:'北京·中国古动物馆·白垩纪鸟类化石厅'},
+        {era:'4000万年前', name:'早期佛法僧类', desc:'热带林鸟辐射演化，开始特化捕鱼', icon:'🌿'},
+        {era:'2000万年前', name:'原始翠鸟', desc:'嘴部变长变直，色彩开始艳丽', icon:'🐦'},
+        {era:'现代', name:'翠鸟', desc:'完美的俯冲捕鱼机器，结构色羽毛', icon:'💎', fossil:'北京·国家动物博物馆·鸟类标本馆'},
+    ],
+    '苍鹭': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'兽脚亚目恐龙向鸟类的过渡', icon:'🦕', fossil:'北京·北京自然博物馆·古爬行动物厅'},
+        {era:'7000万年前', name:'鹈形目祖先', desc:'大型涉禽的共同祖先，已适应水边生活', icon:'🪨', fossil:'北京·中国古动物馆·新生代展厅'},
+        {era:'4000万年前', name:'原始鹭类', desc:'长颈长腿开始分化，适应浅水觅食', icon:'🌿'},
+        {era:'1500万年前', name:'大型鹭', desc:'体型增大，颈部S形折叠捕鱼技术成熟', icon:'🐦'},
+        {era:'现代', name:'苍鹭', desc:'站立等待型猎手，耐心是最强武器', icon:'🦩', fossil:'北京·国家动物博物馆·水鸟标本区'},
+    ],
+    '白鹭': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'侏罗纪的飞行先驱', icon:'🦕', fossil:'北京·北京自然博物馆·始祖鸟化石'},
+        {era:'7000万年前', name:'鹈形目祖先', desc:'水边生态位的早期占据者', icon:'🪨'},
+        {era:'3500万年前', name:'白色鹭类分化', desc:'白色羽毛降低对鱼的惊吓，觅食效率提升', icon:'🌿'},
+        {era:'1000万年前', name:'小白鹭', desc:'体型纤细化，能在浅滩快速移动', icon:'🐦'},
+        {era:'现代', name:'白鹭', desc:'纯白涉禽，繁殖期头部长饰羽', icon:'🦢', fossil:'北京·国家动物博物馆·涉禽标本'},
+    ],
+    '鸳鸯': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'所有现代鸟的远祖', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'6800万年前', name:'雁形目祖先', desc:'水禽的共同起点，已有蹼足', icon:'🪨', fossil:'北京·中国古动物馆·中生代水禽化石'},
+        {era:'3000万年前', name:'树栖鸭类', desc:'回到树上筑巢，但保留游泳能力', icon:'🌿'},
+        {era:'1000万年前', name:'东亚林鸭', desc:'雄鸟发展华丽羽色用于求偶', icon:'🐦'},
+        {era:'现代', name:'鸳鸯', desc:'树洞营巢的彩色鸭，但每年换配偶', icon:'🦆', fossil:'北京·国家动物博物馆·雁形目展区'},
+    ],
+    '灰喜鹊': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'恐龙到鸟的桥梁物种', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'5000万年前', name:'鸦科祖先', desc:'高智商鸟类家族的起源，已有社会行为', icon:'🪨', fossil:'北京·中国古动物馆·古近纪鸟类'},
+        {era:'2500万年前', name:'蓝鹊类分化', desc:'东亚-伊比利亚间断分布的证据', icon:'🌿', fossil:'北京·北京自然博物馆·生物进化厅'},
+        {era:'500万年前', name:'灰蓝鹊', desc:'群居策略成熟，协作育幼', icon:'🐦'},
+        {era:'现代', name:'灰喜鹊', desc:'高度社会化的智慧鸟，集群生活', icon:'🐦‍⬛', fossil:'北京·国家动物博物馆·鸦科标本'},
+    ],
+    '戴胜': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'所有鸟类的化石起点', icon:'🦕', fossil:'北京·北京自然博物馆·始祖鸟厅'},
+        {era:'5500万年前', name:'犀鸟目祖先', desc:'热带大型嘴鸟的原始类群', icon:'🪨', fossil:'北京·中国古动物馆·始新世鸟类化石'},
+        {era:'3500万年前', name:'戴胜科分化', desc:'从犀鸟类独立，嘴变细长用于挖土', icon:'🌿'},
+        {era:'1500万年前', name:'古戴胜', desc:'冠羽已发育，成为识别标志', icon:'🐦', fossil:'山东临沂·天宇自然博物馆（世界最大）'},
+        {era:'现代', name:'戴胜', desc:'翻土虫猎手，惊艳的扇形冠羽', icon:'🪶', fossil:'北京·国家动物博物馆·犀鸟目标本'},
+    ],
+    '大斑啄木鸟': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类演化的起点', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'5000万年前', name:'鴷形目祖先', desc:'开始攀树生活，趾型开始变化', icon:'🪨', fossil:'北京·中国古动物馆·古近纪展厅'},
+        {era:'2500万年前', name:'原始啄木鸟', desc:'头骨减震结构开始演化，舌骨变长', icon:'🌿', fossil:'北京·北京自然博物馆·鸟类骨骼对比展'},
+        {era:'800万年前', name:'斑啄木鸟属', desc:'黑白红配色固定，敲击频率提升', icon:'🐦'},
+        {era:'现代', name:'大斑啄木鸟', desc:'每秒20次敲击，头部不受伤的工程奇迹', icon:'🪶', fossil:'北京·国家动物博物馆·啄木鸟头骨展示'},
+    ],
+    '绿头鸭': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'飞行脊椎动物的先驱', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'6800万年前', name:'雁形目祖先', desc:'最早的水禽，已能浮水', icon:'🪨', fossil:'北京·中国古动物馆·白垩纪鸟化石'},
+        {era:'2000万年前', name:'河鸭属辐射', desc:'淡水鸭类的大爆发时期', icon:'🌿'},
+        {era:'500万年前', name:'绿头鸭祖先', desc:'雄鸟绿头金属光泽开始显现', icon:'🐦'},
+        {era:'现代', name:'绿头鸭', desc:'全球最成功的鸭子，家鸭的祖先', icon:'🦆', fossil:'北京·国家动物博物馆·水禽标本'},
+    ],
+    '珠颈斑鸠': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类起源', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'6000万年前', name:'鸽形目祖先', desc:'素食性鸟类的早期代表', icon:'🪨'},
+        {era:'2000万年前', name:'斑鸠类分化', desc:'从鸽子独立，适应地面觅食', icon:'🌿'},
+        {era:'500万年前', name:'东亚斑鸠', desc:'颈部珠纹作为种内识别信号', icon:'🐦'},
+        {era:'现代', name:'珠颈斑鸠', desc:'城市适应冠军，全年可见的留鸟', icon:'🕊️', fossil:'北京·国家动物博物馆·鸠鸽科标本'},
+    ],
+    '猫头鹰': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'兽脚龙到鸟的过渡', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'6000万年前', name:'鸮形目祖先', desc:'夜行性猛禽的起源，面盘开始发育', icon:'🪨', fossil:'北京·中国古动物馆·古近纪猛禽化石'},
+        {era:'3000万年前', name:'原始鸱鸮', desc:'听觉定位系统完善，无声飞行羽缘', icon:'🌿', fossil:'北京·北京自然博物馆·猛禽演化展'},
+        {era:'1000万年前', name:'林鸮类', desc:'大眼向前，立体视觉精确定位猎物', icon:'🐦'},
+        {era:'现代', name:'猫头鹰', desc:'完美的夜间猎手，转头270度', icon:'🦉', fossil:'北京·国家动物博物馆·猛禽标本厅'},
+    ],
+    '喜鹊': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类的共同起点', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'5000万年前', name:'鸦科祖先', desc:'鸟类中最聪明的家族', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'2000万年前', name:'鹊类分化', desc:'长尾+黑白配色，开始适应人类定居区', icon:'🌿'},
+        {era:'500万年前', name:'欧亚喜鹊', desc:'建造复杂巢穴，使用工具', icon:'🐦'},
+        {era:'现代', name:'喜鹊', desc:'能认镜中自己的少数鸟类之一', icon:'🐦‍⬛', fossil:'北京·国家动物博物馆·鸦科智力展示'},
+    ],
+    '乌鸫': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类演化的起点', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'全球最大的鸟类目，占所有鸟类60%', icon:'🪨', fossil:'北京·中国古动物馆·雀形目起源'},
+        {era:'2000万年前', name:'鸫科分化', desc:'鸣禽演化，发声器官复杂化', icon:'🌿'},
+        {era:'500万年前', name:'乌鸫', desc:'纯黑雄鸟+黄嘴，叫声极其丰富', icon:'🐦'},
+        {era:'现代', name:'乌鸫', desc:'城市晨鸣歌手，领地意识极强', icon:'⚫', fossil:'北京·国家动物博物馆·鸣禽鸣管标本'},
+    ],
+    '白鹡鸰': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'所有鸟类的远祖', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'小型鸣禽的起源', icon:'🪨'},
+        {era:'1500万年前', name:'鹡鸰科分化', desc:'水边生态位特化，长尾翘动', icon:'🌿'},
+        {era:'300万年前', name:'白鹡鸰', desc:'黑白配色固定，尾部不停摆动', icon:'🐦'},
+        {era:'现代', name:'白鹡鸰', desc:'水边小精灵，亲人不怕人', icon:'🐧', fossil:'北京·国家动物博物馆·雀形目标本'},
+    ],
+    '夜鹭': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'侏罗纪的鸟形恐龙', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'7000万年前', name:'鹈形目祖先', desc:'涉禽的共同先祖', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'3000万年前', name:'夜行鹭类分化', desc:'避开白天竞争，特化夜间觅食', icon:'🌿'},
+        {era:'1000万年前', name:'夜鹭', desc:'大眼+紧凑体型适应弱光', icon:'🐦'},
+        {era:'现代', name:'夜鹭', desc:'黄昏出动的渔夫，日间集群睡觉', icon:'🌙', fossil:'北京·国家动物博物馆·鹭科标本'},
+    ],
+    '鸬鹚': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类起源', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'7000万年前', name:'鲣鸟目祖先', desc:'海洋/水域潜水鸟的原始类型', icon:'🪨', fossil:'北京·中国古动物馆·海洋爬行动物与鸟'},
+        {era:'3000万年前', name:'鸬鹚科分化', desc:'放弃防水羽毛换取潜水速度', icon:'🌿'},
+        {era:'800万年前', name:'大鸬鹚', desc:'体型增大，集群捕鱼策略', icon:'🐦'},
+        {era:'现代', name:'鸬鹚', desc:'潜水捕鱼高手，晒翅是必修课', icon:'🦅', fossil:'北京·国家动物博物馆·潜水鸟标本'},
+    ],
+    '红嘴蓝鹊': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类的化石先驱', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'5000万年前', name:'鸦科祖先', desc:'智慧鸟类家族的起源', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'2500万年前', name:'蓝鹊类分化', desc:'长尾飘带+蓝色羽毛演化', icon:'🌿'},
+        {era:'800万年前', name:'红嘴蓝鹊', desc:'东亚特有的华丽鸦科', icon:'🐦'},
+        {era:'现代', name:'红嘴蓝鹊', desc:'拖着60cm尾巴滑翔的林中精灵', icon:'🔵', fossil:'北京·国家动物博物馆·鸦科标本'},
+    ],
+    '麻雀': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'所有鸟类的起源', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'小型鸣禽的大爆发', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'2000万年前', name:'文鸟总科', desc:'种子食性特化，粗壮圆锥嘴', icon:'🌿'},
+        {era:'1000万年前', name:'麻雀属', desc:'跟随人类定居扩散全球', icon:'🐦'},
+        {era:'现代', name:'麻雀', desc:'与人类共存万年的邻居', icon:'🐦', fossil:'北京·国家动物博物馆·伴人鸟类展'},
+    ],
+    '小鸊鷉': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类演化起点', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'8000万年前', name:'鸊鷉目祖先', desc:'极古老的水鸟类群，与火烈鸟近亲', icon:'🪨', fossil:'北京·中国古动物馆·白垩纪水鸟'},
+        {era:'3000万年前', name:'原始鸊鷉', desc:'完全适应潜水，趾瓣而非蹼', icon:'🌿'},
+        {era:'1000万年前', name:'小型鸊鷉', desc:'体型缩小，擅长隐蔽', icon:'🐦'},
+        {era:'现代', name:'小鸊鷉', desc:'害羞的潜水小鸭，浮巢养娃', icon:'🐥', fossil:'北京·国家动物博物馆·潜水鸟标本'},
+    ],
+    '凤头鸊鷉': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类远祖', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'8000万年前', name:'鸊鷉目祖先', desc:'古老的潜水鸟谱系', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'3000万年前', name:'大型鸊鷉分化', desc:'体型增大，凤头用于求偶展示', icon:'🌿'},
+        {era:'500万年前', name:'凤头鸊鷉', desc:'精美求偶舞蹈演化完成', icon:'🐦'},
+        {era:'现代', name:'凤头鸊鷉', desc:'水上芭蕾舞者，达尔文都赞叹', icon:'🦩', fossil:'北京·国家动物博物馆·鸊鷉标本'},
+    ],
+    '家燕': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类的始祖', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'鸣禽的大分化', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'2000万年前', name:'燕科分化', desc:'特化空中捕虫，嘴宽而短', icon:'🌿'},
+        {era:'500万年前', name:'家燕', desc:'跟随人类建筑筑巢的共生演化', icon:'🐦'},
+        {era:'现代', name:'家燕', desc:'每年迁徙万里，春来秋去的信使', icon:'✈️', fossil:'北京·国家动物博物馆·迁徙鸟类展'},
+    ],
+    '北红尾鸲': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'鸟类起源', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'小型鸣禽的辐射', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'1500万年前', name:'鹟科分化', desc:'食虫鸟类，伏击捕食策略', icon:'🌿'},
+        {era:'500万年前', name:'红尾鸲属', desc:'橙红尾羽作为种间识别信号', icon:'🐦'},
+        {era:'现代', name:'北红尾鸲', desc:'抖尾小猎手，石头上的伏击者', icon:'🔥', fossil:'北京·国家动物博物馆·鹟科标本'},
+    ],
+    '黄眉柳莺': [
+        {era:'1.5亿年前', name:'始祖鸟', desc:'所有鸟类的远祖', icon:'🦕', fossil:'北京·北京自然博物馆'},
+        {era:'4500万年前', name:'雀形目祖先', desc:'鸣禽辐射', icon:'🪨', fossil:'北京·中国古动物馆'},
+        {era:'1500万年前', name:'柳莺科分化', desc:'极小型食虫鸟，灌丛中穿梭', icon:'🌿'},
+        {era:'300万年前', name:'黄眉柳莺', desc:'眉纹黄色作为辨识标志', icon:'🐦'},
+        {era:'现代', name:'黄眉柳莺', desc:'仅重6g的迁徙旅行者', icon:'🌿', fossil:'北京·国家动物博物馆·柳莺科标本'},
+    ],
+};
+
+// 鸟类部位解析
+const birdAnatomy = {
+    '翠鸟': {parts:[
+        {name:'大嘴', pos:'right', desc:'又长又直的黑色尖嘴，专为俯冲入水捕鱼设计'},
+        {name:'头部', pos:'top', desc:'橙红色头顶，蓝绿色过眼纹'},
+        {name:'背羽', pos:'center', desc:'亮蓝色金属光泽，阳光下如宝石闪耀（结构色）'},
+        {name:'胸腹', pos:'bottom', desc:'橙红色胸腹，与蓝背形成强烈对比'},
+        {name:'短尾', pos:'right-bottom', desc:'极短尾巴减少水阻，利于俯冲'},
+    ]},
+    '苍鹭': {parts:[
+        {name:'长嘴', pos:'right', desc:'黄色匕首状喙，一击刺穿鱼身'},
+        {name:'黑冠', pos:'top', desc:'额白色，头侧黑纹延伸为长饰羽'},
+        {name:'S形颈', pos:'center', desc:'可折叠的长颈，像弹簧一样弹出捕食'},
+        {name:'灰翼', pos:'left', desc:'蓝灰色翼面，飞行时翼展可达1.7米'},
+        {name:'长腿', pos:'bottom', desc:'黄褐色长腿，可站入浅水等待猎物'},
+    ]},
+    '白鹭': {parts:[
+        {name:'黑嘴', pos:'right', desc:'纤细黑色嘴，精准捕捉小鱼虾'},
+        {name:'饰羽', pos:'top', desc:'繁殖期头后生2条白色丝状饰羽'},
+        {name:'纯白体', pos:'center', desc:'全身雪白，降低水中鱼类的警觉'},
+        {name:'黄趾', pos:'bottom', desc:'黑腿+亮黄色脚趾，识别白鹭的关键'},
+    ]},
+    '鸳鸯': {parts:[
+        {name:'红嘴', pos:'right', desc:'雄鸟红色嘴，雌鸟灰褐色'},
+        {name:'冠羽', pos:'top', desc:'雄鸟绿紫色冠羽，后颈白色飘带'},
+        {name:'帆状翼', pos:'center', desc:'雄鸟特有的橙色"帆状翼"直立于背上'},
+        {name:'锦衣', pos:'left', desc:'彩色鳞纹体侧，中国画中的经典元素'},
+    ]},
+    '灰喜鹊': {parts:[
+        {name:'黑头', pos:'top', desc:'黑色头冠延至后颈，像戴黑帽'},
+        {name:'蓝翼', pos:'center', desc:'天蓝色翅膀和长尾，飞行时醒目'},
+        {name:'白喉', pos:'right', desc:'白色喉部到胸，与黑顶形成对比'},
+        {name:'长尾', pos:'bottom', desc:'蓝色长尾占体长一半，平衡飞行'},
+    ]},
+    '戴胜': {parts:[
+        {name:'冠羽', pos:'top', desc:'标志性扇形羽冠，警觉时竖起如皇冠'},
+        {name:'细嘴', pos:'right', desc:'长而弯的细嘴，探入土壤捕虫'},
+        {name:'黑白翼', pos:'center', desc:'翅膀宽阔，黑白条纹似斑马纹'},
+        {name:'棕体', pos:'left', desc:'肉桂棕色身体，地面觅食时保护色'},
+    ]},
+    '大斑啄木鸟': {parts:[
+        {name:'凿嘴', pos:'right', desc:'短粗的凿子状嘴，每秒敲击20次'},
+        {name:'红枕', pos:'top', desc:'雄鸟后枕红色斑，雌鸟全黑'},
+        {name:'黑白背', pos:'center', desc:'黑色背部大白斑，飞行时醒目'},
+        {name:'红臀', pos:'bottom', desc:'臀部鲜红色，所有大斑啄木鸟都有'},
+        {name:'刚尾', pos:'left', desc:'硬挺的尾羽支撑身体攀树'},
+    ]},
+    '绿头鸭': {parts:[
+        {name:'绿头', pos:'top', desc:'雄鸟绿色金属光泽头部，阳光下变幻'},
+        {name:'黄嘴', pos:'right', desc:'雄鸟橄榄黄嘴，雌鸟橙+黑嘴'},
+        {name:'白颈环', pos:'center', desc:'绿头下方窄白环，分隔头与栗胸'},
+        {name:'卷尾', pos:'bottom', desc:'雄鸟尾部2根黑色卷翘中央尾羽'},
+    ]},
+    '珠颈斑鸠': {parts:[
+        {name:'红眼', pos:'top', desc:'深红色虹膜，眼周淡蓝色裸皮'},
+        {name:'珠纹', pos:'right', desc:'颈侧黑底白点如珍珠项链，得名于此'},
+        {name:'灰褐体', pos:'center', desc:'整体灰褐+粉色调，朴素优雅'},
+        {name:'黑尾', pos:'bottom', desc:'尾羽外侧白色尖端，飞行时明显'},
+    ]},
+    '猫头鹰': {parts:[
+        {name:'面盘', pos:'center', desc:'圆形面盘收集声波，定位猎物精确到1度'},
+        {name:'耳羽', pos:'top', desc:'头顶"角状"耳羽簇（非真正耳朵）'},
+        {name:'大眼', pos:'right', desc:'正前方大眼提供立体视觉，但不能转动'},
+        {name:'静音羽', pos:'left', desc:'羽缘锯齿状，飞行完全无声'},
+        {name:'利爪', pos:'bottom', desc:'强壮趾爪，握力极大，猎物无法挣脱'},
+    ]},
+    '喜鹊': {parts:[
+        {name:'黑头', pos:'top', desc:'黑色头颈到胸，金属绿光泽'},
+        {name:'白肩', pos:'center', desc:'黑底白肩白腹，飞行时黑白分明'},
+        {name:'长尾', pos:'bottom', desc:'楔形长尾，绿紫色金属光泽'},
+        {name:'黑嘴', pos:'right', desc:'粗壮黑嘴，杂食性的万能工具'},
+    ]},
+    '乌鸫': {parts:[
+        {name:'黄嘴', pos:'right', desc:'雄鸟亮橙黄嘴，雌鸟暗褐色'},
+        {name:'黄眼圈', pos:'top', desc:'雄鸟明显的橙黄色眼圈'},
+        {name:'纯黑体', pos:'center', desc:'雄鸟全身纯黑，阳光下有光泽'},
+        {name:'歌喉', pos:'left', desc:'鸣管复杂，能模仿多种声音'},
+    ]},
+    '白鹡鸰': {parts:[
+        {name:'黑顶', pos:'top', desc:'黑色头顶+过眼纹，白色面部'},
+        {name:'细嘴', pos:'right', desc:'纤细黑嘴，捕捉水面昆虫'},
+        {name:'黑白体', pos:'center', desc:'清晰的黑白灰配色，像小绅士'},
+        {name:'长尾', pos:'bottom', desc:'不停上下摆动的长尾，永远在点头'},
+    ]},
+    '夜鹭': {parts:[
+        {name:'红眼', pos:'top', desc:'成鸟红色虹膜，夜视能力强'},
+        {name:'黑冠', pos:'right', desc:'黑色头顶+2-3根白色丝状饰羽'},
+        {name:'粗颈', pos:'center', desc:'短粗体型，不像其他鹭那样细长'},
+        {name:'黄腿', pos:'bottom', desc:'黄绿色短腿，适合在树上栖息'},
+    ]},
+    '鸬鹚': {parts:[
+        {name:'钩嘴', pos:'right', desc:'嘴尖弯钩，咬住滑鱼不脱手'},
+        {name:'蓝眼', pos:'top', desc:'翠绿色虹膜+喉部黄色裸皮'},
+        {name:'黑体', pos:'center', desc:'全身黑色带铜绿光泽'},
+        {name:'蹼足', pos:'bottom', desc:'四趾全蹼，水下推进器'},
+        {name:'展翅', pos:'left', desc:'羽毛不防水，捕鱼后必须展翅晾干'},
+    ]},
+    '红嘴蓝鹊': {parts:[
+        {name:'红嘴', pos:'right', desc:'鲜红色嘴和脚，配色大胆'},
+        {name:'黑头', pos:'top', desc:'黑色头部+白色后枕斑'},
+        {name:'蓝体', pos:'center', desc:'紫蓝色身体，极其华丽'},
+        {name:'超长尾', pos:'bottom', desc:'可达40cm的蓝白相间长尾'},
+    ]},
+    '麻雀': {parts:[
+        {name:'黑喉', pos:'right', desc:'雄鸟黑色喉斑（围兜），地位象征'},
+        {name:'栗顶', pos:'top', desc:'栗红色头顶，黑色过眼纹'},
+        {name:'白颊', pos:'center', desc:'白色面颊上有黑色耳斑'},
+        {name:'短嘴', pos:'left', desc:'粗壮圆锥嘴，壳谷类种子'},
+    ]},
+    '小鸊鷉': {parts:[
+        {name:'圆头', pos:'top', desc:'蓬松圆头，无冠羽，眼睛黄色'},
+        {name:'尖嘴', pos:'right', desc:'短小尖嘴，嘴基有浅色斑'},
+        {name:'绒体', pos:'center', desc:'深褐色背，繁殖期两颊栗红'},
+        {name:'无尾', pos:'bottom', desc:'几乎看不到尾巴，屁股圆圆'},
+        {name:'瓣蹼', pos:'left', desc:'趾上有分瓣蹼（非全蹼），高效划水'},
+    ]},
+    '凤头鸊鷉': {parts:[
+        {name:'凤冠', pos:'top', desc:'黑色双角状冠羽，求偶时扇开'},
+        {name:'红嘴', pos:'right', desc:'粉红色嘴，面部白色'},
+        {name:'颊饰', pos:'center', desc:'繁殖期栗红色颊饰如围巾展开'},
+        {name:'白颈', pos:'left', desc:'修长白色颈部，游泳时如天鹅'},
+    ]},
+    '家燕': {parts:[
+        {name:'剪尾', pos:'bottom', desc:'深叉形尾巴如剪刀，高速转向'},
+        {name:'红脸', pos:'top', desc:'额头和喉部栗红色'},
+        {name:'蓝背', pos:'center', desc:'上体钢蓝色金属光泽'},
+        {name:'白腹', pos:'left', desc:'白色或淡棕色腹部'},
+        {name:'宽口', pos:'right', desc:'嘴小但张开极大，空中兜虫'},
+    ]},
+    '北红尾鸲': {parts:[
+        {name:'白翼斑', pos:'center', desc:'雄鸟翅上大白斑，飞行时醒目'},
+        {name:'黑脸', pos:'top', desc:'雄鸟黑色面部和喉，似面具'},
+        {name:'橙胸', pos:'right', desc:'橙红色胸腹，雌鸟为棕灰色'},
+        {name:'红尾', pos:'bottom', desc:'橙红色尾巴不停抖动，得名于此'},
+    ]},
+    '黄眉柳莺': {parts:[
+        {name:'黄眉', pos:'top', desc:'淡黄色眉纹，是辨识关键特征'},
+        {name:'小嘴', pos:'right', desc:'极细小的嘴，捕捉微小昆虫'},
+        {name:'绿背', pos:'center', desc:'橄榄绿色上体，完美隐入树叶'},
+        {name:'翼斑', pos:'left', desc:'翼上1-2道淡色翼斑'},
+    ]},
+};
+
+// 关卡系统：每关3只鸟
+const questLevels = [
+    { name:'初识水边', birds:['翠鸟','苍鹭','白鹭'], desc:'从最容易找到的水鸟开始', optional:[
+        {id:'q1_opt1', text:'观察到鸟类俯冲入水捕鱼', icon:'🎣', hint:'💡 可能看到：翠鸟、鸬鹚、燕鸥'},
+        {id:'q1_opt2', text:'看到鸟站立不动等待猎物超过5分钟', icon:'⏱️', hint:'💡 可能看到：苍鹭、白鹭、夜鹭'},
+        {id:'q1_opt3', text:'一天观鸟步行超过2万步', icon:'🚶', hint:'💡 打开手机计步器记录'},
+    ]},
+    { name:'湖面探秘', birds:['鸳鸯','绿头鸭','小鸊鷉'], desc:'天境湖的水禽们', optional:[
+        {id:'q2_opt1', text:'观察到鸟类成对游水（配对行为）', icon:'💕', hint:'💡 可能看到：鸳鸯、绿头鸭、凤头鸊鷉'},
+        {id:'q2_opt2', text:'记录一次鸟类潜水时长（秒）', icon:'⏳', hint:'💡 可能看到：小鸊鷉、鸬鹚、凤头鸊鷉'},
+        {id:'q2_opt3', text:'同一视野内同时看到3种以上鸟', icon:'🏆', hint:'💡 清晨湖面、湿地最容易达成'},
+    ]},
+    { name:'林间穿行', birds:['灰喜鹊','喜鹊','珠颈斑鸠'], desc:'公园里最常见的邻居', optional:[
+        {id:'q3_opt1', text:'听到并辨认出一种鸟的叫声', icon:'🔊', hint:'💡 可能听到：斑鸠咕咕、喜鹊嘎嘎、乌鸫啼鸣'},
+        {id:'q3_opt2', text:'看到5只以上同种鸟群体活动', icon:'👥', hint:'💡 可能看到：灰喜鹊、麻雀、家燕'},
+        {id:'q3_opt3', text:'观察到鸟类筑巢或衔材料', icon:'🏠', hint:'💡 可能看到：喜鹊、家燕、麻雀（春季）'},
+    ]},
+    { name:'树上寻宝', birds:['戴胜','大斑啄木鸟','红嘴蓝鹊'], desc:'藏在树上的精灵', optional:[
+        {id:'q4_opt1', text:'看到鸟类展示特殊羽饰（冠羽/尾羽）', icon:'👑', hint:'💡 可能看到：戴胜竖冠、红嘴蓝鹊长尾、凤头鸊鷉'},
+        {id:'q4_opt2', text:'循着声音找到一只鸟（听声辨位）', icon:'🥁', hint:'💡 可能听到：啄木鸟敲击、乌鸫晨鸣、杜鹃远啼'},
+        {id:'q4_opt3', text:'拍到鸟类在树间滑翔或穿梭', icon:'✨', hint:'💡 可能看到：红嘴蓝鹊、灰喜鹊、燕子'},
+    ]},
+    { name:'晨昏交替', birds:['乌鸫','白鹡鸰','麻雀'], desc:'从清晨到黄昏的常客', optional:[
+        {id:'q5_opt1', text:'清晨6点前听到鸟类鸣唱', icon:'🌅', hint:'💡 可能听到：乌鸫、喜鹊、珠颈斑鸠'},
+        {id:'q5_opt2', text:'观察到鸟类重复性身体动作', icon:'🔄', hint:'💡 可能看到：白鹡鸰翘尾、北红尾鸲抖尾、啄木鸟敲击'},
+        {id:'q5_opt3', text:'看到鸟类洗浴（水浴或沙浴）', icon:'🏖️', hint:'💡 可能看到：麻雀沙浴、白鹡鸰水浴、乌鸫水浴'},
+    ]},
+    { name:'夜行者', birds:['夜鹭','猫头鹰','鸬鹚'], desc:'暗夜与水下的猎手', optional:[
+        {id:'q6_opt1', text:'黄昏或夜间观察到鸟类活动', icon:'🌙', hint:'💡 可能看到：夜鹭出动、猫头鹰飞行、蝙蝠（非鸟）'},
+        {id:'q6_opt2', text:'看到鸟类展翅晾干羽毛', icon:'🦅', hint:'💡 可能看到：鸬鹚、苍鹭、白鹭'},
+        {id:'q6_opt3', text:'在完全靠听觉的情况下辨认一种鸟', icon:'👂', hint:'💡 可能听到：猫头鹰、夜鹭、杜鹃'},
+    ]},
+    { name:'候鸟之约', birds:['家燕','北红尾鸲','黄眉柳莺'], desc:'随季节来去的旅者', optional:[
+        {id:'q7_opt1', text:'观察到鸟类育雏（喂食幼鸟）', icon:'🍼', hint:'💡 可能看到：家燕、麻雀、喜鹊（春夏季）'},
+        {id:'q7_opt2', text:'看到鸟类伏击捕食昆虫', icon:'🪲', hint:'💡 可能看到：北红尾鸲、白鹡鸰、家燕'},
+        {id:'q7_opt3', text:'一天内观察到3种以上没见过的鸟', icon:'🍂', hint:'💡 秋季迁徙期9-10月概率最高'},
+    ]},
+    { name:'深水高手', birds:['凤头鸊鷉','鸳鸯','鸬鹚'], desc:'潜水与水面的精彩', optional:[
+        {id:'q8_opt1', text:'观察到鸟类求偶展示行为', icon:'💃', hint:'💡 可能看到：凤头鸊鷉对舞、鸳鸯炫羽、戴胜献食'},
+        {id:'q8_opt2', text:'记录一只鸟连续捕食的成功次数', icon:'🐟', hint:'💡 可能看到：翠鸟、鸬鹚、苍鹭'},
+        {id:'q8_opt3', text:'观鸟一天拍了100张以上照片', icon:'📸', hint:'💡 行为越精彩越停不下快门'},
+    ]},
+];
+let currentLevel = 0;
+let curOptIdx = 0;
+
+// 图鉴书编号（按纲目属种）
+let guidePageNum = 0;
+
+function initGraph() {
+    renderGuideBook();
+    setupBookSwipe();
+    renderQuest();
+}
+
+// 按纲目属种排序所有鸟（作为页面顺序）
+let bookPages = []; // sorted guideData
+let curPageIdx = 0;
+
+function renderGuideBook() {
+    const collected = guideData.filter(b=>b.got).length;
+    const subEl = document.getElementById('guideBookSub');
+    if(subEl) subEl.textContent = `已收录 ${collected} / 386 种`;
+
+    // Sort by order → family → name (taxonomy order)
+    bookPages = [...guideData].sort((a,b) => {
+        if(a.order !== b.order) return a.order.localeCompare(b.order);
+        if(a.family !== b.family) return a.family.localeCompare(b.family);
+        return a.id - b.id;
+    });
+
+    renderCurrentPage();
+}
+
+function renderCurrentPage() {
+    const b = bookPages[curPageIdx];
+    if(!b) return;
+    const pageEl = document.getElementById('guidePage');
+    const navInfo = document.getElementById('guideNavInfo');
+
+    if(navInfo) navInfo.innerHTML = `${b.got ? b.name : '???'} · p.${curPageIdx+1}/${bookPages.length}`;
+
+    if(!b.got) {
+        pageEl.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">❓</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-hint)">待发现鸟种</div>
+            <div style="font-size:11px;color:var(--text-hint);margin-top:6px">${b.order} · ${b.family}</div>
+            <div style="font-size:10px;color:var(--text-hint);margin-top:4px">${b.season} · 稀有度 ${'★'.repeat(b.star)}${'☆'.repeat(5-b.star)}</div>
+            <div style="margin-top:16px;padding:12px;background:#FFF8E1;border-radius:8px;font-size:11px;color:#F57C00">
+                💡 前往 ${b.park} 探索，记录观察即可解锁
+            </div>
+        </div>`;
+        pageEl.scrollTop = 0;
+        return;
+    }
+
+    const refUrl = birdRefPhotos[b.name];
+    const multiPhotos = birdMultiPhotos[b.name] || (refUrl ? [refUrl] : []);
+    const evo = birdEvolution[b.name];
+    const anatomy = birdAnatomy[b.name];
+    const obs = birdObservations[b.name] || [];
+    const nextInfo = birdNextGuide[b.name];
+    const savedAnatomy = JSON.parse(localStorage.getItem('birdAnatomy_'+b.name) || '{}');
+
+    let html = '';
+    // 大图
+    if(refUrl) {
+        html += `<div style="position:relative">
+            <img src="${refUrl}" style="width:100%;height:150px;object-fit:cover;display:block">
+            <div style="position:absolute;bottom:8px;left:8px;right:8px;padding:10px 14px;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:12px">
+                <div style="font-size:15px;font-weight:800;color:var(--text-primary)">${b.name}</div>
+                <div style="font-size:9px;color:var(--text-secondary);font-style:italic">${b.eng} · ${b.sci}</div>
+            </div>
+        </div>`;
+    }
+
+    // 基本信息
+    html += `<div style="padding:12px 16px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <span style="padding:2px 7px;background:#F5F9F5;font-size:9px;color:var(--primary);font-weight:500">${b.order} · ${b.family}</span>
+            <span style="padding:2px 7px;background:#FFF8E1;font-size:9px;color:#F57C00;font-weight:500">${b.season}</span>
+            <span style="padding:2px 7px;background:#f5f5f5;font-size:9px;color:var(--text-secondary)">${'★'.repeat(b.star)}${'☆'.repeat(5-b.star)}</span>
         </div>
-        ${rankBirds.map((b,i) => {
-            const refUrl = birdRefPhotos[b.name];
-            const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-            return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;${i<4?'border-bottom:1px solid #EDE8E0':''}">
-                <span style="font-size:11px;font-weight:700;color:var(--text-hint);width:16px">${medal||i+1}</span>
-                <div style="width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#E8EDE6">${refUrl?`<img src="${refUrl}" style="width:100%;height:100%;object-fit:cover">`:''}</div>
-                <span style="flex:1;font-size:12px;font-weight:600">${b.name}</span>
-                <span style="font-size:11px;color:var(--text-secondary)">${b.count} 次 ${b.trend}</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;font-size:10px">
+            <div style="padding:6px 8px;background:#fafafa;border-radius:4px"><span style="color:var(--text-hint)">首次</span><div style="font-weight:600;margin-top:1px">${b.first}</div></div>
+            <div style="padding:6px 8px;background:#fafafa;border-radius:4px"><span style="color:var(--text-hint)">地点</span><div style="font-weight:600;margin-top:1px;color:var(--primary)">${b.spot}</div></div>
+            <div style="padding:6px 8px;background:#fafafa;border-radius:4px"><span style="color:var(--text-hint)">次数</span><div style="font-weight:600;margin-top:1px">${b.count} 次</div></div>
+            <div style="padding:6px 8px;background:#fafafa;border-radius:4px"><span style="color:var(--text-hint)">公园</span><div style="font-weight:600;margin-top:1px">${b.park}</div></div>
+        </div>
+        ${b.behaviors ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">${b.behaviors.map(t=>`<span style="padding:2px 7px;background:#F5EFE0;font-size:9px;color:#6D4C2A;border-radius:10px">${t}</span>`).join('')}</div>` : ''}
+        ${b.sensitive ? `<div style="background:#FFF3E0;padding:8px;margin-bottom:10px;border-radius:6px;font-size:9px;color:#BF360C">⚠️ 敏感物种 · 请勿公开位置</div>` : ''}
+    </div>`;
+
+    // 多张照片
+    if(multiPhotos.length > 1) {
+        html += `<div style="padding:0 16px 10px">
+            <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:4px">
+                ${multiPhotos.map(p => `<img src="${p}" style="width:80px;height:60px;object-fit:cover;border-radius:4px;flex-shrink:0" loading="lazy">`).join('')}
+            </div>
+        </div>`;
+    }
+
+    // 部位解析
+    if(anatomy) {
+        html += `<div style="padding:10px 16px;background:#F5F9FF;border-top:1px solid #f0f0f0">
+            <div style="font-size:10px;font-weight:600;color:#1565C0;margin-bottom:8px">🔬 部位解析</div>
+            ${anatomy.parts.map(p => {
+                const userNote = savedAnatomy[p.name] || '';
+                return `<div style="display:flex;gap:6px;padding:6px;background:#fff;border-radius:4px;border:1px solid #e8f0fe;margin-bottom:4px">
+                    <div style="min-width:38px;font-size:9px;font-weight:600;color:#1565C0">${p.name}</div>
+                    <div style="flex:1">
+                        <div style="font-size:9px;color:var(--text-secondary);line-height:1.3">${p.desc}</div>
+                        <input type="text" placeholder="你的笔记..." value="${userNote.replace(/"/g,'&quot;')}"
+                            style="width:100%;padding:3px 6px;border:1px dashed #ddd;border-radius:3px;font-size:9px;outline:none;font-family:inherit;background:#fafafa;margin-top:3px"
+                            onchange="saveAnatomyNote('${b.name}','${p.name}',this.value)">
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`;
+    }
+
+    // 进化链
+    if(evo) {
+        html += `<div style="padding:10px 16px;background:#FFFBF0;border-top:1px solid #f0f0f0">
+            <div style="font-size:10px;font-weight:600;color:#8B6914;margin-bottom:8px">🦕 进化之路</div>
+            <div style="padding-left:16px">
+                ${evo.map((step,i) => `
+                    <div style="position:relative;padding-bottom:${i<evo.length-1?'8px':'0'};padding-left:12px;border-left:${i<evo.length-1?'2px solid #E8D5B7':'2px solid transparent'}">
+                        <div style="position:absolute;left:-5px;top:2px;width:8px;height:8px;border-radius:50%;background:${i===evo.length-1?'var(--primary)':'#E8D5B7'}"></div>
+                        <div style="font-size:8px;color:var(--text-hint)">${step.era}</div>
+                        <div style="font-size:10px;font-weight:600;color:var(--text-primary)">${step.icon} ${step.name}</div>
+                        <div style="font-size:9px;color:var(--text-secondary);line-height:1.3">${step.desc}</div>
+                        ${step.fossil ? `<div style="display:inline-block;margin-top:3px;padding:2px 8px;background:linear-gradient(135deg,#FFF8E7,#F5E6C8);border:1px solid #D4A854;border-radius:10px;font-size:8px;color:#6B4E13;font-weight:500">🏛️ ${step.fossil}</div>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+
+
+    // 观察记录
+    html += `<div style="padding:10px 16px;border-top:1px solid #f0f0f0">
+        <div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:6px">📋 观察记录 (${obs.length})</div>
+        ${obs.length ? obs.map(o => `
+            <div style="display:flex;gap:6px;padding:5px 0;border-bottom:1px solid #f8f8f5;font-size:9px">
+                <span style="color:var(--text-hint);min-width:60px">${o.date}</span>
+                <span style="color:var(--primary);min-width:50px">${o.spot}</span>
+                <span style="color:var(--text-secondary);flex:1">${o.note}</span>
+            </div>
+        `).join('') : '<div style="font-size:10px;color:var(--text-hint);text-align:center;padding:8px">暂无</div>'}
+    </div>`;
+
+    // 百科
+    html += `<div style="padding:10px 16px 20px;border-top:1px solid #f0f0f0">
+        <div id="birdWikiArea"></div>
+        <button class="bird-wiki-btn" onclick="loadBirdWiki('${b.name}')" style="width:100%;padding:8px;background:#f9f9f9;border:1px solid #eee;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--primary)">📚 中科院物种百科</button>
+    </div>`;
+
+    pageEl.innerHTML = html;
+    pageEl.scrollTop = 0;
+}
+
+function toggleBookExpand() {
+    const book = document.getElementById('guideBook');
+    const btn = document.getElementById('guideExpandBtn');
+    book.classList.toggle('expanded');
+    if(book.classList.contains('expanded')) {
+        btn.textContent = '✕';
+        btn.title = '收缩';
+    } else {
+        btn.textContent = '⛶';
+        btn.title = '展开';
+    }
+}
+
+function flipPage(dir) {
+    const newIdx = curPageIdx + dir;
+    if(newIdx < 0 || newIdx >= bookPages.length) return;
+
+    const pageEl = document.getElementById('guidePage');
+    // Animate out
+    pageEl.classList.remove('current');
+    pageEl.classList.add(dir > 0 ? 'prev' : 'next');
+
+    setTimeout(() => {
+        curPageIdx = newIdx;
+        // Prep new position (opposite side)
+        pageEl.style.transition = 'none';
+        pageEl.classList.remove('prev','next');
+        pageEl.classList.add(dir > 0 ? 'next' : 'prev');
+        renderCurrentPage();
+        // Force reflow then animate in
+        pageEl.offsetHeight;
+        pageEl.style.transition = '';
+        pageEl.classList.remove('prev','next');
+        pageEl.classList.add('current');
+    }, 200);
+}
+
+function openBirdPage(id) {
+    // 翻到对应鸟的页面
+    const idx = bookPages.findIndex(x=>x.id===id);
+    if(idx >= 0) {
+        curPageIdx = idx;
+        renderCurrentPage();
+    }
+}
+
+// 滑动翻页支持
+let bookTouchStartX = 0;
+function setupBookSwipe() {
+    const vp = document.getElementById('guideBookViewport');
+    if(!vp) return;
+    vp.addEventListener('touchstart', e => {
+        bookTouchStartX = e.touches[0].clientX;
+    }, {passive:true});
+    vp.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - bookTouchStartX;
+        if(Math.abs(dx) > 50) {
+            flipPage(dx < 0 ? 1 : -1);
+        }
+    }, {passive:true});
+}
+
+function renderQuest() {
+    const el = document.getElementById('guideQuest');
+    if(!el) return;
+    const level = questLevels[currentLevel];
+    const done = level.birds.filter(name => {
+        const b = guideData.find(x=>x.name===name);
+        return b && b.got;
+    });
+    const allDone = done.length === level.birds.length;
+
+    let html = `
+        <div class="quest-header">
+            <div style="display:flex;align-items:center;gap:8px">
+                ${currentLevel > 0 ? `<button style="font-size:12px;cursor:pointer;color:#fff;padding:5px 12px;background:var(--primary);border:none;border-radius:14px;font-weight:600;box-shadow:0 2px 4px rgba(0,0,0,0.15)" onclick="prevLevel()">← 上一关</button>` : ''}
+                <div class="quest-level" style="flex:1">关卡 ${currentLevel+1}：${level.name}</div>
+            </div>
+            <div class="quest-progress">${done.length}/${level.birds.length} · ${level.desc}</div>
+        </div>
+        <div class="quest-birds">`;
+
+    level.birds.forEach(name => {
+        const b = guideData.find(x=>x.name===name);
+        const isDone = b && b.got;
+        const refUrl = b ? birdRefPhotos[b.name] : null;
+        const imgInner = refUrl ? `<img src="${refUrl}">` : (b ? b.emoji : '?');
+        const spot = b ? b.spot : '';
+        const park = b ? b.park : '';
+        const locText = spot || park || '';
+        html += `
+            <div class="quest-bird ${isDone?'done':''}" onclick="${isDone?`openBirdPage(${b.id})`:''}">
+                <div class="quest-bird-img">${imgInner}</div>
+                <div class="quest-bird-name">${isDone ? name : '???'}</div>
+                <div class="quest-bird-status">${isDone ? '✅ 已观测' : '未观测'}</div>
+                ${locText ? `<div class="quest-bird-loc" onclick="event.stopPropagation();jumpToSpot('${spot}')">📍 ${locText}</div>` : ''}
             </div>`;
-        }).join('')}
-    `;
+    });
+
+    html += `</div>`;
+
+    // 选修任务 - 一次只显示一个，可切换
+    if(level.optional && level.optional.length) {
+        const optDone = level.optional.filter(o => localStorage.getItem('opt_'+o.id));
+        const optIdx = curOptIdx % level.optional.length;
+        const opt = level.optional[optIdx];
+        const checked = localStorage.getItem('opt_'+opt.id);
+        html += `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px dashed #e0e0e0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+                <span style="font-size:11px;font-weight:700;color:var(--primary)">🌟 选修挑战</span>
+                <span style="font-size:9px;color:var(--text-hint);background:#f5f5f5;padding:1px 6px;border-radius:8px">${optDone.length}/${level.optional.length}</span>
+                <span style="margin-left:auto;font-size:9px;color:var(--primary);cursor:pointer;padding:2px 8px;background:var(--primary-bg);border-radius:8px" onclick="switchOptQuest()">换一个 ↻</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${checked?'#f0f7f0':'#fafafa'};border-radius:8px;border:1px solid ${checked?'#c8e6c9':'#f0f0f0'}" onclick="toggleOptQuest('${opt.id}')">
+                <div style="width:22px;height:22px;border-radius:50%;border:2px solid ${checked?'var(--primary)':'#ddd'};display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">${checked?'✓':''}</div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:12px;font-weight:500;color:var(--text-primary);${checked?'text-decoration:line-through;opacity:0.6':''}">${opt.icon} ${opt.text}</div>
+                    <div style="font-size:9px;color:var(--text-hint);margin-top:2px">💡 ${opt.hint}</div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:6px;font-size:9px;color:var(--text-hint)">${optIdx+1} / ${level.optional.length}</div>
+        </div>`;
+    }
+
+    if(allDone && currentLevel < questLevels.length - 1) {
+        html += `<button class="quest-next-btn" onclick="nextLevel()">下一关 →</button>`;
+    } else if(!allDone) {
+        html += `<button class="quest-next-btn" disabled>完成全部必修观测解锁下一关</button>`;
+    } else {
+        html += `<button class="quest-next-btn" disabled>🎉 全部关卡已完成！</button>`;
+    }
+    el.innerHTML = html;
+}
+
+function toggleOptQuest(id) {
+    if(localStorage.getItem('opt_'+id)) {
+        localStorage.removeItem('opt_'+id);
+    } else {
+        localStorage.setItem('opt_'+id, '1');
+        showToast('🌟 选修挑战完成！');
+    }
+    renderQuest();
+}
+
+function switchOptQuest() {
+    const level = questLevels[currentLevel];
+    if(level.optional) {
+        curOptIdx = (curOptIdx + 1) % level.optional.length;
+    }
+    renderQuest();
+}
+
+function nextLevel() {
+    if(currentLevel < questLevels.length - 1) {
+        currentLevel++;
+        renderQuest();
+    }
+}
+
+function prevLevel() {
+    if(currentLevel > 0) {
+        currentLevel--;
+        renderQuest();
+    }
 }
 
 function openProfile() {
@@ -5035,7 +5923,7 @@ function openProfile() {
             <div style="font-size:11px;font-weight:600;color:var(--text-hint);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em">装备</div>
             <div style="display:flex;flex-direction:column;gap:10px;font-size:12px">
                 <div style="display:flex;justify-content:space-between"><span style="color:var(--text-hint)">望远镜</span><span style="font-weight:500">尼康 Monarch M5 8x42</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-hint)">相机</span><span style="font-weight:500">索尼 A7R4 + 200-600mm</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-hint)">图鉴</span><span style="font-weight:500">中国鸟类野外手册（第二版）</span></div>
             </div>
         </div>
         <div style="background:var(--bg-card);border:var(--border);padding:14px">
@@ -5051,97 +5939,254 @@ function openProfile() {
     document.getElementById('profilePage').classList.add('show');
 }
 
-function renderShelves() {
-    const collected = guideData.filter(b=>b.got).length;
-    document.getElementById('guideCount').textContent = collected;
-    document.getElementById('guideFill').style.width = (collected/386*100).toFixed(1) + '%';
+function filterGuide(keyword) {
+    // Not used in new graph mode, kept for compatibility
+}
 
-    const html = `
-        <div class="shelf-section">
-            <div class="shelf-section-title">📍 按地点</div>
-            <div class="shelf-grid">
-                ${guideShelves.byPark.map(s=>{
-                    const total = guideData.filter(b=>b.park===s.key).length;
-                    const got = guideData.filter(b=>b.park===s.key&&b.got).length;
-                    return `<div class="shelf-card" onclick="openShelf('park','${s.key}','${s.name}')">
-                        <div class="shelf-icon" style="background:${s.iconBg}">${s.icon}</div>
-                        <div class="shelf-info"><div class="shelf-name">${s.name}</div><div class="shelf-meta">${got}/${total} 种</div></div>
-                    </div>`;
-                }).join('')}
+function renderShelves() {
+    // Legacy - now replaced by initGraph
+    initGraph();
+}
+
+// ===== MAGAZINE: 鸟有乐 =====
+let curMagTab = 'quiz';
+
+// 猜鸟题库
+const quizData = [
+    { id:1, img:'birds/cuiniao.jpg', answer:'翠鸟', options:['翠鸟','白鹡鸰','北红尾鸲','家燕'], hint:'提示：它是水边的宝石猎手', mode:'blur' },
+    { id:2, img:'birds/canglv.jpg', answer:'苍鹭', options:['白鹭','苍鹭','夜鹭','鸬鹚'], hint:'提示：它能一动不动站半小时', mode:'crop' },
+    { id:3, img:'birds/daisheng.jpg', answer:'戴胜', options:['戴胜','啄木鸟','喜鹊','灰喜鹊'], hint:'提示：它有一顶漂亮的皇冠', mode:'blur' },
+    { id:4, img:'birds/yuanyang.jpg', answer:'鸳鸯', options:['鸳鸯','绿头鸭','小鸊鷉','凤头鸊鷉'], hint:'提示：爱情的象征，但其实每年换对象', mode:'crop' },
+    { id:5, img:'birds/dabanzhuomuniao.jpg', answer:'大斑啄木鸟', options:['大斑啄木鸟','红嘴蓝鹊','戴胜','喜鹊'], hint:'提示：森林医生，每秒敲击20次', mode:'blur' },
+    { id:6, img:'birds/luci.jpg', answer:'鸬鹚', options:['鸬鹚','苍鹭','夜鹭','白骨顶鸡'], hint:'提示：潜水高手，但羽毛不防水', mode:'crop' },
+    { id:7, img:'birds/hongzuilanque.jpg', answer:'红嘴蓝鹊', options:['红嘴蓝鹊','灰喜鹊','喜鹊','乌鸫'], hint:'提示：拖着长长的蓝色尾巴滑翔', mode:'blur' },
+    { id:8, img:'birds/fengtoupiti.jpg', answer:'凤头鸊鷉', options:['凤头鸊鷉','小鸊鷉','鸳鸯','绿头鸭'], hint:'提示：求偶时会跳水上芭蕾', mode:'crop' },
+];
+
+// 表情包数据
+const memeData = [
+    { img:'birds/maotouying.jpg', caption:'你说什么？我白天不营业', bird:'猫头鹰' },
+    { img:'birds/canglv2.jpg', caption:'我不是雕塑，我只是懒', bird:'苍鹭' },
+    { img:'birds/cuiniao3.jpg', caption:'今天的鱼不新鲜，差评', bird:'翠鸟' },
+    { img:'birds/huixique2.jpg', caption:'开会开会！都到齐了没', bird:'灰喜鹊' },
+    { img:'birds/yuanyang2.jpg', caption:'别拍了别拍了，没化妆', bird:'鸳鸯' },
+    { img:'birds/dabanzhuomuniao2.jpg', caption:'加班加班，这棵树还没敲完', bird:'大斑啄木鸟' },
+];
+
+let quizCurrent = 0;
+let quizAnswered = false;
+
+function renderMagTabs() {
+    const tabs = [{key:'quiz', label:'🎯 猜猜看'}, {key:'knowledge', label:'📚 答题'}, {key:'meme', label:'😂 表情包'}];
+    document.getElementById('magTabs').innerHTML = tabs.map(t =>
+        `<div class="mag-tab ${curMagTab===t.key?'active':''}" onclick="curMagTab='${t.key}';renderMagTabs();renderMagContent()">${t.label}</div>`
+    ).join('');
+}
+
+function renderMagContent() {
+    if(curMagTab === 'quiz') renderQuiz();
+    else if(curMagTab === 'knowledge') renderKnowledgeQuiz();
+    else renderMemes();
+}
+
+function renderQuiz() {
+    const q = quizData[quizCurrent % quizData.length];
+    const imgStyle = q.mode === 'blur' ? 'quiz-img blurred' : 'quiz-img cropped';
+    document.getElementById('magContent').innerHTML = `
+        <div class="quiz-card">
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)">第 ${quizCurrent+1}/${quizData.length} 题</div>
+            <img src="${q.img}" class="${imgStyle}" id="quizImg">
+            <div class="quiz-options" id="quizOpts">
+                ${q.options.map(opt => `<div class="quiz-opt" onclick="checkQuiz('${opt}','${q.answer}',this)">${opt}</div>`).join('')}
             </div>
+            <div class="quiz-hint" id="quizHint">${q.hint}</div>
         </div>
-        <div class="shelf-section">
-            <div class="shelf-section-title">🔬 按纲目</div>
-            <div class="shelf-grid">
-                ${guideShelves.byOrder.map(s=>{
-                    const total = s.key==='其他' ? guideData.filter(b=>!['雀形目','鹈形目','雁形目','鸮形目','佛法僧目'].includes(b.order)).length : guideData.filter(b=>b.order===s.key).length;
-                    const got = s.key==='其他' ? guideData.filter(b=>!['雀形目','鹈形目','雁形目','鸮形目','佛法僧目'].includes(b.order)&&b.got).length : guideData.filter(b=>b.order===s.key&&b.got).length;
-                    return `<div class="shelf-card" onclick="openShelf('order','${s.key}','${s.name}')">
-                        <div class="shelf-icon" style="background:${s.iconBg}">${s.icon}</div>
-                        <div class="shelf-info"><div class="shelf-name">${s.desc||s.name}</div><div class="shelf-meta">${got}/${total} 种</div></div>
-                    </div>`;
-                }).join('')}
+        <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+            <div onclick="quizCurrent=Math.max(0,quizCurrent-1);quizAnswered=false;renderQuiz()" style="padding:8px 20px;background:#f5f5f5;border-radius:20px;font-size:12px;cursor:pointer">← 上一题</div>
+            <div onclick="quizCurrent=(quizCurrent+1)%quizData.length;quizAnswered=false;renderQuiz()" style="padding:8px 20px;background:#f5f5f5;border-radius:20px;font-size:12px;cursor:pointer">下一题 →</div>
+        </div>
+    `;
+}
+
+function checkQuiz(selected, answer, el) {
+    if(quizAnswered) return;
+    quizAnswered = true;
+    // Reveal image
+    document.getElementById('quizImg').className = 'quiz-img';
+    // Mark options
+    document.querySelectorAll('.quiz-opt').forEach(opt => {
+        if(opt.textContent === answer) opt.classList.add('correct');
+        else if(opt === el && selected !== answer) opt.classList.add('wrong');
+        opt.style.pointerEvents = 'none';
+    });
+    // Show fun fact
+    const bird = guideData.find(b=>b.name===answer);
+    if(bird) {
+        document.getElementById('quizHint').innerHTML = `✅ ${answer}（${bird.eng}）· ${bird.order} · ${bird.family} · ${bird.season}`;
+    }
+}
+
+// 表情包征集期数（限时主题）
+const memeSeasons = [
+    { id:1, theme:'职场鸟生', desc:'用鸟的照片表达你的打工日常', deadline:'2026-07-14', status:'active' },
+    { id:2, theme:'社恐 vs 社牛', desc:'内向的鸟和外向的鸟，你是哪种？', deadline:'2026-07-28', status:'upcoming' },
+    { id:3, theme:'干饭鸟', desc:'鸟吃东西的沙雕瞬间', deadline:'2026-08-11', status:'upcoming' },
+];
+
+function getMemeCountdown(deadline) {
+    const now = new Date();
+    const end = new Date(deadline + 'T23:59:59');
+    const diff = end - now;
+    if(diff <= 0) return '已结束';
+    const days = Math.floor(diff / 86400000);
+    if(days > 0) return `剩 ${days} 天`;
+    const hours = Math.floor(diff / 3600000);
+    return `剩 ${hours} 小时`;
+}
+
+// ===== 知识答题 =====
+const knowledgeQuestions = [
+    { id:1, q:'翠鸟羽毛的蓝色来自？', options:['A. 蓝色色素','B. 结构色（光的干涉）','C. 食物中的矿物质','D. 基因突变'], answer:'B', explain:'翠鸟的蓝色是结构色，由羽毛微观结构对光的干涉产生，不含蓝色色素' },
+    { id:2, q:'以下哪种鸟能在镜子中认出自己？', options:['A. 麻雀','B. 鸽子','C. 喜鹊','D. 燕子'], answer:'C', explain:'喜鹊是极少数通过镜子测试的非哺乳动物之一，说明有一定自我意识' },
+    { id:3, q:'啄木鸟为什么不会脑震荡？', options:['A. 脑子很小','B. 头骨有海绵状结构缓冲','C. 它敲得不用力','D. 戴了自然头盔'], answer:'B', explain:'啄木鸟的头骨有特殊海绵骨质和舌骨环绕大脑，能吸收99.7%的冲击力' },
+    { id:4, q:'鸳鸯真的一生一世只有一个伴侣吗？', options:['A. 是的，忠贞不渝','B. 不是，每年换配偶','C. 只有雄鸟会换','D. 看心情'], answer:'B', explain:'鸳鸯实际每年都会重新择偶配对，并非人们想象的终身伴侣' },
+    { id:5, q:'猫头鹰转头最多能转多少度？', options:['A. 90度','B. 180度','C. 270度','D. 360度'], answer:'C', explain:'猫头鹰颈椎有14节（人只有7节），且有特殊血管结构防止脑供血中断，最多转270度' },
+    { id:6, q:'以下哪种鸟是"留鸟"（全年不迁徙）？', options:['A. 家燕','B. 黄眉柳莺','C. 麻雀','D. 北红尾鸲'], answer:'C', explain:'麻雀是典型留鸟，全年不迁徙。家燕和黄眉柳莺是候鸟，北红尾鸲在北京是旅鸟' },
+    { id:7, q:'鸬鹚捕鱼后为什么要展翅晾干？', options:['A. 跳胜利舞','B. 羽毛不防水，需要晒干','C. 吸引异性','D. 调节体温'], answer:'B', explain:'鸬鹚为了减少潜水浮力，牺牲了羽毛防水性，所以捕鱼后必须展翅晾干' },
+    { id:8, q:'全球鸟类约有多少种？', options:['A. 约3000种','B. 约5000种','C. 约10000种','D. 约20000种'], answer:'C', explain:'目前全球已知鸟类约10,000-11,000种，中国有约1500种，北京可观察到约500种' },
+    { id:9, q:'苍鹭捕鱼时为什么能一动不动站很久？', options:['A. 睡着了','B. 节省体力的"伏击策略"','C. 腿抽筋了','D. 在晒太阳'], answer:'B', explain:'站立等待是苍鹭的高效觅食策略，比主动追逐猎物消耗更少能量，成功率更高' },
+    { id:10, q:'哪种鸟的飞行完全无声？', options:['A. 麻雀','B. 猫头鹰','C. 喜鹊','D. 鸽子'], answer:'B', explain:'猫头鹰羽毛边缘有锯齿状结构，能消除飞行中的空气湍流声，实现无声飞行' },
+];
+
+let knowledgeCurrent = 0;
+let knowledgeAnswered = false;
+let knowledgeScore = parseInt(localStorage.getItem('knowledgeScore') || '0');
+
+function renderKnowledgeQuiz() {
+    const q = knowledgeQuestions[knowledgeCurrent % knowledgeQuestions.length];
+    const total = knowledgeQuestions.length;
+    document.getElementById('magContent').innerHTML = `
+        <div style="padding:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <span style="font-size:12px;font-weight:600;color:var(--text-secondary)">第 ${knowledgeCurrent+1}/${total} 题</span>
+                <span style="font-size:11px;color:var(--primary);background:var(--primary-bg);padding:4px 10px;border-radius:12px;font-weight:600">🏆 ${knowledgeScore} 分</span>
             </div>
-        </div>
-        <div class="shelf-section">
-            <div class="shelf-section-title">🗓️ 按季节</div>
-            <div class="shelf-grid">
-                ${guideShelves.bySeason.map(s=>{
-                    const total = guideData.filter(b=>b.season===s.key).length;
-                    const got = guideData.filter(b=>b.season===s.key&&b.got).length;
-                    return `<div class="shelf-card" onclick="openShelf('season','${s.key}','${s.name}')">
-                        <div class="shelf-icon" style="background:${s.iconBg}">${s.icon}</div>
-                        <div class="shelf-info"><div class="shelf-name">${s.name}</div><div class="shelf-meta">${got}/${total} · ${s.desc}</div></div>
-                    </div>`;
-                }).join('')}
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06)">
+                <div style="font-size:15px;font-weight:700;color:var(--text-primary);line-height:1.6;margin-bottom:16px">${q.q}</div>
+                <div id="knowledgeOpts">
+                    ${q.options.map(opt => {
+                        const letter = opt.charAt(0);
+                        return `<div class="knowledge-opt" id="kopt_${letter}" onclick="checkKnowledge('${letter}','${q.answer}',this)" style="display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:8px;background:#f9fafb;border-radius:12px;border:1.5px solid #eee;cursor:pointer;transition:all 0.2s">
+                            <div style="width:28px;height:28px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${letter}</div>
+                            <div style="font-size:13px;color:var(--text-primary);line-height:1.4">${opt.slice(3)}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div id="knowledgeExplain" style="display:none;margin-top:12px;padding:12px;background:var(--primary-bg);border-radius:12px;font-size:12px;color:var(--primary);line-height:1.6">
+                    💡 ${q.explain}
+                </div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:16px">
+                <div onclick="knowledgeCurrent=Math.max(0,knowledgeCurrent-1);knowledgeAnswered=false;renderKnowledgeQuiz()" style="padding:10px 22px;background:#fff;border-radius:20px;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.06);font-weight:500">← 上一题</div>
+                <div onclick="knowledgeCurrent=(knowledgeCurrent+1)%knowledgeQuestions.length;knowledgeAnswered=false;renderKnowledgeQuiz()" style="padding:10px 22px;background:#fff;border-radius:20px;font-size:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.06);font-weight:500">下一题 →</div>
             </div>
         </div>
     `;
-    document.getElementById('guideShelves').innerHTML = html;
 }
 
-let curShelfType = '', curShelfKey = '';
-
-function openShelf(type, key, title) {
-    curShelfType = type; curShelfKey = key;
-    document.getElementById('guideInnerTitle').textContent = title;
-    curGF = 'all';
-    renderGF();
-    renderGuide();
-    document.getElementById('guideInner').classList.add('show');
-}
-
-function getShelfBirds() {
-    if(curShelfType==='park') return guideData.filter(b=>b.park===curShelfKey);
-    if(curShelfType==='season') return guideData.filter(b=>b.season===curShelfKey);
-    if(curShelfType==='order') {
-        if(curShelfKey==='其他') return guideData.filter(b=>!['雀形目','鹈形目','雁形目','鸮形目','佛法僧目'].includes(b.order));
-        return guideData.filter(b=>b.order===curShelfKey);
+function checkKnowledge(selected, answer, el) {
+    if(knowledgeAnswered) return;
+    knowledgeAnswered = true;
+    const correct = selected === answer;
+    if(correct) {
+        knowledgeScore += 10;
+        localStorage.setItem('knowledgeScore', knowledgeScore);
     }
-    return guideData;
+    // 标记选项
+    document.querySelectorAll('.knowledge-opt').forEach(opt => {
+        const letter = opt.id.replace('kopt_','');
+        if(letter === answer) {
+            opt.style.background = '#E8F5E9';
+            opt.style.borderColor = '#66BB6A';
+            opt.style.transform = 'scale(1.02)';
+            opt.querySelector('div').style.background = '#66BB6A';
+            opt.querySelector('div').style.color = '#fff';
+        } else if(opt === el && !correct) {
+            opt.style.background = '#FFEBEE';
+            opt.style.borderColor = '#EF5350';
+            opt.style.animation = 'shakeWrong 0.4s ease';
+            opt.querySelector('div').style.background = '#EF5350';
+            opt.querySelector('div').style.color = '#fff';
+        }
+        opt.style.cursor = 'default';
+    });
+    // 答对撒花
+    if(correct) {
+        const colors = ['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3','#F38181'];
+        const wrap = document.createElement('div');
+        wrap.className = 'confetti-wrap';
+        el.style.position = 'relative';
+        el.appendChild(wrap);
+        for(let i=0; i<8; i++) {
+            const s = document.createElement('span');
+            s.style.background = colors[i%colors.length];
+            s.style.left = (Math.random()*40-20)+'px';
+            s.style.animationDelay = (Math.random()*0.2)+'s';
+            wrap.appendChild(s);
+        }
+        setTimeout(()=>wrap.remove(), 1000);
+    }
+    // 显示解释
+    document.getElementById('knowledgeExplain').style.display = 'block';
+    if(correct) showToast('✅ 答对了！+10分');
+    else showToast('❌ 答错了，正确答案是 ' + answer);
 }
 
-function renderGF() {
-    document.getElementById('gFilter').innerHTML = [{k:'all',l:'全部'},{k:'collected',l:'已收集'},{k:'uncollected',l:'未收集'}].map(f=>
-        `<div class="gf-btn ${curGF===f.k?'active':''}" onclick="curGF='${f.k}';renderGF();renderGuide()">${f.l}</div>`
-    ).join('');
-}
-function renderGuide() {
-    let list = getShelfBirds();
-    if(curGF==='collected') list=list.filter(b=>b.got);
-    if(curGF==='uncollected') list=list.filter(b=>!b.got);
-    document.getElementById('gGrid').innerHTML = list.map(b=>{
-        const refUrl = b.got ? birdRefPhotos[b.name] : null;
-        const imgStyle = refUrl ? '' : (b.got ? `background:${b.color}` : '');
-        const imgInner = refUrl ? `<img src="${refUrl}" style="width:100%;height:100%;object-fit:cover">` : ((!refUrl && b.got) ? b.emoji : '');
-        return `
-        <div class="gcard" onclick="${b.got?`showBird(${b.id})`:`showUnknownBird(${b.id})`}">
-            <div class="gcard-img ${b.got?'y':'n'}" style="${imgStyle}">
-                ${imgInner}
+function renderMemes() {
+    const activeSeason = memeSeasons.find(s => s.status === 'active');
+    const countdown = activeSeason ? getMemeCountdown(activeSeason.deadline) : '';
+
+    document.getElementById('magContent').innerHTML = `
+        ${activeSeason ? `
+        <div style="background:linear-gradient(135deg,#FFF3E0,#FFF8E1);padding:14px;margin-bottom:12px;border-radius:10px;border:1px solid #FFE0B2">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div style="font-size:13px;font-weight:700;color:#E65100">🔥 本期主题：${activeSeason.theme}</div>
+                <div style="font-size:10px;color:#BF360C;font-weight:600;background:#FFCCBC;padding:2px 8px;border-radius:10px">${countdown}</div>
             </div>
-            <div class="gcard-info"><div class="gcard-name ${b.got?'':'unk'}">${b.got?b.name:'???'}</div><div class="gcard-star">${'★'.repeat(b.star)}${'☆'.repeat(5-b.star)}</div></div>
-        </div>`;
-    }).join('') || '<div style="text-align:center;padding:30px;color:var(--text-hint);font-size:12px">暂无数据</div>';
+            <div style="font-size:11px;color:#5D4037;margin-bottom:8px">${activeSeason.desc}</div>
+            <div style="font-size:9px;color:var(--text-hint)">截止 ${activeSeason.deadline} · 第 ${activeSeason.id} 期征集</div>
+        </div>` : ''}
+        <div class="meme-upload" onclick="showToast('表情包上传功能开发中~')">
+            <div style="font-size:24px;margin-bottom:6px">📸</div>
+            <div style="font-size:12px;color:var(--text-secondary)">上传你的参赛作品</div>
+            <div style="font-size:10px;color:var(--text-hint);margin-top:4px">拍到鸟的搞怪瞬间？配上文字投稿本期主题</div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+            <span>往期精选</span>
+            <span style="font-size:9px;color:var(--text-hint);font-weight:400">${memeData.length} 张</span>
+        </div>
+        <div class="meme-grid">
+            ${memeData.map(m => `
+                <div class="meme-item">
+                    <img src="${m.img}" loading="lazy">
+                    <div style="padding:8px;font-size:11px">
+                        <div style="font-weight:600;margin-bottom:2px">${m.bird}</div>
+                        <div style="color:var(--text-secondary);font-size:10px">"${m.caption}"</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        ${memeSeasons.filter(s=>s.status==='upcoming').length ? `
+        <div style="margin-top:16px;padding:12px;background:#f9f9f9;border-radius:8px">
+            <div style="font-size:10px;font-weight:600;color:var(--text-hint);margin-bottom:8px">预告</div>
+            ${memeSeasons.filter(s=>s.status==='upcoming').map(s => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0">
+                    <span style="font-size:11px;color:var(--text-primary)">第${s.id}期：${s.theme}</span>
+                    <span style="font-size:9px;color:var(--text-hint)">${s.deadline} 开始</span>
+                </div>
+            `).join('')}
+        </div>` : ''}
+    `;
 }
 // ===== 百度动物识别 API =====
 const BAIDU_API_KEY = 'ZYk6Id4MX32HsgB1iEPGiFeM';
@@ -5244,7 +6289,7 @@ function showWildBirdInfo(birdName) {
         <div class="modal-bd">
             <div class="modal-nm">${birdName}</div>
             <div class="modal-sci" style="color:var(--primary)">图鉴中暂未收录此鸟种</div>
-            <div style="font-size:11px;color:var(--text-hint);margin-top:8px">发现新鸟种！去公园找到它并拍照记录，即可解锁图鉴。</div>
+            <div style="font-size:11px;color:var(--text-hint);margin-top:8px">发现新鸟种！去公园找到它并记录观察，即可解锁图鉴。</div>
         </div>
         <div id="birdWikiArea"></div>
         <button class="bird-wiki-btn" onclick="loadBirdWiki('${birdName}')">📚 查看物种百科</button>
@@ -5297,34 +6342,16 @@ async function fetchBirdWiki(birdName) {
     }
 }
 
+function saveAnatomyNote(birdName, partName, note) {
+    const key = 'birdAnatomy_' + birdName;
+    const data = JSON.parse(localStorage.getItem(key) || '{}');
+    data[partName] = note;
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
 function showBird(id) {
-    const b=guideData.find(x=>x.id===id);
-    const refUrl = birdRefPhotos[b.name];
-    const imgStyle = refUrl ? '' : `background:${b.color}`;
-    const imgInner = refUrl ? `<img src="${refUrl}" style="width:100%;height:100%;object-fit:cover">` : b.emoji;
-    document.getElementById('birdBox').innerHTML = `
-        <div class="modal-img" style="${imgStyle}">${imgInner}</div>
-        <div class="modal-bd">
-            <div class="modal-nm">${b.name}</div>
-            <div class="modal-sci">${b.eng} · ${b.sci}</div>
-            <div class="modal-rows">
-                <div class="modal-r"><span class="k">目/科</span><span class="v">${b.order} · ${b.family}</span></div>
-                <div class="modal-r"><span class="k">居留型</span><span class="v">${b.season}</span></div>
-                <div class="modal-r"><span class="k">稀有度</span><span class="v">${'★'.repeat(b.star)}${'☆'.repeat(5-b.star)}</span></div>
-                <div class="modal-r"><span class="k">首次发现</span><span class="v">${b.first}</span></div>
-                <div class="modal-r"><span class="k">发现地点</span><span class="v" style="color:var(--primary);cursor:pointer;text-decoration:underline" onclick="jumpToSpot('${b.spot}')">${b.park} · ${b.spot}</span></div>
-                <div class="modal-r"><span class="k">观测次数</span><span class="v">${b.count} 次</span></div>
-            </div>
-        </div>
-        <div id="birdWikiArea"></div>
-        <button class="bird-wiki-btn" onclick="loadBirdWiki('${b.name}')">📚 查看物种百科</button>
-        <button class="modal-cls" onclick="hideM('birdModal')">关闭</button>
-    `;
-    showM('birdModal');
-    // 如果缓存中已有，直接显示
-    if(birdWikiCache[b.name]) {
-        renderBirdWiki(b.name);
-    }
+    switchTab('guide');
+    setTimeout(() => openBirdPage(id), 100);
 }
 
 async function loadBirdWiki(birdName) {
@@ -5376,8 +6403,8 @@ function showUnknownBird(id) {
                 <div class="modal-r"><span class="k">稀有度</span><span class="v">${'★'.repeat(b.star)}${'☆'.repeat(5-b.star)}</span></div>
                 <div class="modal-r"><span class="k">可能出没</span><span class="v" style="color:var(--primary);cursor:pointer;text-decoration:underline" onclick="jumpToPark('${b.park}')">${b.park} 📍 点击前往</span></div>
             </div>
-            <div style="margin-top:12px;padding:10px;background:#F5EFE0;border-radius:0;font-size:11px;color:#8B6914">
-                💡 提示：前往 ${b.park} 探索，拍照上传即可解锁此鸟种！
+            <div style="margin-top:12px;padding:10px;background:#F5EFE0;border-radius:12px;font-size:11px;color:#8B6914">
+                💡 提示：前往 ${b.park} 探索，观察记录即可解锁此鸟种！
             </div>
         </div>
         <button class="modal-cls" onclick="hideM('birdModal')">关闭</button>
@@ -5395,15 +6422,7 @@ function jumpToSpot(spotName) {
 }
 
 function jumpToPhotoWall(birdName) {
-    // 关闭地图观鸟点面板，切到社区照片墙（按鸟种筛选）
-    document.getElementById('spotOv').classList.remove('show');
-    switchTab('community');
-    setTimeout(() => {
-        curCommTab = 'nearby';
-        curPWBird = birdName;
-        renderCommTabs();
-        renderPhotoWall();
-    }, 100);
+    // community removed - no-op
 }
 
 function jumpToPark(parkName) {
@@ -5418,13 +6437,134 @@ function jumpToPark(parkName) {
 
 // ===== BIRD MAIL =====
 function renderNestTabs() {
-    const tabs = [{key:'mailbox',label:'信箱'},{key:'contacts',label:'通讯录'}];
+    const tabs = [{key:'diary',label:'观鸟日记'},{key:'mailbox',label:'信箱'},{key:'contacts',label:'通讯录'}];
     document.getElementById('nestTabs').innerHTML = tabs.map(t=>`<div class="loc-tab ${curNestTab===t.key?'active':''}" onclick="curNestTab='${t.key}';renderNestTabs();renderNestContent()">${t.label}</div>`).join('');
 }
 function renderNestContent() {
     const el = document.getElementById('nestContent');
-    if(curNestTab==='mailbox') renderMailbox(el);
+    if(curNestTab==='diary') renderDiary(el);
+    else if(curNestTab==='mailbox') renderMailbox(el);
     else renderContacts(el);
+}
+
+// 观鸟日记：把所有 birdObservations 聚合成时间线，鸟可以评论
+const diaryComments = JSON.parse(localStorage.getItem('diaryComments') || '{}');
+
+function getAllDiaryEntries() {
+    const entries = [];
+    Object.entries(birdObservations).forEach(([birdName, obs]) => {
+        obs.forEach((o, idx) => {
+            entries.push({bird: birdName, date: o.date, spot: o.spot, note: o.note, key: birdName+'_'+idx});
+        });
+    });
+    // 也加入用户上传的记录
+    const userUploads = JSON.parse(localStorage.getItem('userDiaryUploads') || '[]');
+    userUploads.forEach(u => entries.push(u));
+    // 按日期倒序
+    entries.sort((a,b) => b.date.localeCompare(a.date));
+    return entries;
+}
+
+function getBirdComment(birdName, entryKey) {
+    // 根据鸟名和日记条目生成一条评论
+    const commentPool = {
+        '翠鸟': ['那天我也在！不过你没看到我😤','这个位置是我的领地哦','下次早点来，早上鱼多'],
+        '苍鹭': ['…站着听你说。','你观察得很仔细。继续保持。','那天风很大，我差点没站稳。'],
+        '白鹭': ['我们那天有5只不是3只，你数错了~','谢谢不打扰我们觅食','那片水域鱼确实多'],
+        '鸳鸯': ['别偷拍！我没化妆！','其实我们不是一辈子的…每年换的','天境湖是我家，欢迎参观'],
+        '灰喜鹊': ['开会开会！讨论一下这条日记！','你写得还行，继续加油','下次带点花生来'],
+        '戴胜': ['我的皇冠好看吧？','那天虫子特别肥，嘿嘿','你走了之后我又翻了半小时土'],
+        '大斑啄木鸟': ['吵？那是我在工作！','你知道我一天要敲多少下吗？12000下！','那棵树里虫子超多的'],
+        '喜鹊': ['我的巢可结实了！','那个斑鸠又来偷我巢了气死','你下次来记得仰头看树顶'],
+        '乌鸫': ['我的歌声还可以吧？','黎明时分来最好，我嗓子最亮','不是模仿，那都是原创'],
+        '猫头鹰': ['别、来、了。白天让我睡觉。','…','你看到我算你运气好'],
+        '麻雀': ['那个...你...你下次还来吗...','我们沙浴很正常啦不要大惊小怪','我其实就在你旁边但你没注意到'],
+    };
+    const pool = commentPool[birdName] || ['今天天气不错呢', '我看到你了哦', '下次还来玩~'];
+    // 用entryKey做seed选一条
+    const hash = entryKey.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+    return pool[hash % pool.length];
+}
+
+function getCommentBird(entryBirdName, entryKey) {
+    // 评论者就是被观测的鸟自己
+    return entryBirdName;
+}
+
+function renderDiary(el) {
+    const entries = getAllDiaryEntries();
+    if(!entries.length) {
+        el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-hint);font-size:12px">还没有观鸟日记，点击右下角 ＋ 上传记录吧~</div>';
+        return;
+    }
+
+    el.innerHTML = `<div style="padding:14px 14px 14px 24px;position:relative">
+        <div style="font-size:10px;color:var(--text-hint);margin-bottom:12px">你的观鸟时间线 · 鸟朋友会来评论哦</div>
+        <!-- 时间轴线 -->
+        <div style="position:absolute;left:18px;top:38px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--primary-light),var(--primary-bg));border-radius:1px"></div>
+        ${entries.map((entry, idx) => {
+            const b = guideData.find(x=>x.name===entry.bird);
+            const emoji = b ? b.emoji : '🐦';
+            const photoUrl = (idx % 2 === 0) ? getBirdPhoto(entry.bird, idx) : '';
+            const commentBird = getCommentBird(entry.bird, entry.key);
+            const commentB = guideData.find(x=>x.name===commentBird);
+            const commentEmoji = commentB ? commentB.emoji : '🐦';
+            const comment = getBirdComment(commentBird, entry.key);
+            const userReply = diaryComments[entry.key] || '';
+
+            return `<div style="position:relative;margin-bottom:16px;padding-left:20px;animation:cardFadeIn 0.4s ease backwards;animation-delay:${idx*0.08}s">
+                <!-- 时间轴圆点 -->
+                <div style="position:absolute;left:-8px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2.5px solid #fff;box-shadow:0 0 0 2px var(--primary-bg)"></div>
+                <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05)">
+                    ${photoUrl ? `<img src="${photoUrl}" style="width:100%;height:160px;object-fit:cover;display:block" loading="lazy">` : ''}
+                    <div style="padding:14px">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                            </div>
+                            <div style="flex:1">
+                                <div style="font-size:11px;font-weight:700">我的观鸟记录</div>
+                                <div style="font-size:9px;color:var(--text-hint)">${entry.date} · ${entry.spot}</div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:var(--text-primary);line-height:1.6;margin-bottom:10px">
+                            观测到 <span style="font-weight:700;color:var(--primary)">${entry.bird}</span>：${entry.note}
+                        </div>
+                        <!-- 鸟的评论气泡 -->
+                        <div style="position:relative;background:#f5f9f7;padding:12px;border-radius:12px;margin-top:8px">
+                            <div style="position:absolute;top:-6px;left:16px;width:12px;height:12px;background:#f5f9f7;transform:rotate(45deg);border-radius:2px"></div>
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                                <span style="font-size:16px">${commentEmoji}</span>
+                                <span style="font-size:10px;font-weight:700;color:var(--primary)">${commentBird}</span>
+                                <span style="font-size:9px;color:var(--text-hint)">评论了</span>
+                            </div>
+                            <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">${comment}</div>
+                            ${userReply ? `<div style="margin-top:6px;font-size:10px;color:var(--text-hint);border-top:1px solid #eee;padding-top:6px">↩ 我：${userReply}</div>` : ''}
+                            <div style="margin-top:8px;display:flex;gap:10px">
+                                <span style="font-size:10px;color:var(--primary);cursor:pointer;font-weight:500" onclick="replyDiaryComment('${entry.key}')">回复</span>
+                                <span style="font-size:10px;color:var(--text-hint);cursor:pointer" onclick="openChat('${commentB?getCommentBirdChatId(commentBird):'kingfisher'}')">私聊它</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('')}
+    </div>`;
+}
+
+function getCommentBirdChatId(birdName) {
+    const map = {'翠鸟':'kingfisher','苍鹭':'heron','喜鹊':'magpie','猫头鹰':'owl','麻雀':'sparrow'};
+    return map[birdName] || 'kingfisher';
+}
+
+function replyDiaryComment(entryKey) {
+    const reply = prompt('回复这只鸟：');
+    if(reply && reply.trim()) {
+        diaryComments[entryKey] = reply.trim();
+        localStorage.setItem('diaryComments', JSON.stringify(diaryComments));
+        renderNestContent();
+        showToast('已回复~');
+    }
 }
 function renderMailbox(el) {
     const unreadCount = birdPostcards.filter(p=>!p.read).length;
@@ -5539,20 +6679,9 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', ()=>{
     initMap();
-    renderCommTabs(); renderCommunityContent();
-    renderShelves();
+    initGraph();
     renderNestTabs(); renderNestContent();
-    // type pills
-    const typeKeys = ['record','rally','charity','discuss'];
-    const typeLabels = ['📷 记录','📢 召集','🏠 公益','💬 讨论'];
-    document.getElementById('typePills').innerHTML = typeLabels.map((t,i)=>
-        `<span class="loc-tab ${i===0?'active':''}" onclick="this.parentElement.querySelectorAll('.loc-tab').forEach(x=>x.classList.remove('active'));this.classList.add('active');selectedPostType='${typeKeys[i]}'">${t}</span>`
-    ).join('');
-    // area pills for post
-    const postAreas = ['奥森公园','圆明园','天坛公园','颐和园'];
-    document.getElementById('areaPills').innerHTML = postAreas.map((a,i)=>
-        `<span class="loc-tab ${i===0?'active':''}" onclick="this.parentElement.querySelectorAll('.loc-tab').forEach(x=>x.classList.remove('active'));this.classList.add('active');selectedPostArea='${a}'">${a}</span>`
-    ).join('');
+    renderMagTabs(); renderMagContent();
 });
 </script>
 </body>
