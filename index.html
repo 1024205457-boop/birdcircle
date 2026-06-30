@@ -660,6 +660,14 @@
         </section>
 
 
+        <!-- ===== TAB 3: 社区 ===== -->
+        <section class="tab-page" id="page-comm" style="display:flex;flex-direction:column">
+            <div class="page-header"><h1>鸟有社区</h1><div class="sub">发现与分享</div></div>
+            <div class="loc-tabs" id="commTabs"></div>
+            <div id="calendarWrap" style="display:none"></div>
+            <div style="flex:1;overflow-y:auto" id="postFeed"></div>
+        </section>
+
         <!-- ===== TAB 4: BIRD MAIL / AI CHAT ===== -->
         <section class="tab-page" id="page-nest">
             <div class="page-header"><h1>鸟有来信</h1><div class="sub">BIRD MAIL</div></div>
@@ -809,6 +817,7 @@
     <nav class="tab-bar">
         <div class="tab-item active" onclick="switchTab('map')"><span class="ti">🗺️</span><span class="tl">寻鸟</span></div>
         <div class="tab-item" onclick="switchTab('guide')"><span class="ti">📖</span><span class="tl">图鉴</span></div>
+        <div class="tab-item" onclick="switchTab('comm')"><span class="ti">📸</span><span class="tl">社区</span></div>
         <div class="tab-item" onclick="switchTab('nest')"><span class="ti">✉️</span><span class="tl">来信</span></div>
     </nav>
     <div class="toast" id="toast"></div>
@@ -1441,9 +1450,10 @@ function switchTab(t) {
     document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-'+t).classList.add('active');
     document.querySelectorAll('.tab-item').forEach((el,i)=>{
-        el.classList.toggle('active', ['map','guide','nest','mag'][i]===t);
+        el.classList.toggle('active', ['map','guide','comm','nest'][i]===t);
     });
     if(t === 'guide') setTimeout(initGraph, 50);
+    if(t === 'comm') { renderCommTabs(); renderCommunityContent(); }
 }
 
 // ===== MAP: SVG Vector Map + Coordinate Mapping =====
