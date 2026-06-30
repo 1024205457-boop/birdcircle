@@ -141,13 +141,8 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1); white-space: nowrap;
             backdrop-filter: blur(4px);
         }
-        .pin-hot { position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background: #FF6B6B; border-radius: 50%; border: 2px solid white; }
-        .pin-pulse {
-            position: absolute; width: 32px; height: 32px; border-radius: 50%;
-            background: var(--primary); opacity: 0;
-            animation: mapPulse 2s ease-out infinite;
-        }
-        @keyframes mapPulse { 0%{transform:scale(0.8);opacity:0.5} 100%{transform:scale(2.2);opacity:0} }
+        .pin-hot { display: none; }
+        .pin-pulse { display: none; }
 
         /* Route legend */
         .map-legend {
@@ -1185,6 +1180,12 @@ const birdSpots = [
     { id:10, name:"南园东侧竹林", area:"南园", lat:40.000, lng:116.397, birds:[], desc:"待发现 — 竹林深处可能有惊喜", hot:false, empty:true, x:420, y:640 },
     { id:11, name:"北园湖东草地", area:"北园", lat:40.016, lng:116.397, birds:[], desc:"待发现 — 开阔地带适合观察", hot:false, empty:true, x:450, y:270 },
     { id:12, name:"连接区西侧", area:"连接区", lat:40.011, lng:116.383, birds:[], desc:"待发现 — 灌木丛中或有小型鸟类", hot:false, empty:true, x:130, y:370 },
+    // 花草观赏点
+    { id:101, name:"荷花池", area:"南园", lat:40.004, lng:116.390, birds:[], type:'flora', flora:["荷花"], desc:"6-8月荷花盛开，清晨花瓣舒展最美", icon:"🪷", iconColor:"#E91E63", x:290, y:540 },
+    { id:102, name:"北园花田", area:"北园", lat:40.016, lng:116.384, birds:[], type:'flora', flora:["月季","鸢尾"], desc:"月季5-10月持续开放，鸢尾4-5月蓝紫一片", icon:"🌹", iconColor:"#E91E63", x:150, y:260 },
+    { id:103, name:"银杏大道", area:"连接区", lat:40.009, lng:116.391, birds:[], type:'flora', flora:["银杏"], desc:"10-11月金黄落叶，秋季必来打卡", icon:"🍂", iconColor:"#FF8F00", x:300, y:400 },
+    { id:104, name:"玉兰坡", area:"北园", lat:40.018, lng:116.387, birds:[], type:'flora', flora:["玉兰"], desc:"3-4月先花后叶，白色花朵如玉盏", icon:"🤍", iconColor:"#9E9E9E", x:230, y:210 },
+    { id:105, name:"海棠径", area:"南园", lat:40.003, lng:116.387, birds:[], type:'flora', flora:["海棠"], desc:"4月花期短暂但极美，粉色花瓣飘落如雨", icon:"🌸", iconColor:"#EC407A", x:200, y:570 },
 ];
 
 // Bird sighting data - each spot has bird records with taxonomy & multiple sightings
@@ -4168,19 +4169,22 @@ function initMap() {
                 <div class="pin-label" style="color:var(--text-hint)">${s.name}</div>
             `;
             pin.onclick = () => openEmptySpot(s);
+        } else if(s.type === 'flora') {
+            pin.innerHTML = `
+                <div class="pin-dot" style="background:${s.iconColor||'#E91E63'}">
+                    <span style="font-size:14px">${s.icon || '🌸'}</span>
+                </div>
+                <div class="pin-label" style="color:#E91E63">${s.name}</div>
+            `;
+            pin.onclick = () => openFloraSpot(s);
         } else {
             const hasSensitiveBird = s.birds.some(name => { const g = guideData.find(d=>d.name===name); return g && g.sensitive; });
-            const maxStar = Math.max(...s.birds.map(name => { const g = guideData.find(d=>d.name===name); return g ? g.star : 0; }), 0);
-            const isRare = maxStar >= 4;
             const dotColor = s.iconColor || 'var(--primary)';
             pin.innerHTML = `
-                <div class="pin-dot" style="background:${dotColor};color:${dotColor}${isRare?';box-shadow:0 0 8px 3px rgba(255,193,7,0.6)':''}">
-                    <div class="pin-pulse" style="background:${dotColor}"></div>
-                    ${s.hot ? '<div class="pin-hot"></div>' : ''}
-                    ${isRare ? '<div style="position:absolute;top:-6px;right:-6px;font-size:9px">⭐</div>' : ''}
+                <div class="pin-dot" style="background:${dotColor}">
                     <span style="font-size:14px">${s.icon || '🐦'}</span>
                 </div>
-                <div class="pin-label">${s.name}${hasSensitiveBird?' 🔒':''}${isRare?' ★稀有':''}</div>
+                <div class="pin-label">${s.name}${hasSensitiveBird?' 🔒':''}</div>
             `;
             pin.onclick = () => openSpot(s.id);
         }
@@ -4474,6 +4478,29 @@ function showSeasonBirds() {
     document.getElementById('spotTitle').textContent = '🗓️ 当季观鸟指南';
     document.getElementById('spotLoc').textContent = seasonLabel;
     document.getElementById('spotMeta').innerHTML = `<div style="font-size:11px;color:var(--text-secondary)">留鸟全年可见 · ${season}当季可见</div>`;
+    document.getElementById('spotPanel').innerHTML = html;
+    document.getElementById('spotOv').classList.add('show');
+}
+
+function openFloraSpot(s) {
+    document.getElementById('spotTitle').textContent = '🌸 ' + s.name;
+    document.getElementById('spotLoc').textContent = '📍 ' + s.area;
+    document.getElementById('spotMeta').innerHTML = `<div style="font-size:11px;color:var(--text-secondary)">${s.desc}</div>`;
+    let html = '';
+    if(s.flora && s.flora.length) {
+        html += s.flora.map(name => {
+            const f = floraData.find(x=>x.name===name);
+            if(!f) return '';
+            return `<div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px">
+                <div style="width:44px;height:44px;background:linear-gradient(135deg,${f.color},#fff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${f.emoji}</div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:700">${f.name}</div>
+                    <div style="font-size:9px;color:var(--text-hint);font-style:italic">${f.eng} · ${f.sci}</div>
+                    <div style="font-size:10px;color:var(--text-secondary);margin-top:2px">${f.family} · 花期 ${f.season}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
     document.getElementById('spotPanel').innerHTML = html;
     document.getElementById('spotOv').classList.add('show');
 }
