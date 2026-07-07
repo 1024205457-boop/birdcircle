@@ -1456,11 +1456,9 @@ function matchTimeFilter(timeStr, filter) {
 // ===== AI BIRD IDENTIFICATION (integrated into Import) =====
 var importSelectedImages = [];
 var aiAccessToken = '';
-var BAIDU_AI_CONFIG = {
-  clientId: 'ZYk6Id4MX32HsgB1iEPGiFeM',
-  clientSecret: '8UHycT1wzdCCbtp6nb6E2f5o9hv2TBYo',
-  tokenUrl: 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials',
-  classifyUrl: 'https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general'
+var AI_CONFIG = {
+  tokenUrl: '/api/baidu/token',
+  classifyUrl: '/api/baidu/animal'
 };
 
 function handleImportSelect(e) {
@@ -1512,7 +1510,7 @@ async function startImportIdentify() {
 
   try {
     if (!aiAccessToken) {
-      var tokenRes = await fetch(BAIDU_AI_CONFIG.tokenUrl + '&client_id=' + BAIDU_AI_CONFIG.clientId + '&client_secret=' + BAIDU_AI_CONFIG.clientSecret);
+      var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
       if (tokenRes.ok) {
         var tokenData = await tokenRes.json();
         if (tokenData.access_token) aiAccessToken = tokenData.access_token;
@@ -1520,8 +1518,8 @@ async function startImportIdentify() {
       } else throw new Error('token fetch failed');
     }
     var base64Data = img.split(',')[1];
-    var formData = 'image=' + encodeURIComponent(base64Data) + '&access_token=' + encodeURIComponent(aiAccessToken) + '&baike_num=3';
-    var classifyRes = await fetch(BAIDU_AI_CONFIG.classifyUrl, {
+    var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
+    var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formData
@@ -1786,7 +1784,7 @@ async function handleUploadSpotPhoto(e) {
     var isDemo = false;
     try {
       if (!aiAccessToken) {
-        var tokenRes = await fetch(BAIDU_AI_CONFIG.tokenUrl + '&client_id=' + BAIDU_AI_CONFIG.clientId + '&client_secret=' + BAIDU_AI_CONFIG.clientSecret);
+        var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
         if (tokenRes.ok) {
           var tokenData = await tokenRes.json();
           if (tokenData.access_token) aiAccessToken = tokenData.access_token;
@@ -1794,8 +1792,8 @@ async function handleUploadSpotPhoto(e) {
         } else throw new Error('token fetch failed');
       }
       var base64Data = imgData.split(',')[1];
-      var formData = 'image=' + encodeURIComponent(base64Data) + '&access_token=' + encodeURIComponent(aiAccessToken) + '&baike_num=3';
-      var classifyRes = await fetch(BAIDU_AI_CONFIG.classifyUrl, {
+      var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
+      var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData

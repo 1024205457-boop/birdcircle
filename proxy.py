@@ -3,6 +3,14 @@ import urllib.request
 import urllib.parse
 import json
 
+import os
+
+# 从环境变量读取 API 凭证，无默认值，启动时若缺失则报错
+BAIDU_CLIENT_ID = os.environ.get('BAIDU_CLIENT_ID')
+BAIDU_CLIENT_SECRET = os.environ.get('BAIDU_CLIENT_SECRET')
+if not BAIDU_CLIENT_ID or not BAIDU_CLIENT_SECRET:
+    raise RuntimeError('请设置环境变量 BAIDU_CLIENT_ID 和 BAIDU_CLIENT_SECRET')
+
 class ProxyHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -16,8 +24,8 @@ class ProxyHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path.startswith('/api/baidu/token'):
-            # 获取百度 access_token
-            url = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=ZYk6Id4MX32HsgB1iEPGiFeM&client_secret=8UHycT1wzdCCbtp6nb6E2f5o9hv2TBYo'
+            # 获取百度 access_token（凭证仅在服务端）
+            url = f'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={BAIDU_CLIENT_ID}&client_secret={BAIDU_CLIENT_SECRET}'
             req = urllib.request.Request(url, method='POST', data=b'')
             with urllib.request.urlopen(req) as resp:
                 data = resp.read()
