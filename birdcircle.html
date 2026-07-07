@@ -1,0 +1,2460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>鸟有圈</title>
+<link rel="stylesheet" href="libs/leaflet.min.css" />
+<script src="libs/leaflet.min.js"></script>
+<script src="libs/jszip.min.js"></script>
+<style>
+:root {
+  --green-primary: #2d6a4f;
+  --green-light: #52b788;
+  --green-pale: #d8f3dc;
+  --green-bg: #f0faf4;
+  --blue-water: #339af0;
+  --green-forest: #51cf66;
+  --yellow-field: #fcc419;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border: #e9ecef;
+  --card-bg: #ffffff;
+  --page-bg: #f8f9fa;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --tab-height: 56px;
+  --accent-warm: #ff6b35;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { 
+  height:100%; 
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  height: 100%;
+  position: relative;
+  background: var(--page-bg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Pages */
+.page {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: var(--tab-height);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  display: none;
+  background: var(--page-bg);
+}
+.page.active { display: block; }
+.page::-webkit-scrollbar { display: none; }
+
+/* Tab Bar */
+.tab-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-height);
+  background: #fff;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--text-muted); cursor: pointer; transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item.active { color: var(--green-primary); }
+.tab-item svg { width: 24px; height: 24px; }
+.tab-center {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--green-primary), var(--green-light));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: -20px;
+  box-shadow: 0 4px 12px rgba(45,106,79,0.35);
+  cursor: pointer; transition: transform 0.2s;
+}
+.tab-center:active { transform: scale(0.92); }
+.tab-center svg { width: 24px; height: 24px; color: #fff; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200; display: none; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-sheet {
+  background: #fff; border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 430px; padding: 20px 20px 24px;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.modal-overlay.show .modal-sheet { transform: translateY(0); }
+.modal-sheet h3 { text-align:center; font-size:16px; margin-bottom:16px; color:var(--text-secondary); }
+.modal-option {
+  display:flex; align-items:center; gap:14px; padding:16px; border-radius:var(--radius); cursor:pointer; transition:background 0.2s;
+}
+.modal-option:active { background:var(--green-bg); }
+.modal-option-icon {
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.modal-option-text h4 { font-size:15px; font-weight:600; }
+.modal-option-text p { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+.modal-cancel { margin-top:12px; text-align:center; padding:12px; color:var(--text-muted); cursor:pointer; font-size:14px; border-radius:10px; border:1px solid var(--border); background:var(--card-bg); transition:background 0.15s; }
+.modal-cancel:active { background:var(--green-pale); }
+
+/* ===== HOME ===== */
+.home { padding: 0 16px 20px; }
+.location-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 0; position:sticky; top:0; background:var(--page-bg); z-index:10;
+}
+.location-info {
+  display:flex; align-items:center; gap:6px; font-size:15px; font-weight:600;
+  cursor:pointer; padding:4px 8px; margin:-4px -8px; border-radius:8px;
+  transition:background 0.15s;
+}
+.location-info:active { background:var(--green-pale); }
+.location-info svg:first-child { width:16px; height:16px; color:var(--green-primary); flex-shrink:0; }
+.location-arrow { width:14px; height:14px; color:var(--text-muted); flex-shrink:0; }
+.search-bar {
+  width:36px;height:36px;background:var(--card-bg);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);cursor:pointer;
+}
+.search-bar svg { width:18px;height:18px; color:var(--text-muted); }
+
+.weather-card {
+  background: linear-gradient(135deg, var(--green-primary) 0%, #1b4332 100%);
+  border-radius: 14px; padding: 14px 16px; color: #fff; margin-bottom: 12px;
+}
+.weather-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.weather-temp { font-size:38px; font-weight:200; line-height:1; }
+.weather-main { display:flex; align-items:center; gap:12px; }
+.weather-icon { font-size:28px; }
+.weather-index { text-align:center; }
+.weather-index .label { font-size:10px; opacity:0.8; }
+.weather-index .value { font-size:18px; font-weight:700; color:#fff; }
+.weather-best-time { display:flex; gap:6px; margin-bottom:10px; align-items:center; flex-wrap:wrap; }
+.best-time-label { font-size:11px; opacity:0.8; margin-right:2px; }
+.time-tag {
+  background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:20px;
+  font-size:11px; backdrop-filter:blur(4px);
+}
+.weather-meta { display:flex; gap:16px; font-size:11px; opacity:0.8; border-top:1px solid rgba(255,255,255,0.15); padding-top:8px; }
+.weather-meta-item { display:flex; align-items:center; gap:4px; }
+
+.section-header { display:flex; align-items:center; justify-content:space-between; padding:10px 0 6px; }
+.section-header h3 { font-size:15px; font-weight:600; }
+.section-header .more { font-size:12px; color:var(--text-muted); cursor:pointer; }
+
+.spot-scroll { display:flex; gap:10px; overflow-x:auto; padding-bottom:2px; scroll-snap-type:x mandatory; }
+.spot-scroll::-webkit-scrollbar { display:none; }
+.spot-card {
+  flex:0 0 160px; scroll-snap-align:start; border-radius:var(--radius); overflow:hidden;
+  background:var(--card-bg); box-shadow:var(--shadow-sm); cursor:pointer; transition:transform 0.2s;
+}
+.spot-card:active { transform:scale(0.97); }
+.spot-card-img {
+  width:160px; height:120px; overflow:hidden; position:relative;
+}
+.spot-card-img img { width:100%; height:100%; object-fit:cover; }
+.spot-card-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(transparent, rgba(0,0,0,0.55));
+  padding:16px 8px 6px; color:#fff;
+}
+.spot-card-overlay-name { font-size:13px; font-weight:600; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
+.spot-card-overlay-meta { font-size:10px; opacity:0.85; margin-top:1px; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
+
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.col-section { background:var(--card-bg); border-radius:var(--radius); padding:12px; box-shadow:var(--shadow-sm); }
+.col-section h4 { font-size:13px; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.col-section h4 svg { width:14px; height:14px; }
+
+.star-item { display:flex; align-items:center; gap:8px; padding:6px 0; cursor:pointer; }
+.star-item:active { opacity:0.7; }
+.star-img { width:40px; height:40px; border-radius:8px; overflow:hidden; flex-shrink:0; }
+.star-img img { width:100%; height:100%; object-fit:cover; }
+.star-name { font-size:12px; font-weight:500; }
+.star-sub { font-size:10px; color:var(--text-muted); }
+
+.task-item { display:flex; align-items:center; justify-content:space-between; padding:6px 0; cursor:pointer; }
+.task-item:active { opacity:0.7; }
+.task-info { font-size:12px; }
+.task-points { font-size:11px; font-weight:600; color:var(--green-primary); background:var(--green-pale); padding:2px 8px; border-radius:10px; }
+
+.feed-item { background:var(--card-bg); border-radius:var(--radius); padding:12px; margin-bottom:6px; box-shadow:var(--shadow-sm); }
+.feed-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.feed-avatar { width:28px;height:28px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:12px; }
+.feed-user { font-size:13px; font-weight:600; }
+.feed-meta { font-size:10px; color:var(--text-muted); }
+.feed-content { font-size:13px; line-height:1.5; }
+.feed-photo { width:100%; border-radius:var(--radius); margin-top:8px; overflow:hidden; }
+.feed-photo img { width:100%; height:auto; display:block; }
+.feed-footer { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.feed-tag { font-size:10px; padding:2px 8px; border-radius:10px; }
+.feed-tag.news { background:#e3f2fd; color:#1565c0; }
+.feed-tag.event { background:#fff3e0; color:#e65100; }
+.feed-tag.help { background:#fce4ec; color:#c2185b; }
+.feed-more { text-align:center; padding:10px; font-size:12px; color:var(--text-muted); cursor:pointer; }
+
+/* Location Picker */
+.location-picker-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.4); z-index:250; display:none; align-items:flex-end; justify-content:center;
+}
+.location-picker-overlay.show { display:flex; }
+.location-picker {
+  background:#fff; border-radius:20px 20px 0 0;
+  width:100%; max-width:430px; padding:20px 20px 40px;
+  transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.location-picker-overlay.show .location-picker { transform:translateY(0); }
+.location-picker h3 { text-align:center; font-size:16px; margin-bottom:16px; color:var(--text-primary); }
+.location-picker-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 14px; }
+.location-option {
+  display:flex; align-items:center; gap:12px; padding:14px; border-radius:var(--radius);
+  cursor:pointer; transition:background 0.15s;
+}
+.location-option:active { background:var(--green-bg); }
+.location-option.active { background:var(--green-pale); }
+.location-option-icon {
+  width:40px;height:40px;border-radius:10px;background:var(--green-pale);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.location-option-icon svg { width:20px; height:20px; color:var(--green-primary); }
+.location-option-name { font-size:14px; font-weight:600; }
+.location-option-sub { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+.location-option-check { margin-left:auto; color:var(--green-primary); font-size:16px; flex-shrink:0; }
+
+/* ===== MAP ===== */
+.map-page { background:#e8efe5; overflow:hidden !important; }
+.map-container { width:100%; height:100%; position:relative; }
+#map { width:100%; height:100%; z-index:1; }
+
+.map-search {
+  position:absolute; top:12px; left:12px; right:12px; z-index:1000;
+  display:flex; align-items:center; gap:10px;
+}
+.map-location {
+  background:rgba(255,255,255,0.95); padding:10px 14px; border-radius:var(--radius);
+  font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px;
+  box-shadow:var(--shadow-md); white-space:nowrap;
+}
+.map-location svg { width:14px; height:14px; color:var(--green-primary); }
+.map-search-input {
+  flex:1; background:rgba(255,255,255,0.95); padding:10px 14px; border-radius:var(--radius);
+  font-size:13px; box-shadow:var(--shadow-md); border:none; outline:none; color:var(--text-primary);
+}
+.map-search-input::placeholder { color:var(--text-muted); }
+
+.map-legend {
+  position:absolute; top:70px; right:12px;
+  background:rgba(255,255,255,0.92); padding:10px; border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-sm); z-index:1000; display:flex; flex-direction:column; gap:6px;
+}
+.legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); }
+.legend-dot { width:12px; height:12px; border-radius:50%; }
+
+.map-controls {
+  position:absolute; right:12px; bottom:210px;
+  display:flex; flex-direction:column; gap:2px; z-index:1000;
+}
+.map-ctrl-btn {
+  width:36px;height:36px;background:rgba(255,255,255,0.92);border:none;
+  border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-sm);cursor:pointer;font-size:16px;font-weight:600;color:var(--text-primary);
+}
+
+/* Custom map markers */
+.custom-marker {
+  width:24px; height:24px; border-radius:50%; border:3px solid #fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  position:relative;
+}
+.custom-marker::before {
+  content:''; position:absolute;
+  width:8px; height:8px; border-radius:50%;
+  background:#fff; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+}
+.custom-marker.week { background:#22c55e; }
+.custom-marker.month { background:#f59e0b; }
+.custom-marker.quarter { background:#8b5cf6; }
+.custom-marker.older { background:#9ca3af; }
+.custom-marker.sensitive {
+  position:relative;
+}
+.custom-marker.sensitive::after {
+  content:'🔒'; position:absolute; top:-8px; right:-8px; font-size:10px;
+}
+
+/* Leaflet overrides */
+.leaflet-container { font-family:inherit; }
+.leaflet-control-zoom { display:none !important; }
+
+/* Spot Detail Card */
+.spot-detail {
+  position:absolute; bottom:0; left:0; right:0;
+  background:#fff; border-radius:20px 20px 0 0; padding:0;
+  transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index:1001; box-shadow:0 -4px 20px rgba(0,0,0,0.1);
+  max-height:50%; overflow-y:auto;
+}
+.spot-detail.show { transform:translateY(0); }
+.spot-detail-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:10px auto 8px; }
+.spot-detail-img {
+  width:100%; height:120px; border-radius:20px 20px 0 0; overflow:hidden; position:relative;
+}
+.spot-detail-img img { width:100%; height:100%; object-fit:cover; }
+.spot-detail-img-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(transparent, rgba(0,0,0,0.6));
+  padding:20px 16px 10px; color:#fff;
+}
+.spot-detail-img-name { font-size:16px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+.spot-detail-img-meta {
+  display:flex; gap:8px; margin-top:3px; font-size:11px; opacity:0.9;
+  text-shadow:0 1px 2px rgba(0,0,0,0.5);
+}
+.spot-detail-img-meta span::after {
+  content:''; display:inline-block; width:1px; height:10px;
+  background:rgba(255,255,255,0.4); margin-left:8px; vertical-align:middle;
+}
+.spot-detail-img-meta span:last-child::after { display:none; }
+.spot-detail-body { padding:10px 16px 16px; }
+.spot-detail-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.bird-tag { font-size:11px; padding:4px 10px; background:var(--green-bg); border-radius:20px; color:var(--green-primary); }
+.spot-detail-btn {
+  width:100%; padding:10px; background:var(--green-primary); color:#fff;
+  border:none; border-radius:var(--radius); font-size:14px; font-weight:600;
+  cursor:pointer;
+}
+.spot-detail-btn.disabled {
+  background:#ccc; cursor:not-allowed;
+}
+.spot-detail-sensitivity {
+  background:#fff3e0; color:#e65100; font-size:12px; padding:8px 12px;
+  border-radius:var(--radius-sm); margin-top:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.spot-detail-news {
+  font-size:12px; color:var(--text-muted); margin-top:6px;
+}
+.spot-detail-actions {
+  display:flex; gap:8px; margin-top:10px;
+}
+.spot-detail-checkin {
+  flex:1; padding:10px; border:1.5px solid var(--green-primary);
+  border-radius:var(--radius); background:#fff; color:var(--green-primary);
+  font-size:13px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  transition:all 0.15s;
+}
+.spot-detail-checkin:active { background:var(--green-pale); }
+.spot-detail-checkin.checked {
+  background:var(--green-pale); border-color:var(--green-primary);
+  color:var(--green-primary); pointer-events:none;
+}
+.spot-detail-checkin svg { width:16px; height:16px; }
+.spot-detail-nav {
+  flex:1; padding:10px; background:var(--green-primary); color:#fff;
+  border:none; border-radius:var(--radius); font-size:13px; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.spot-detail-nav:active { opacity:0.85; }
+.spot-detail-nav.disabled { background:#ccc; cursor:not-allowed; }
+.spot-detail-nav svg { width:16px; height:16px; }
+
+/* ===== POINTS ===== */
+.points-page { padding:12px 16px; }
+.points-card {
+  background:linear-gradient(135deg, var(--green-primary), #1b4332);
+  border-radius:14px; padding:18px 20px; color:#fff; margin-bottom:12px;
+}
+.points-label { font-size:13px; opacity:0.8; }
+.points-value { font-size:32px; font-weight:700; margin:6px 0 12px; }
+.points-upload-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.2); padding:7px 14px; border-radius:20px;
+  font-size:12px; cursor:pointer; transition:background 0.2s;
+}
+.points-upload-btn:active { background:rgba(255,255,255,0.3); }
+.week-section { margin-bottom:12px; }
+.week-title { font-size:14px; font-weight:600; margin-bottom:8px; }
+.week-stats { display:flex; gap:10px; }
+.week-stat {
+  flex:1; background:var(--card-bg); border-radius:var(--radius-sm); padding:10px;
+  text-align:center; box-shadow:var(--shadow-sm);
+}
+.week-stat .num { font-size:18px; font-weight:700; color:var(--green-primary); }
+.week-stat .desc { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.points-hint { font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.5; }
+.shop-title { font-size:15px; font-weight:600; margin-bottom:10px; }
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.shop-item {
+  background:var(--card-bg); border-radius:var(--radius); overflow:hidden;
+  box-shadow:var(--shadow-sm); cursor:pointer; transition:transform 0.2s;
+}
+.shop-item:active { transform:scale(0.97); }
+.shop-item-img {
+  width:100%; height:90px; background:var(--green-pale);
+  display:flex; align-items:center; justify-content:center; font-size:36px;
+  overflow:hidden; position:relative;
+}
+.shop-item-img img { width:100%; height:100%; object-fit:cover; }
+.shop-item-img .item-name-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  padding:6px 8px;
+  background:linear-gradient(transparent, rgba(0,0,0,0.6));
+  color:#fff; font-size:11px; font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.shop-item-body { padding:6px 10px 8px; }
+.shop-item-desc { font-size:10px; color:var(--text-muted); }
+.shop-item-price { font-size:13px; font-weight:700; color:var(--green-primary); margin-top:2px; }
+
+/* ===== ALBUM ===== */
+.album-page { padding:0 16px 10px; }
+.album-header {
+  padding:8px 0; display:flex; align-items:center; justify-content:space-between;
+}
+.album-header h2 { font-size:18px; font-weight:700; }
+.album-count { font-size:12px; color:var(--text-muted); font-weight:600; }
+.album-search {
+  position:relative; margin-bottom:10px; display:flex; gap:8px;
+}
+.album-search-input {
+  flex:1; padding:10px 14px 10px 36px;
+  border:1px solid var(--border); border-radius:var(--radius);
+  font-size:13px; background:var(--card-bg);
+  outline:none; color:var(--text-primary);
+  transition: border-color 0.2s;
+}
+.album-search-input:focus { border-color: var(--green-light); }
+.album-search-input::placeholder { color:var(--text-muted); }
+.album-filter-btn {
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--card-bg); color:var(--text-primary); font-size:13px;
+  cursor:pointer; transition:background 0.15s, border-color 0.15s; white-space:nowrap;
+}
+.album-filter-btn:active { background:var(--green-pale); }
+.album-filter-btn.active { border-color:var(--green-primary); color:var(--green-primary); background:var(--green-pale); }
+.album-filter-btn svg { width:16px; height:16px; }
+.album-export-btn {
+  padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--card-bg); color:var(--text-primary); font-size:13px;
+  cursor:pointer; transition:background 0.15s; display:flex; align-items:center; gap:4px;
+}
+.album-export-btn:active { background:var(--green-pale); }
+.album-export-btn svg { width:16px; height:16px; }
+.album-search-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:16px; height:16px; color:var(--text-muted);
+}
+.album-empty {
+  text-align:center; padding:40px 0; color:var(--text-muted); font-size:14px;
+}
+
+/* Album Filter Panel */
+.album-filter-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.4); z-index:250; display:none; align-items:flex-end; justify-content:center;
+}
+.album-filter-overlay.show { display:flex; }
+.album-filter-panel {
+  background:#fff; border-radius:20px 20px 0 0;
+  width:100%; max-width:430px; padding:0 20px 30px;
+  transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  max-height:70vh; overflow-y:auto;
+}
+.album-filter-overlay.show .album-filter-panel { transform:translateY(0); }
+.album-filter-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:14px auto 10px; }
+.album-filter-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.album-filter-header h3 { font-size:16px; font-weight:600; }
+.album-filter-reset { font-size:13px; color:var(--green-primary); cursor:pointer; background:none; border:none; }
+.album-filter-section { margin-bottom:14px; }
+.album-filter-label { font-size:12px; color:var(--text-muted); margin-bottom:8px; }
+.album-filter-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.album-filter-chip {
+  padding:6px 14px; border-radius:20px; font-size:13px;
+  background:var(--card-bg); border:1px solid var(--border); color:var(--text-primary);
+  cursor:pointer; transition:all 0.15s;
+}
+.album-filter-chip:active { opacity:0.7; }
+.album-filter-chip.active {
+  background:var(--green-primary); color:#fff; border-color:var(--green-primary);
+}
+.album-category { margin-bottom:14px; }
+.category-title {
+  font-size:11px; color:var(--text-muted); margin-bottom:6px; padding-left:2px;
+  display:block;
+}
+.album-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  padding-right:4px; padding-bottom:6px;
+}
+/* Single-card categories paired on one row */
+.album-pair {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  padding-right:4px; margin-bottom:14px;
+}
+.album-pair .album-pair-item .category-title {
+  margin-bottom:6px;
+}
+.album-pair .album-pair-item .bird-stack {
+  height:180px;
+}
+
+/* Species Card — ONE species = ONE card, overflow:visible so back photos peek out */
+.bird-stack {
+  position:relative;
+  width:100%; height:180px;
+  overflow:visible;
+  cursor:grab; touch-action:pan-y;
+  -webkit-user-select:none; user-select:none;
+}
+.bird-stack:active { cursor:grabbing; }
+/* Photo layers — base transition for smooth promotion */
+.bird-stack-layer {
+  position:absolute;
+  border-radius:16px; overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.18);
+  pointer-events:none;
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1),
+              opacity 220ms;
+}
+.bird-stack-layer img {
+  width:100%; height:100%; object-fit:cover; display:block;
+  -webkit-user-drag:none;
+}
+/* Photo layers — ALL use left positioning for smooth transitions */
+.bird-stack-layer.front {
+  left:0; top:0;
+  width:88%; height:155px;
+  z-index:3; opacity:1;
+  transform:rotate(0deg);
+}
+/* Back-1 */
+.bird-stack-layer.second {
+  left:8%; top:10px;
+  width:88%; height:155px;
+  z-index:2; opacity:0.88;
+  transform:rotate(2deg);
+}
+/* Swipe out */
+.bird-stack-layer.swipe-out-left {
+  transform:translateX(-120%) rotate(-10deg);
+  opacity:0;
+  z-index:0;
+}
+.bird-stack-layer.swipe-out-right {
+  transform:translateX(120%) rotate(10deg);
+  opacity:0;
+  z-index:0;
+}
+/* Promotion targets */
+.bird-stack-layer.to-front {
+  left:0; top:0;
+  z-index:3; opacity:1;
+  transform:rotate(0deg);
+}
+/* Badges — positioned inside front layer */
+.bird-stack-name {
+  position:absolute; top:8px; left:8px; z-index:20;
+  color:#fff; font-size:13px; font-weight:600;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  padding:3px 10px; background:rgba(0,0,0,0.3);
+  border-radius:8px; backdrop-filter:blur(4px);
+  pointer-events:none;
+}
+.bird-stack-count {
+  position:absolute; bottom:8px; right:8px; z-index:20;
+  color:#fff; font-size:11px;
+  padding:2px 8px; background:rgba(0,0,0,0.35);
+  border-radius:10px; backdrop-filter:blur(4px);
+  pointer-events:none;
+}
+
+/* ===== BIRD DETAIL ===== */
+.bird-detail {
+  position:fixed; top:0;left:0;right:0;bottom:0;
+  background:var(--page-bg); z-index:300;
+  display:none; flex-direction:column;
+  max-width:430px; margin:0 auto;
+}
+.bird-detail.show { display:flex; }
+.bird-detail-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; background:#fff; border-bottom:1px solid var(--border);
+}
+.bird-detail-header h3 { font-size:16px; font-weight:600; }
+.bird-detail-back {
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--page-bg);cursor:pointer;border:none;
+}
+.bird-detail-back svg { width:18px;height:18px; }
+.bird-detail-scroll { flex:1; overflow-y:auto; padding:16px; }
+.bird-detail-info {
+  background:var(--card-bg); border-radius:var(--radius); padding:14px; margin-bottom:12px; box-shadow:var(--shadow-sm);
+}
+.bird-detail-name-en { font-size:13px; color:var(--text-muted); margin-top:2px; }
+.bird-detail-latin { font-size:12px; color:var(--text-muted); font-style:italic; margin-top:2px; }
+.bird-detail-taxonomy { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.taxonomy-tag { font-size:11px; padding:3px 8px; background:var(--green-bg); border-radius:4px; color:var(--green-primary); }
+.bird-photo-item { width:100%; border-radius:var(--radius); overflow:hidden; margin-bottom:12px; position:relative; }
+.bird-photo-item img { width:100%; height:240px; object-fit:cover; display:block; }
+.bird-photo-info {
+  padding:10px 14px;
+  background:linear-gradient(transparent, rgba(0,0,0,0.5));
+  position:absolute; bottom:0; left:0; right:0;
+  display:flex; justify-content:space-between;
+  font-size:12px; color:#fff;
+}
+
+/* ===== UPLOAD & IMPORT PAGES ===== */
+.upload-page, .import-page {
+  position:fixed; top:0;left:0;right:0;bottom:0;
+  background:var(--page-bg); z-index:300;
+  display:none; flex-direction:column;
+  max-width:430px; margin:0 auto;
+}
+.upload-page.show, .import-page.show { display:flex; }
+.page-header {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px; background:#fff; border-bottom:1px solid var(--border);
+}
+.page-header h3 { font-size:16px; font-weight:600; flex:1; }
+.page-back {
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--page-bg);cursor:pointer;border:none;
+}
+.page-back svg { width:18px;height:18px; }
+.page-body { flex:1; overflow-y:auto; padding:16px; }
+
+.form-section { margin-bottom:20px; }
+.form-label { font-size:13px; font-weight:600; margin-bottom:8px; display:block; }
+.form-row {
+  display:flex; align-items:center; gap:8px; padding:12px;
+  background:var(--card-bg); border-radius:var(--radius-sm); margin-bottom:8px; box-shadow:var(--shadow-sm);
+}
+.form-row svg { width:18px;height:18px; color:var(--text-muted); flex-shrink:0; }
+.form-row span { font-size:14px; }
+.form-row input { flex:1; border:none; outline:none; font-size:14px; font-family:inherit; background:transparent; }
+.form-row input::placeholder { color:var(--text-muted); }
+.photo-upload-area { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.photo-upload-slot {
+  aspect-ratio:1; border:2px dashed var(--border); border-radius:var(--radius-sm);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  color:var(--text-muted); transition:all 0.2s;
+}
+.photo-upload-slot:active { border-color:var(--green-primary); color:var(--green-primary); }
+.bird-select-item {
+  display:flex; align-items:center; gap:12px; padding:12px;
+  background:var(--card-bg); border-radius:var(--radius-sm); margin-bottom:6px;
+  box-shadow:var(--shadow-sm); cursor:pointer;
+}
+.bird-select-item:active { background:var(--green-bg); }
+.bird-select-icon { width:40px;height:40px;border-radius:8px;overflow:hidden; flex-shrink:0; }
+.bird-select-icon img { width:100%;height:100%;object-fit:cover; }
+.bird-select-name { font-size:14px; font-weight:500; }
+.bird-select-sub { font-size:11px; color:var(--text-muted); }
+.toggle-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px; background:var(--card-bg); border-radius:var(--radius-sm); box-shadow:var(--shadow-sm);
+}
+.toggle-row span { font-size:14px; }
+.toggle-switch {
+  width:44px;height:24px;background:var(--border);border-radius:12px;
+  position:relative; cursor:pointer; transition:background 0.2s;
+}
+.toggle-switch.on { background:var(--green-primary); }
+.toggle-switch::after {
+  content:''; position:absolute; width:20px;height:20px; background:#fff;
+  border-radius:50%; top:2px;left:2px; transition:transform 0.2s;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { transform:translateX(20px); }
+.submit-btn {
+  width:100%; padding:14px; background:var(--green-primary); color:#fff;
+  border:none; border-radius:var(--radius); font-size:15px; font-weight:600;
+  cursor:pointer; margin-top:8px;
+}
+.submit-btn:active { opacity:0.85; }
+
+.import-guide { text-align:center; padding:40px 20px; }
+.import-guide-icon { font-size:60px; margin-bottom:16px; }
+.import-guide h4 { font-size:16px; margin-bottom:8px; }
+.import-guide p { font-size:13px; color:var(--text-muted); line-height:1.6; }
+.import-select-btn {
+  display:inline-flex; align-items:center; gap:8px; margin-top:20px;
+  padding:12px 24px; background:var(--green-primary); color:#fff;
+  border:none; border-radius:var(--radius); font-size:14px; font-weight:600; cursor:pointer;
+}
+.import-results { display:none; margin-top:20px; }
+.import-results.show { display:block; }
+.import-result-item {
+  display:flex; align-items:center; gap:12px; padding:14px;
+  background:var(--card-bg); border-radius:var(--radius-sm); margin-bottom:8px; box-shadow:var(--shadow-sm);
+}
+.import-result-icon { width:48px;height:48px;border-radius:10px;overflow:hidden; flex-shrink:0; }
+.import-result-icon img { width:100%;height:100%;object-fit:cover; }
+.import-result-info { flex:1; }
+.import-result-name { font-size:14px; font-weight:600; }
+.import-result-count { font-size:12px; color:var(--text-muted); }
+.import-result-status { font-size:12px; color:var(--green-primary); font-weight:500; }
+
+/* Toast */
+.toast {
+  position:fixed; top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(0.8);
+  background:rgba(0,0,0,0.75); color:#fff;
+  padding:12px 24px; border-radius:10px; font-size:14px;
+  z-index:500; opacity:0; transition:all 0.3s;
+  max-width:280px; text-align:center;
+}
+.toast.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+
+/* ===== GUIDE BANNER ===== */
+.guide-banner {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  background:linear-gradient(135deg, #ff6b35, #ff8f00); color:#fff;
+  border-radius:var(--radius); margin-bottom:14px; font-size:13px;
+}
+.guide-text { flex:1; }
+.guide-close {
+  padding:6px 14px; border-radius:20px; border:none;
+  background:rgba(255,255,255,0.3); color:#fff; font-size:12px;
+  cursor:pointer; white-space:nowrap;
+}
+
+.ai-identify-btn {
+  width:100%; padding:14px; border:none; border-radius:var(--radius);
+  background:var(--green-primary); color:#fff; font-size:15px; font-weight:600;
+  cursor:pointer; transition:opacity 0.2s;
+}
+.ai-identify-btn:active { opacity:0.8; }
+.ai-identify-btn:disabled { opacity:0.5; cursor:not-allowed; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== HOME ===== -->
+  <div class="page home active" id="page-home">
+    <div class="guide-banner" id="guideBanner">
+      <div class="guide-text">欢迎使用鸟有圈！拍照识鸟 → 发现鸟点 → 记录分享</div>
+      <button class="guide-close" onclick="dismissGuide()">知道了</button>
+    </div>
+    <div class="location-bar">
+      <div class="location-info" onclick="openLocationPicker()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <span id="locationText">奥森公园 · 南园</span>
+        <svg class="location-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+
+    <div class="weather-card">
+      <div class="weather-top">
+        <div><div class="weather-temp">24°</div></div>
+        <div class="weather-main">
+          <div class="weather-icon">⛅</div>
+          <div class="weather-index">
+            <div class="label">观鸟指数</div>
+            <div class="value" style="color:#ff6b35">4.5<span style="font-size:14px;font-weight:400">/5</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="weather-best-time">
+        <div class="best-time-label">最佳观赏时间</div>
+        <div class="time-tag">🌅 05:00 - 08:00</div>
+        <div class="time-tag">🌇 17:30 - 19:30</div>
+      </div>
+      <div class="weather-meta">
+        <div class="weather-meta-item">风力 3级</div>
+        <div class="weather-meta-item">湿度 62%</div>
+        <div class="weather-meta-item">能见度 15km</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3>附近鸟点</h3>
+      <span class="more">查看更多 ›</span>
+    </div>
+    <div class="spot-scroll">
+      <div class="spot-card" onclick="switchTab(1)">
+        <div class="spot-card-img">
+          <img src="photos/spot_lake_island.jpg" alt="奥林匹克森林公园南园">
+          <div class="spot-card-overlay">
+            <div class="spot-card-overlay-name">奥林匹克森林公园南园</div>
+            <div class="spot-card-overlay-meta">距你 1.2km · 朝阳区</div>
+          </div>
+        </div>
+      </div>
+      <div class="spot-card" onclick="switchTab(1)">
+        <div class="spot-card-img">
+          <img src="photos/spot_mirror_lake.jpg" alt="元大都城垣遗址公园">
+          <div class="spot-card-overlay">
+            <div class="spot-card-overlay-name">元大都城垣遗址公园</div>
+            <div class="spot-card-overlay-meta">距你 800m · 朝阳区</div>
+          </div>
+        </div>
+      </div>
+      <div class="spot-card" onclick="switchTab(1)">
+        <div class="spot-card-img">
+          <img src="photos/spot_wetland.jpg" alt="朝阳公园">
+          <div class="spot-card-overlay">
+            <div class="spot-card-overlay-name">朝阳公园</div>
+            <div class="spot-card-overlay-meta">距你 6.8km · 朝阳区</div>
+          </div>
+        </div>
+      </div>
+      <div class="spot-card" onclick="switchTab(1)">
+        <div class="spot-card-img">
+          <img src="photos/spot_meadow.jpg" alt="玉渊潭公园">
+          <div class="spot-card-overlay">
+            <div class="spot-card-overlay-name">玉渊潭公园</div>
+            <div class="spot-card-overlay-meta">距你 5.8km · 海淀区</div>
+          </div>
+        </div>
+      </div>
+      <div class="spot-card" onclick="switchTab(1)">
+        <div class="spot-card-img">
+          <img src="photos/spot_forest_path.jpg" alt="颐和园">
+          <div class="spot-card-overlay">
+            <div class="spot-card-overlay-name">颐和园</div>
+            <div class="spot-card-overlay-meta">距你 8.5km · 海淀区</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:8px;">
+      <div class="col-section">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          当季明星
+        </h4>
+        <div class="star-item" onclick="openBirdDetail('kingfisher')">
+          <div class="star-img"><img src="photos/kingfisher_1.jpg" alt="翠鸟"></div>
+          <div><div class="star-name">翠鸟</div><div class="star-sub">3 张照片</div></div>
+        </div>
+        <div class="star-item" onclick="openBirdDetail('mandarin')">
+          <div class="star-img"><img src="photos/mandarin_1.jpg" alt="鸳鸯"></div>
+          <div><div class="star-name">鸳鸯</div><div class="star-sub">5 张照片</div></div>
+        </div>
+        <div class="star-item" onclick="openBirdDetail('hoopoe')">
+          <div class="star-img"><img src="photos/hoopoe_1.jpg" alt="戴胜"></div>
+          <div><div class="star-name">戴胜</div><div class="star-sub">2 张照片</div></div>
+        </div>
+      </div>
+      <div class="col-section">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          积分任务
+        </h4>
+        <div class="task-item">
+          <span class="task-info">上传观鸟点</span>
+          <span class="task-points">+50</span>
+        </div>
+        <div class="task-item">
+          <span class="task-info">补充鸟种照片</span>
+          <span class="task-points">+20</span>
+        </div>
+        <div class="task-item" onclick="showToast('已为你加入朝阳同城观鸟群')">
+          <span class="task-info">加入同城观鸟群</span>
+          <span class="task-points">+10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3>同城动态</h3>
+      <span class="more">查看更多 ›</span>
+    </div>
+    <div class="feed-item">
+      <div class="feed-header">
+        <div class="feed-avatar">❓</div>
+        <div><div class="feed-user">北坞新手</div><div class="feed-meta">1小时前 · 北坞公园</div></div>
+      </div>
+      <div class="feed-content">今天拍到这只鸟，头部有红色斑纹，体型比麻雀大一圈，请问是什么鸟？</div>
+      <div class="feed-photo"><img src="photos/bird_help.jpg" alt="求助辨鸟"></div>
+      <div class="feed-footer"><span class="feed-tag help">辨鸟</span><span style="font-size:12px;color:var(--text-muted)">12 人回复</span></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-header">
+        <div class="feed-avatar">🦅</div>
+        <div><div class="feed-user">湿地守望者</div><div class="feed-meta">3小时前 · 奥森公园</div></div>
+      </div>
+      <div class="feed-content">奥海湿地今天鸬鹚集群捕鱼，场面壮观！</div>
+      <div class="feed-footer"><span class="feed-tag news">鸟讯</span></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-header">
+        <div class="feed-avatar">🔭</div>
+        <div><div class="feed-user">望远镜里的世界</div><div class="feed-meta">5小时前 · 朝阳</div></div>
+      </div>
+      <div class="feed-content">周六清晨天境湖新手观鸟，欢迎参加</div>
+      <div class="feed-footer">
+        <span class="feed-tag event">召集</span>
+        <span style="font-size:12px;color:var(--text-muted)">已报名 7 人</span>
+      </div>
+    </div>
+    <div class="feed-more" onclick="showToast('社区模块已保留，后续接入')">查看更多 ›</div>
+  </div>
+
+  <!-- ===== MAP ===== -->
+  <div class="page map-page" id="page-map">
+    <div class="map-container">
+      <div id="map"></div>
+      <div class="map-search">
+        <div class="map-location">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          奥森公园 · 南园
+        </div>
+        <input type="text" class="map-search-input" placeholder="搜索地点/鸟类">
+      </div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>一周内</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>一月内</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>一季度内</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#9ca3af"></div>一季度以上</div>
+      </div>
+      <div class="map-controls">
+        <button class="map-ctrl-btn" onclick="map.zoomIn()">+</button>
+        <button class="map-ctrl-btn" onclick="map.zoomOut()">−</button>
+      </div>
+      <div class="spot-detail" id="spotDetail">
+        <div class="spot-detail-handle"></div>
+        <div class="spot-detail-img" id="spotDetailImg"></div>
+        <div class="spot-detail-body">
+          <div class="spot-detail-tags" id="spotDetailTags"></div>
+          <div class="spot-detail-news" id="spotDetailNews"></div>
+          <div id="spotSensitivity"></div>
+          <div class="spot-detail-actions">
+            <button class="spot-detail-checkin" id="spotDetailCheckin" onclick="checkInSpot()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+              打卡
+            </button>
+            <button class="spot-detail-nav" id="spotDetailNav" onclick="navToSpot()">导航</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== POINTS ===== -->
+  <div class="page points-page" id="page-points">
+    <div class="points-card">
+      <div class="points-label">我的观鸟积分</div>
+      <div class="points-value">2,680</div>
+      <div class="points-upload-btn" onclick="showUploadPage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        上传鸟点
+      </div>
+    </div>
+    <div class="week-section">
+      <div class="week-title">本周贡献</div>
+      <div class="week-stats">
+        <div class="week-stat"><div class="num">3</div><div class="desc">上传鸟点</div></div>
+        <div class="week-stat"><div class="num">12</div><div class="desc">鸟种照片</div></div>
+        <div class="week-stat"><div class="num">+260</div><div class="desc">获得积分</div></div>
+      </div>
+    </div>
+    <div class="points-hint">积分来源：上传观鸟点 +50，补充鸟种照片 +20，加入同城观鸟群 +10</div>
+    <div class="shop-title">积分兑换</div>
+    <div class="shop-grid">
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/binoculars.jpg" alt="双筒望远镜" onerror="this.style.display='none';this.parentNode.textContent='🔭'"><div class="item-name-overlay">蔡司 Terra ED 8x42</div></div><div class="shop-item-body"><div class="shop-item-desc">德国进口 · 适合湿地林地观鸟</div><div class="shop-item-price">9,800 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cap.jpg" alt="遮阳帽" onerror="this.style.display='none';this.parentNode.textContent='🧢'"><div class="item-name-overlay">Columbia 速干遮阳帽</div></div><div class="shop-item-body"><div class="shop-item-desc">UPF50+ · 防晒透气</div><div class="shop-item-price">1,200 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cleaning.jpg" alt="清洁套装" onerror="this.style.display='none';this.parentNode.textContent='🧴'"><div class="item-name-overlay">VSGO 镜头清洁套装</div></div><div class="shop-item-body"><div class="shop-item-desc">镜头笔 + 气吹 + 无绒纸</div><div class="shop-item-price">800 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/bag.jpg" alt="腰包" onerror="this.style.display='none';this.parentNode.textContent='🎒'"><div class="item-name-overlay">Lowepro 摄影腰包</div></div><div class="shop-item-body"><div class="shop-item-desc">防水面料 · 多功能分区</div><div class="shop-item-price">1,500 积分</div></div></div>
+    </div>
+  </div>
+
+  <!-- ===== ALBUM ===== -->
+  <div class="page album-page" id="page-album">
+    <div class="album-header">
+      <h2>相册</h2>
+      <span class="album-count" id="albumCount"></span>
+    </div>
+    <div class="album-search">
+      <svg class="album-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="album-search-input" id="albumSearchInput" type="text" placeholder="搜索鸟种名称或分类">
+      <button class="album-filter-btn" id="albumFilterBtn" onclick="openAlbumFilter()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        筛选
+      </button>
+      <button class="album-export-btn" id="albumExportBtn" onclick="exportAlbum()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        导出
+      </button>
+    </div>
+    <div id="albumContainer"></div>
+  </div>
+
+  <!-- Album Filter Panel -->
+  <div class="album-filter-overlay" id="albumFilterOverlay" onclick="closeAlbumFilter(event)">
+    <div class="album-filter-panel" onclick="event.stopPropagation()">
+      <div class="album-filter-handle"></div>
+      <div class="album-filter-header">
+        <h3>筛选</h3>
+        <button class="album-filter-reset" onclick="resetAlbumFilter()">重置</button>
+      </div>
+      <div class="album-filter-section">
+        <div class="album-filter-label">目</div>
+        <div class="album-filter-chips" id="filterOrder"></div>
+      </div>
+      <div class="album-filter-section">
+        <div class="album-filter-label">科</div>
+        <div class="album-filter-chips" id="filterFamily"></div>
+      </div>
+      <div class="album-filter-section">
+        <div class="album-filter-label">拍摄时间</div>
+        <div class="album-filter-chips" id="filterTime"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AI BIRD ID ===== -->
+  <!-- ===== TAB BAR ===== -->
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-item active" onclick="switchTab(0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span>首页</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span>鸟点</span>
+    </div>
+    <div class="tab-center" onclick="showPublishModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="tab-item" onclick="switchTab(3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>积分</span>
+    </div>
+    <div class="tab-item" onclick="switchTab(4)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span>相册</span>
+    </div>
+  </div>
+</div>
+
+<!-- Location Picker -->
+<div class="location-picker-overlay" id="locationPicker" onclick="closeLocationPicker(event)">
+  <div class="location-picker" onclick="event.stopPropagation()">
+    <div class="location-picker-handle"></div>
+    <h3>选择观鸟地点</h3>
+    <div id="locationOptions"></div>
+  </div>
+</div>
+
+<!-- Publish Modal -->
+<div class="modal-overlay" id="publishModal" onclick="hidePublishModal(event)">
+  <div class="modal-sheet">
+    <h3>选择操作</h3>
+    <div class="modal-option" onclick="showUploadPage()">
+      <div class="modal-option-icon" style="background:var(--green-pale);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-primary)" stroke-width="2" style="width:24px;height:24px"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div class="modal-option-text">
+        <h4>上传鸟点</h4>
+        <p>同步位置、鸟种、照片、观测时间</p>
+      </div>
+    </div>
+    <div class="modal-option" onclick="showImportPage()">
+      <div class="modal-option-icon" style="background:#e3f2fd;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2" style="width:24px;height:24px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div class="modal-option-text">
+        <h4>导入照片</h4>
+        <p>批量上传照片，AI 自动识别鸟种并归类</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Page -->
+<div class="upload-page" id="uploadPage">
+  <div class="page-header">
+    <button class="page-back" onclick="hideUploadPage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h3>上传鸟点</h3>
+  </div>
+  <div class="page-body">
+    <div class="form-section">
+      <span class="form-label">定位信息</span>
+      <div class="form-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+        <span>奥森公园 · 南园湖心岛</span>
+      </div>
+    </div>
+    <div class="form-section">
+      <span class="form-label">地点名称</span>
+      <div class="form-row"><input type="text" placeholder="输入或使用当前位置"></div>
+    </div>
+    <div class="form-section">
+      <span class="form-label">观测时间</span>
+      <div class="form-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>2026年7月5日 06:30</span>
+      </div>
+    </div>
+    <div class="form-section">
+      <span class="form-label">上传照片</span>
+      <input type="file" id="uploadSpotFileInput" accept="image/*" style="display:none" onchange="handleUploadSpotPhoto(event)">
+      <div class="photo-upload-area" id="uploadSpotPhotoArea">
+        <div class="photo-upload-slot" onclick="document.getElementById('uploadSpotFileInput').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:28px;height:28px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">上传照片将自动识别鸟种并填充到下方</div>
+      <div class="upload-ai-loading" id="uploadAiLoading" style="display:none;text-align:center;padding:12px;">
+        <div style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--green-primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px;"></div>
+        <p style="font-size:12px;color:var(--text-muted);">AI 识别中...</p>
+      </div>
+    </div>
+    <div class="form-section">
+      <span class="form-label">识别结果</span>
+      <div id="uploadSpotBirdList">
+        <div style="font-size:13px;color:var(--text-muted);padding:8px 0;">上传照片后自动识别鸟种</div>
+      </div>
+      <div style="font-size:12px;color:var(--green-primary);margin-top:6px;cursor:pointer;" onclick="showToast('手动添加功能开发中')">+ 手动添加鸟种</div>
+    </div>
+    <div class="form-section">
+      <span class="form-label">观测备注</span>
+      <div class="form-row"><input type="text" placeholder="可选，记录观察到的行为等"></div>
+    </div>
+    <div class="toggle-row" onclick="this.querySelector('.toggle-switch').classList.toggle('on')">
+      <span>公开鸟点</span>
+      <div class="toggle-switch on"></div>
+    </div>
+    <button class="submit-btn" onclick="showToast('鸟点上传成功！+50 积分');hideUploadPage();">提交鸟讯</button>
+  </div>
+</div>
+
+<!-- Import Page -->
+<div class="import-page" id="importPage">
+  <div class="page-header">
+    <button class="page-back" onclick="hideImportPage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h3>导入照片</h3>
+  </div>
+  <div class="page-body">
+    <div class="import-guide" id="importGuide">
+      <div class="import-guide-icon">📸</div>
+      <h4>批量导入照片</h4>
+      <p>从手机选择照片，AI 将自动识别鸟种并按种类归档到相册</p>
+      <input type="file" id="importFileInput" accept="image/*" multiple style="display:none" onchange="handleImportSelect(event)">
+      <button class="import-select-btn" onclick="document.getElementById('importFileInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        选择照片
+      </button>
+    </div>
+    <div class="import-preview-area" id="importPreviewArea" style="display:none">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">已选择 <span id="importPhotoCount">0</span> 张照片</div>
+      <div class="import-preview-grid" id="importPreviewGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+      <button class="ai-identify-btn" id="importIdentifyBtn" onclick="startImportIdentify()">AI 识别鸟种</button>
+    </div>
+    <div class="import-results" id="importResults">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">识别结果</div>
+      <div id="importResultList"></div>
+      <button class="submit-btn" style="margin-top:16px;" onclick="finishImport()">完成导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bird Detail -->
+<div class="bird-detail" id="birdDetail">
+  <div class="bird-detail-header">
+    <button class="bird-detail-back" onclick="hideBirdDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h3 id="birdDetailTitle"></h3>
+    <span style="width:32px;"></span>
+  </div>
+  <div class="bird-detail-scroll" id="birdDetailContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== TAB SWITCHING =====
+const pages = ['page-home','page-map',null,'page-points','page-album'];
+const tabItems = document.querySelectorAll('.tab-item');
+let map = null;
+let mapInitialized = false;
+
+// Tab index to tabItems index mapping: page 0→0, 1→1, 3→2, 4→3
+const tabIndexMap = {0:0, 1:1, 3:2, 4:3};
+function switchTab(index) {
+  pages.forEach((p,i) => { if(p) document.getElementById(p).classList.remove('active'); });
+  tabItems.forEach(t => t.classList.remove('active'));
+  if(pages[index]) document.getElementById(pages[index]).classList.add('active');
+  const ti = tabIndexMap[index];
+  if (ti !== undefined && tabItems[ti]) tabItems[ti].classList.add('active');
+  if(index === 1) {
+    if(!map) initMap();
+    setTimeout(() => map && map.invalidateSize(), 100);
+  }
+  if(index !== 1) document.getElementById('spotDetail').classList.remove('show');
+}
+
+// ===== PUBLISH MODAL =====
+function showPublishModal() {
+  document.getElementById('spotDetail').classList.remove('show');
+  document.getElementById('tabBar').style.display = 'none';
+  document.getElementById('publishModal').classList.add('show');
+}
+function hidePublishModal(e) {
+  if(!e || e.target === document.getElementById('publishModal')) {
+    document.getElementById('publishModal').classList.remove('show');
+    document.getElementById('tabBar').style.display = '';
+  }
+}
+
+// ===== LOCATION PICKER =====
+const locationList = [
+  { id: 'aosen', name: '奥林匹克森林公园', sub: '北京市朝阳区', active: true },
+  { id: 'chaoyang-park', name: '朝阳公园', sub: '北京市朝阳区', active: false },
+  { id: 'yuyuantan', name: '玉渊潭公园', sub: '北京市海淀区', active: false },
+  { id: 'yuanmingyuan', name: '圆明园遗址公园', sub: '北京市海淀区', active: false },
+  { id: 'yiheyuan', name: '颐和园', sub: '北京市海淀区', active: false },
+  { id: 'baiwangshan', name: '百望山森林公园', sub: '北京市海淀区', active: false },
+  { id: 'wenyuhe', name: '温榆河公园', sub: '北京市朝阳区', active: false },
+];
+let currentLocation = 'aosen';
+
+function openLocationPicker() {
+  const container = document.getElementById('locationOptions');
+  const pinSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
+  let html = '';
+  locationList.forEach(loc => {
+    html += `<div class="location-option${loc.id === currentLocation ? ' active' : ''}" onclick="selectLocation('${loc.id}')">
+      <div class="location-option-icon">${pinSvg}</div>
+      <div>
+        <div class="location-option-name">${loc.name}</div>
+        <div class="location-option-sub">${loc.sub}</div>
+      </div>
+      ${loc.id === currentLocation ? '<div class="location-option-check">✓</div>' : ''}
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('locationPicker').classList.add('show');
+}
+
+function closeLocationPicker(e) {
+  if(!e || e.target === document.getElementById('locationPicker'))
+    document.getElementById('locationPicker').classList.remove('show');
+}
+
+function selectLocation(id) {
+  currentLocation = id;
+  const loc = locationList.find(l => l.id === id);
+  if (loc) {
+    document.getElementById('locationText').textContent = loc.name;
+    showToast('已切换到：' + loc.name);
+  }
+  document.getElementById('locationPicker').classList.remove('show');
+}
+
+// ===== ALBUM FILTER =====
+let albumFilterState = { order: null, family: null, time: null };
+
+function getUniqueOrders() {
+  const set = new Set();
+  Object.values(birdData).forEach(b => set.add(b.taxonomy[0]));
+  return Array.from(set);
+}
+function getUniqueFamilies() {
+  const set = new Set();
+  Object.values(birdData).forEach(b => set.add(b.taxonomy[1]));
+  return Array.from(set);
+}
+const filterTimeOptions = [
+  { label: '全部', value: null },
+  { label: '今天', value: 'today' },
+  { label: '最近3天', value: '3days' },
+  { label: '最近7天', value: '7days' },
+  { label: '最近30天', value: '30days' },
+  { label: '更早', value: 'older' },
+];
+
+function openAlbumFilter() {
+  // Build order chips
+  const orders = ['全部', ...getUniqueOrders()];
+  const ordersContainer = document.getElementById('filterOrder');
+  ordersContainer.innerHTML = orders.map(o =>
+    `<span class="album-filter-chip${(!albumFilterState.order && o==='全部') || albumFilterState.order===o ? ' active' : ''}" onclick="selectFilterChip('order','${o}')">${o}</span>`
+  ).join('');
+
+  // Build family chips
+  const families = ['全部', ...getUniqueFamilies()];
+  const familiesContainer = document.getElementById('filterFamily');
+  familiesContainer.innerHTML = families.map(f =>
+    `<span class="album-filter-chip${(!albumFilterState.family && f==='全部') || albumFilterState.family===f ? ' active' : ''}" onclick="selectFilterChip('family','${f}')">${f}</span>`
+  ).join('');
+
+  // Build time chips
+  const timeContainer = document.getElementById('filterTime');
+  timeContainer.innerHTML = filterTimeOptions.map(t =>
+    `<span class="album-filter-chip${albumFilterState.time === t.value ? ' active' : ''}" onclick="selectFilterChip('time','${t.value}')">${t.label}</span>`
+  ).join('');
+
+  document.getElementById('albumFilterOverlay').classList.add('show');
+}
+
+function closeAlbumFilter(e) {
+  if(!e || e.target === document.getElementById('albumFilterOverlay')) {
+    document.getElementById('albumFilterOverlay').classList.remove('show');
+    applyAlbumFilter();
+  }
+}
+
+function selectFilterChip(type, value) {
+  if (type === 'order') albumFilterState.order = value === '全部' ? null : value;
+  if (type === 'family') albumFilterState.family = value === '全部' ? null : value;
+  if (type === 'time') albumFilterState.time = value === 'null' ? null : value;
+  // Re-render chips to update active state
+  openAlbumFilter();
+}
+
+function resetAlbumFilter() {
+  albumFilterState = { order: null, family: null, time: null };
+  openAlbumFilter(); // re-render
+  document.getElementById('albumFilterBtn').classList.remove('active');
+  applyAlbumFilter();
+  showToast('已重置筛选');
+}
+
+function applyAlbumFilter() {
+  const hasFilter = albumFilterState.order || albumFilterState.family || albumFilterState.time;
+  document.getElementById('albumFilterBtn').classList.toggle('active', !!hasFilter);
+
+  // Combine with search keyword
+  const keyword = document.getElementById('albumSearchInput').value.trim();
+
+  // Filter categories
+  const filtered = albumCategories.map(cat => {
+    const matchedBirds = cat.birds.filter(bid => {
+      // Search keyword match
+      if (keyword) {
+        const kw = keyword.toLowerCase();
+        const bird = birdData[bid];
+        const nameMatch = bird.name.includes(kw)
+          || (bird.en && bird.en.toLowerCase().includes(kw))
+          || (bird.latin && bird.latin.toLowerCase().includes(kw))
+          || bird.taxonomy.some(t => t.toLowerCase().includes(kw));
+        if (!nameMatch) return false;
+      }
+      // Filter match
+      const bird = birdData[bid];
+      if (albumFilterState.order && bird.taxonomy[0] !== albumFilterState.order) return false;
+      if (albumFilterState.family && bird.taxonomy[1] !== albumFilterState.family) return false;
+      if (albumFilterState.time) {
+        const latestTime = bird.photos[0].time;
+        if (!matchTimeFilter(latestTime, albumFilterState.time)) return false;
+      }
+      return true;
+    });
+    return { ...cat, birds: matchedBirds };
+  }).filter(cat => cat.birds.length > 0);
+
+  // Re-render
+  if (typeof renderAlbumWithCategories === 'function') {
+    renderAlbumWithCategories(filtered);
+  }
+}
+
+function matchTimeFilter(timeStr, filter) {
+  const photoDate = new Date(timeStr);
+  const now = new Date('2026-07-06T12:00:00');
+  const diffMs = now - photoDate;
+  const diffDays = Math.floor(diffMs / (1000*60*60*24));
+  switch(filter) {
+    case 'today': return diffDays === 0;
+    case '3days': return diffDays <= 3;
+    case '7days': return diffDays <= 7;
+    case '30days': return diffDays <= 30;
+    case 'older': return diffDays > 30;
+    default: return true;
+  }
+}
+
+// ===== AI BIRD IDENTIFICATION (integrated into Import) =====
+var importSelectedImages = [];
+var aiAccessToken = '';
+var BAIDU_AI_CONFIG = {
+  clientId: 'ZYk6Id4MX32HsgB1iEPGiFeM',
+  clientSecret: '8UHycT1wzdCCbtp6nb6E2f5o9hv2TBYo',
+  tokenUrl: 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials',
+  classifyUrl: 'https://aip.baidubce.com/rest/2.0/image-classify/v2/advanced_general'
+};
+
+function handleImportSelect(e) {
+  var files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  importSelectedImages = [];
+  var loaded = 0;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      importSelectedImages.push(ev.target.result);
+      loaded++;
+      if (loaded === files.length) {
+        showImportPreview();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showImportPreview() {
+  var grid = document.getElementById('importPreviewGrid');
+  var count = document.getElementById('importPhotoCount');
+  grid.innerHTML = '';
+  importSelectedImages.forEach(function(img) {
+    var div = document.createElement('div');
+    div.style.cssText = 'width:70px;height:70px;border-radius:8px;overflow:hidden;flex-shrink:0;';
+    div.innerHTML = '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;">';
+    grid.appendChild(div);
+  });
+  count.textContent = importSelectedImages.length;
+  document.getElementById('importGuide').style.display = 'none';
+  document.getElementById('importPreviewArea').style.display = 'block';
+  document.getElementById('importResults').classList.remove('show');
+}
+
+async function startImportIdentify() {
+  if (importSelectedImages.length === 0) return;
+  var btn = document.getElementById('importIdentifyBtn');
+  btn.disabled = true;
+  btn.textContent = '识别中...';
+
+  // 识别第一张照片（批量简化版）
+  var img = importSelectedImages[0];
+  var result = null;
+  var isDemo = false;
+
+  try {
+    if (!aiAccessToken) {
+      var tokenRes = await fetch(BAIDU_AI_CONFIG.tokenUrl + '&client_id=' + BAIDU_AI_CONFIG.clientId + '&client_secret=' + BAIDU_AI_CONFIG.clientSecret);
+      if (tokenRes.ok) {
+        var tokenData = await tokenRes.json();
+        if (tokenData.access_token) aiAccessToken = tokenData.access_token;
+        else throw new Error('token failed');
+      } else throw new Error('token fetch failed');
+    }
+    var base64Data = img.split(',')[1];
+    var formData = 'image=' + encodeURIComponent(base64Data) + '&access_token=' + encodeURIComponent(aiAccessToken) + '&baike_num=3';
+    var classifyRes = await fetch(BAIDU_AI_CONFIG.classifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+    if (classifyRes.ok) {
+      var classifyData = await classifyRes.json();
+      if (classifyData.result && classifyData.result.length > 0) {
+        result = classifyData.result;
+      } else throw new Error('no result');
+    } else throw new Error('classify fetch failed');
+  } catch(e) {
+    console.log('API failed, demo mode:', e.message);
+    isDemo = true;
+    result = generateDemoResult();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'AI 识别鸟种';
+  renderImportResult(result, isDemo, importSelectedImages.length);
+}
+
+function generateDemoResult() {
+  var birds = [
+    { name:'翠鸟', score:92.3, desc:'翠鸟属佛法僧目翠鸟科，体型小巧，喙长而尖直。常栖息于溪流、湖泊附近，以鱼类为食。' },
+    { name:'白头鹎', score:85.1, desc:'白头鹎属雀形目鹎科，又名白头翁。头顶黑色有白色斑块，是最常见的城市鸟类之一。' },
+    { name:'珠颈斑鸠', score:78.6, desc:'珠颈斑鸠属鸽形目鸠鸽科，颈部有黑白珠状斑纹。常在地面觅食，以种子为食。' },
+    { name:'灰喜鹊', score:72.4, desc:'灰喜鹊属雀形目鸦科，体长约33-40cm。头和后颈黑色，其余蓝灰色。聪明好动。' },
+    { name:'麻雀', score:65.2, desc:'麻雀属雀形目雀科，体型小。褐色羽毛，脸颊有白色斑块。适应人类环境能力极强。' }
+  ];
+  var main = birds[Math.floor(Math.random() * 3)];
+  var candidates = [{ name: main.name, score: main.score }];
+  var used = [main.name];
+  while (candidates.length < 5) {
+    var b = birds[Math.floor(Math.random() * birds.length)];
+    if (!used.includes(b.name)) {
+      used.push(b.name);
+      candidates.push({ name: b.name, score: Math.max(10, b.score - Math.random() * 30 - 10) });
+    }
+  }
+  return candidates;
+}
+
+function renderImportResult(results, isDemo, photoCount) {
+  var main = results[0];
+  var desc = main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '';
+  if (!desc) desc = main.name + '是一种常见的鸟类，广泛分布于城市公园和湿地环境中。';
+
+  var html = '';
+  html += '<div class="import-result-item" style="background:var(--green-pale);border-radius:8px;padding:12px;margin-bottom:12px;">';
+  html += '<div style="font-size:12px;color:var(--green-primary);font-weight:600;margin-bottom:6px;">' + (isDemo ? '演示模式' : 'AI 识别') + '</div>';
+  html += '<div style="font-size:18px;font-weight:700;margin-bottom:4px;">' + main.name + '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">置信度 ' + main.score.toFixed(1) + '% · ' + photoCount + ' 张照片</div>';
+  html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + desc + '</div>';
+  html += '</div>';
+
+  // 候选列表
+  html += '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">其他候选</div>';
+  results.slice(0, 5).forEach(function(c) {
+    var s = typeof c.score === 'number' ? c.score.toFixed(1) : c.score;
+    html += '<div class="import-result-item"><div class="import-result-info"><div class="import-result-name">' + c.name + '</div></div><div style="font-size:12px;color:var(--text-muted);">' + s + '%</div></div>';
+  });
+
+  document.getElementById('importResultList').innerHTML = html;
+  document.getElementById('importPreviewArea').style.display = 'none';
+  document.getElementById('importResults').classList.add('show');
+}
+
+function finishImport() {
+  showToast('照片已归档到相册');
+  hideImportPage();
+  // Reset
+  importSelectedImages = [];
+  document.getElementById('importGuide').style.display = '';
+  document.getElementById('importPreviewArea').style.display = 'none';
+  document.getElementById('importResults').classList.remove('show');
+  document.getElementById('importFileInput').value = '';
+}
+
+// ===== GUIDE BANNER =====
+function dismissGuide() {
+  document.getElementById('guideBanner').style.display = 'none';
+  localStorage.setItem('birdcircle_guided', '1');
+}
+// 首次访问隐藏引导横幅
+if (localStorage.getItem('birdcircle_guided')) {
+  var gb = document.getElementById('guideBanner');
+  if (gb) gb.style.display = 'none';
+}
+// 初始化识鸟历史
+function renderAiHistory() {
+  // TODO: 实现 AI 识鸟历史记录渲染
+}
+renderAiHistory();
+
+// ===== ALBUM EXPORT =====
+// 使用 img+canvas 读取本地照片（兼容 file:// 协议）-> JSZip 打包下载
+function exportAlbum() {
+  if (typeof JSZip === 'undefined') {
+    showToast('JSZip 库加载失败，请检查网络');
+    return;
+  }
+
+  var keyword = document.getElementById('albumSearchInput').value.trim();
+  var exportBirds = {};
+  Object.entries(birdData).forEach(function(entry) {
+    var bid = entry[0], bird = entry[1];
+    if (keyword) {
+      var kw = keyword.toLowerCase();
+      var nameMatch = bird.name.includes(kw)
+        || (bird.en && bird.en.toLowerCase().includes(kw))
+        || (bird.latin && bird.latin.toLowerCase().includes(kw))
+        || bird.taxonomy.some(function(t) { return t.toLowerCase().includes(kw); });
+      if (!nameMatch) return;
+    }
+    if (albumFilterState.order && bird.taxonomy[0] !== albumFilterState.order) return;
+    if (albumFilterState.family && bird.taxonomy[1] !== albumFilterState.family) return;
+    if (albumFilterState.time) {
+      var latestTime = bird.photos[0].time;
+      if (!matchTimeFilter(latestTime, albumFilterState.time)) return;
+    }
+    exportBirds[bid] = bird;
+  });
+
+  var birdCount = Object.keys(exportBirds).length;
+  var photoCount = 0;
+  Object.values(exportBirds).forEach(function(b) { photoCount += b.photos.length; });
+
+  if (birdCount === 0) {
+    showToast('没有符合筛选条件的照片');
+    return;
+  }
+
+  showToast('正在打包 ' + photoCount + ' 张照片...');
+
+  var zip = new JSZip();
+  var doneFiles = 0;
+  var failFiles = 0;
+
+  // Helper: load image via <img> tag (works with file:// protocol)
+  function loadImageAsBlob(src) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        try {
+          var canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(function(blob) {
+            if (blob) resolve(blob);
+            else reject(new Error('canvas.toBlob failed'));
+          }, 'image/jpeg', 0.92);
+        } catch(e) { reject(e); }
+      };
+      img.onerror = function() { reject(new Error('image load failed: ' + src)); };
+      img.src = src;
+    });
+  }
+
+  var promises = [];
+  Object.entries(exportBirds).forEach(function(entry) {
+    var bid = entry[0], bird = entry[1];
+    var folderName = bird.name + (bird.en ? '_' + bird.en : '');
+    var birdFolder = zip.folder(folderName);
+
+    bird.photos.forEach(function(photo, idx) {
+      var timeStr = photo.time.replace(/[: ]/g, '-');
+      var newFileName = bird.name + '_' + timeStr + '_' + (idx + 1) + '.jpg';
+
+      var p = loadImageAsBlob(photo.src)
+        .then(function(blob) {
+          birdFolder.file(newFileName, blob);
+          doneFiles++;
+        })
+        .catch(function() {
+          failFiles++;
+        });
+      promises.push(p);
+    });
+  });
+
+  Promise.all(promises).then(function() {
+    if (doneFiles === 0) {
+      showToast('所有照片加载失败，请确认 photos 文件夹中有对应图片');
+      return;
+    }
+    zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+      .then(function(content) {
+        var url = URL.createObjectURL(content);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '鸟有圈_' + birdCount + '种_' + doneFiles + '张.zip';
+        a.click();
+        URL.revokeObjectURL(url);
+        var msg = '已导出 ' + doneFiles + ' 张照片 (' + birdCount + ' 种)';
+        if (failFiles > 0) msg += '，' + failFiles + ' 张失败';
+        showToast(msg);
+      });
+  });
+}
+
+// ===== UPLOAD / IMPORT =====
+function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); }
+function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); }
+
+async function handleUploadSpotPhoto(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(ev) {
+    var imgData = ev.target.result;
+    // Show preview
+    var area = document.getElementById('uploadSpotPhotoArea');
+    area.innerHTML = '<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;"><img src="' + imgData + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+    // Show loading
+    document.getElementById('uploadAiLoading').style.display = 'block';
+    // AI identify
+    var result = null;
+    var isDemo = false;
+    try {
+      if (!aiAccessToken) {
+        var tokenRes = await fetch(BAIDU_AI_CONFIG.tokenUrl + '&client_id=' + BAIDU_AI_CONFIG.clientId + '&client_secret=' + BAIDU_AI_CONFIG.clientSecret);
+        if (tokenRes.ok) {
+          var tokenData = await tokenRes.json();
+          if (tokenData.access_token) aiAccessToken = tokenData.access_token;
+          else throw new Error('token failed');
+        } else throw new Error('token fetch failed');
+      }
+      var base64Data = imgData.split(',')[1];
+      var formData = 'image=' + encodeURIComponent(base64Data) + '&access_token=' + encodeURIComponent(aiAccessToken) + '&baike_num=3';
+      var classifyRes = await fetch(BAIDU_AI_CONFIG.classifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      });
+      if (classifyRes.ok) {
+        var classifyData = await classifyRes.json();
+        if (classifyData.result && classifyData.result.length > 0) {
+          result = classifyData.result;
+        } else throw new Error('no result');
+      } else throw new Error('classify fetch failed');
+    } catch(err) {
+      console.log('API failed, demo mode:', err.message);
+      isDemo = true;
+      result = generateDemoResult();
+    }
+    document.getElementById('uploadAiLoading').style.display = 'none';
+    // Render result
+    var main = result[0];
+    var desc = main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '';
+    if (!desc) desc = main.name + '是一种常见的鸟类。';
+    var badge = isDemo ? '<span style="font-size:11px;color:#e65100;background:#fff3e0;padding:2px 8px;border-radius:10px;margin-left:8px;">演示</span>' : '<span style="font-size:11px;color:#2e7d32;background:#e8f5e9;padding:2px 8px;border-radius:10px;margin-left:8px;">AI</span>';
+    var html = '<div class="bird-select-item" style="background:var(--green-pale);border-radius:8px;">';
+    html += '<div style="padding:12px;">';
+    html += '<div style="font-size:15px;font-weight:600;margin-bottom:4px;">' + main.name + badge + '</div>';
+    html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">置信度 ' + main.score.toFixed(1) + '%</div>';
+    html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + desc + '</div>';
+    html += '</div></div>';
+    // Candidates
+    if (result.length > 1) {
+      html += '<div style="font-size:12px;color:var(--text-muted);margin:8px 0 4px;">其他候选</div>';
+      result.slice(1, 4).forEach(function(c) {
+        var s = typeof c.score === 'number' ? c.score.toFixed(1) : c.score;
+        html += '<div class="bird-select-item"><div><div class="bird-select-name">' + c.name + '</div></div><div style="font-size:12px;color:var(--text-muted);">' + s + '%</div></div>';
+      });
+    }
+    document.getElementById('uploadSpotBirdList').innerHTML = html;
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); }
+function hideImportPage() {
+  document.getElementById('importPage').classList.remove('show');
+  document.getElementById('importGuide').style.display = 'block';
+  document.getElementById('importResults').classList.remove('show');
+}
+// ===== LEAFLET MAP =====
+const spots = [
+  // === eBird API 真实热点 (2026-07-06) + 权威来源补充 ===
+
+  { ebirdId:'L2394169', name:'沙河水库', lat:40.1313, lng:116.3080, type:'wetland', dist:'47.6km', area:'海淀区', time:'2026-07-05', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'357 种 · 4893 清单', numSpecies:357, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L4427370', name:'温榆河', lat:39.9395, lng:116.6430, type:'wetland', dist:'52.1km', area:'朝阳区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'306 种 · 596 清单', numSpecies:306, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L16224709', name:'大宁水库及其东部永定河废弃河道', lat:39.8290, lng:116.2171, type:'wetland', dist:'57.1km', area:'海淀区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'290 种 · 686 清单', numSpecies:290, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L1168475', name:'颐和园', lat:39.9927, lng:116.2723, type:'park', dist:'32.1km', area:'海淀区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'270 种 · 1489 清单', numSpecies:270, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L7516823', name:'奥林匹克森林公园南园', lat:40.0174, lng:116.3938, type:'forest', dist:'18.3km', area:'朝阳区', time:'2026-07-05', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'268 种 · 2322 清单', numSpecies:268, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L1762807', name:'圆明园', lat:40.0079, lng:116.3006, type:'park', dist:'30.9km', area:'海淀区', time:'2026-06-30', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'265 种 · 1175 清单', numSpecies:265, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L1494335', name:'奥林匹克森林公园', lat:40.0226, lng:116.3920, type:'forest', dist:'19.5km', area:'朝阳区', time:'2026-07-05', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'252 种 · 1014 清单', numSpecies:252, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L7966937', name:'南海子公园', lat:39.7771, lng:116.4606, type:'park', dist:'54.4km', area:'朝阳区', time:'2026-06-27', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'239 种 · 675 清单', numSpecies:239, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L5824445', name:'北京大学', lat:39.9938, lng:116.3103, type:'park', dist:'26.8km', area:'海淀区', time:'2026-06-25', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'236 种 · 1910 清单', numSpecies:236, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L992347', name:'北京植物园', lat:39.9991, lng:116.2092, type:'forest', dist:'40.5km', area:'海淀区', time:'2026-07-05', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'233 种 · 1818 清单', numSpecies:233, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L3527640', name:'百望山森林公园', lat:40.0331, lng:116.2538, type:'forest', dist:'40.4km', area:'海淀区', time:'2026-06-26', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'228 种 · 1608 清单', numSpecies:228, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L13741681', name:'奥林匹克森林公园北园', lat:40.0271, lng:116.3930, type:'forest', dist:'20.9km', area:'朝阳区', time:'2026-07-01', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'227 种 · 860 清单', numSpecies:227, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L36836634', name:'乐活中堤', lat:39.8075, lng:116.2394, type:'wetland', dist:'57.5km', area:'海淀区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'226 种 · 493 清单', numSpecies:226, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L2398320', name:'天坛公园', lat:39.8810, lng:116.4120, type:'park', dist:'37.4km', area:'朝阳区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'219 种 · 1941 清单', numSpecies:219, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L5119148', name:'绿堤公园', lat:39.8392, lng:116.2215, type:'wetland', dist:'55.7km', area:'海淀区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'190 种 · 259 清单', numSpecies:190, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L36497965', name:'京西稻智慧农场', lat:40.0957, lng:116.1952, type:'park', dist:'53.2km', area:'海淀区', time:'2026-07-02', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'176 种 · 235 清单', numSpecies:176, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L3682279', name:'玉渊潭公园', lat:39.9170, lng:116.3173, type:'park', dist:'37.8km', area:'海淀区', time:'2026-06-14', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'172 种 · 928 清单', numSpecies:172, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L7561343', name:'园博园', lat:39.8743, lng:116.1910, type:'park', dist:'54.6km', area:'海淀区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'171 种 · 163 清单', numSpecies:171, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L5270689', name:'清华大学', lat:40.0022, lng:116.3227, type:'park', dist:'26.6km', area:'海淀区', time:'2026-07-03', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'164 种 · 628 清单', numSpecies:164, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L6529689', name:'朝阳公园', lat:39.9396, lng:116.4793, type:'park', dist:'36.3km', area:'朝阳区', time:'2026-06-21', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'161 种 · 503 清单', numSpecies:161, img:'photos/spot_mirror_lake.jpg', sensitive:false },
+  { ebirdId:'L38450904', name:'宋庄蓄滞洪区', lat:39.9734, lng:116.6494, type:'wetland', dist:'48.9km', area:'朝阳区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'159 种 · 134 清单', numSpecies:159, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L6548171', name:'全国农业展览馆', lat:39.9412, lng:116.4657, type:'park', dist:'34.4km', area:'朝阳区', time:'2026-06-21', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'138 种 · 489 清单', numSpecies:138, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L22423288', name:'官庄公园', lat:39.8799, lng:116.5084, type:'park', dist:'47.2km', area:'朝阳区', time:'2026-07-03', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'137 种 · 226 清单', numSpecies:137, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L8325827', name:'温榆河机场段', lat:40.0426, lng:116.5489, type:'wetland', dist:'44.0km', area:'朝阳区', time:'2026-06-08', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'132 种 · 172 清单', numSpecies:132, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L1257298', name:'北海公园', lat:39.9262, lng:116.3892, type:'park', dist:'26.7km', area:'朝阳区', time:'2026-06-28', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'122 种 · 347 清单', numSpecies:122, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L6924822', name:'北京动物园', lat:39.9408, lng:116.3336, type:'park', dist:'32.0km', area:'海淀区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'118 种 · 253 清单', numSpecies:118, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L7989056', name:'红领巾公园', lat:39.9263, lng:116.4915, type:'park', dist:'39.6km', area:'朝阳区', time:'2026-06-16', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'117 种 · 330 清单', numSpecies:117, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L27566744', name:'南苑湿地公园', lat:39.8163, lng:116.3817, type:'wetland', dist:'44.7km', area:'朝阳区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'113 种 · 58 清单', numSpecies:113, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L17495530', name:'马家湾湿地公园', lat:39.8395, lng:116.5592, type:'wetland', dist:'55.8km', area:'朝阳区', time:'2026-06-23', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'111 种 · 82 清单', numSpecies:111, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L15302674', name:'西郊雨洪调蓄工程', lat:39.9205, lng:116.2193, type:'wetland', dist:'47.1km', area:'海淀区', time:'2026-06-10', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'103 种 · 98 清单', numSpecies:103, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L13758467', name:'龙潭西湖公园', lat:39.8795, lng:116.4294, type:'wetland', dist:'39.5km', area:'朝阳区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'99 种 · 129 清单', numSpecies:99, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L30854915', name:'龙潭中湖公园', lat:39.8770, lng:116.4332, type:'wetland', dist:'40.3km', area:'朝阳区', time:'2026-06-24', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'98 种 · 91 清单', numSpecies:98, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L15511453', name:'柳荫公园', lat:39.9605, lng:116.4023, type:'park', dist:'20.8km', area:'朝阳区', time:'2026-06-07', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'97 种 · 86 清单', numSpecies:97, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L8307687', name:'将府公园', lat:39.9661, lng:116.5101, type:'park', dist:'35.9km', area:'朝阳区', time:'2026-06-18', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'92 种 · 96 清单', numSpecies:92, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L1319371', name:'景山公园', lat:39.9247, lng:116.3968, type:'forest', dist:'28.0km', area:'朝阳区', time:'2026-06-11', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'88 种 · 142 清单', numSpecies:88, img:'photos/spot_forest_path.jpg', sensitive:false },
+  { ebirdId:'L29463847', name:'温榆河-清河汇合段', lat:40.0797, lng:116.4914, type:'wetland', dist:'43.1km', area:'朝阳区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'85 种 · 13 清单', numSpecies:85, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L7049829', name:'中科院植物研究所', lat:39.9894, lng:116.2158, type:'park', dist:'38.6km', area:'海淀区', time:'2026-06-21', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'81 种 · 73 清单', numSpecies:81, img:'photos/spot_lake_island.jpg', sensitive:false },
+  { ebirdId:'L7940699', name:'望京楼', lat:40.0049, lng:116.1693, type:'park', dist:'45.2km', area:'海淀区', time:'2026-06-26', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'73 种 · 24 清单', numSpecies:73, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L30610489', name:'首都经济贸易大学', lat:39.8420, lng:116.3112, type:'park', dist:'48.1km', area:'海淀区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'70 种 · 76 清单', numSpecies:70, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L17698533', name:'故宫', lat:39.9171, lng:116.3971, type:'park', dist:'29.5km', area:'朝阳区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'69 种 · 93 清单', numSpecies:69, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L22982209', name:'北京工业大学', lat:39.8743, lng:116.4803, type:'park', dist:'45.3km', area:'朝阳区', time:'2026-06-29', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'68 种 · 107 清单', numSpecies:68, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L2402583', name:'日坛公园', lat:39.9155, lng:116.4439, type:'park', dist:'35.8km', area:'朝阳区', time:'2026-06-07', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'68 种 · 98 清单', numSpecies:68, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L7404153', name:'莲花池公园', lat:39.8923, lng:116.3150, type:'park', dist:'41.5km', area:'海淀区', time:'2026-06-12', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'67 种 · 66 清单', numSpecies:67, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L38450945', name:'黑桥公园', lat:39.9973, lng:116.5360, type:'park', dist:'36.4km', area:'朝阳区', time:'2026-06-17', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'67 种 · 36 清单', numSpecies:67, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L1583649', name:'北京首都国际机场', lat:40.0539, lng:116.6165, type:'park', dist:'51.3km', area:'朝阳区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'66 种 · 119 清单', numSpecies:66, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L24683945', name:'海淀公园', lat:39.9859, lng:116.2952, type:'park', dist:'29.2km', area:'海淀区', time:'2026-06-12', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'64 种 · 41 清单', numSpecies:64, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L28558624', name:'陶然亭公园', lat:39.8739, lng:116.3803, type:'park', dist:'37.0km', area:'朝阳区', time:'2026-06-06', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'64 种 · 72 清单', numSpecies:64, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L19991295', name:'北京二中', lat:39.9197, lng:116.4237, type:'park', dist:'32.7km', area:'朝阳区', time:'2026-06-23', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'63 种 · 373 清单', numSpecies:63, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L29677027', name:'宣武艺园', lat:39.8953, lng:116.3593, type:'park', dist:'36.2km', area:'海淀区', time:'2026-06-22', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'63 种 · 59 清单', numSpecies:63, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L8095787', name:'中关村软件园', lat:40.0482, lng:116.2939, type:'park', dist:'38.2km', area:'海淀区', time:'2026-06-13', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'62 种 · 48 清单', numSpecies:62, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L36715839', name:'太阳宫公园', lat:39.9754, lng:116.4560, type:'park', dist:'26.9km', area:'朝阳区', time:'2026-06-28', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'60 种 · 40 清单', numSpecies:60, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L13989779', name:'东坝郊野公园', lat:39.9532, lng:116.5770, type:'park', dist:'44.7km', area:'朝阳区', time:'2026-06-15', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'59 种 · 34 清单', numSpecies:59, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L38199052', name:'中坞公园', lat:39.9809, lng:116.2609, type:'park', dist:'34.6km', area:'海淀区', time:'2026-06-28', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'56 种 · 11 清单', numSpecies:56, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L14439004', name:'团结湖公园', lat:39.9258, lng:116.4642, type:'wetland', dist:'36.7km', area:'朝阳区', time:'2026-06-26', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'49 种 · 288 清单', numSpecies:49, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L37794307', name:'齐物潭', lat:40.0616, lng:116.1739, type:'park', dist:'51.3km', area:'海淀区', time:'2026-06-17', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'47 种 · 36 清单', numSpecies:47, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L3352512', name:'地坛公园', lat:39.9538, lng:116.4155, type:'park', dist:'24.9km', area:'朝阳区', time:'2026-06-06', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'44 种 · 29 清单', numSpecies:44, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L2543930', name:'菖蒲河公园', lat:39.9085, lng:116.4044, type:'wetland', dist:'32.1km', area:'朝阳区', time:'2026-06-13', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'43 种 · 20 清单', numSpecies:43, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L23509248', name:'中国人民大学', lat:39.9708, lng:116.3132, type:'park', dist:'29.4km', area:'海淀区', time:'2026-06-17', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'42 种 · 26 清单', numSpecies:42, img:'photos/spot_meadow.jpg', sensitive:false },
+  { ebirdId:'L69726090', name:'五一渠生态滨河公园', lat:40.0525, lng:116.2453, type:'wetland', dist:'43.9km', area:'海淀区', time:'2026-07-02', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'42 种 · 21 清单', numSpecies:42, img:'photos/spot_wetland.jpg', sensitive:false },
+
+  // === 权威来源补充（不在 eBird 30天内活跃热点中） ===
+  { name:'翠湖国家城市湿地公园', lat:40.0860, lng:116.1750, type:'wetland', dist:'--', area:'海淀区', time:'2026-04-15', birds:['鸿雁','灰雁','震旦鸦雀','黄胸鹀'], news:'200 种（海淀观鸟地图）', numSpecies:200, img:'photos/spot_wetland.jpg', sensitive:false },
+  { name:'上庄水库', lat:40.0970, lng:116.1890, type:'wetland', dist:'--', area:'海淀区', time:'2025-03-12', birds:['翠鸟','绿头鸭','苍鹭','白鹭'], news:'150 种（海淀观鸟地图）', numSpecies:150, img:'photos/spot_wetland.jpg', sensitive:false },
+  { name:'北坞公园', lat:39.9900, lng:116.2620, type:'park', dist:'--', area:'海淀区', time:'2024-10-20', birds:['游隼','红嘴蓝鹊','红隼','黑水鸡'], news:'80 种（海淀观鸟地图）', numSpecies:80, img:'photos/spot_meadow.jpg', sensitive:false },
+  { name:'温榆河公园（朝阳段）', lat:40.0250, lng:116.5580, type:'wetland', dist:'--', area:'朝阳区', time:'2026-05-10', birds:['棕背伯劳','文须雀','鹊鸭','短耳鸮'], news:'180 种（朝阳区政府发布）', numSpecies:180, img:'photos/spot_wetland.jpg', sensitive:false },
+  { name:'元大都城垣遗址公园', lat:39.9640, lng:116.3830, type:'park', dist:'--', area:'朝阳区', time:'2026-05-28', birds:['小太平鸟','大斑啄木鸟','红尾鸲'], news:'100 种（豆瓣2026版）', numSpecies:100, img:'photos/spot_meadow.jpg', sensitive:false },
+];
+
+// ===== RECENCY HELPERS (global) =====
+function getRecencyColor(dateStr) {
+  const now = new Date('2026-07-06');
+  const d = new Date(dateStr);
+  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 7) return 'week';
+  if (diffDays <= 30) return 'month';
+  if (diffDays <= 90) return 'quarter';
+  return 'older';
+}
+function formatRecency(dateStr) {
+  const now = new Date('2026-07-06');
+  const d = new Date(dateStr);
+  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return '今天';
+  if (diffDays === 1) return '昨天';
+  if (diffDays <= 7) return diffDays + '天前';
+  if (diffDays <= 30) return Math.round(diffDays / 7) + '周前';
+  if (diffDays <= 90) return Math.round(diffDays / 30) + '个月前';
+  return Math.round(diffDays / 365) + '年前';
+}
+
+function initMap() {
+  if(mapInitialized) return;
+  mapInitialized = true;
+
+  map = L.map('map', {
+    center: [39.98, 116.38],
+    zoom: 11,
+    zoomControl: false,
+    attributionControl: false,
+  });
+
+  L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {
+    maxZoom: 19,
+  }).addTo(map);
+
+  spots.forEach((spot, index) => {
+    const colorClass = getRecencyColor(spot.time);
+    const sensitiveClass = spot.sensitive ? ' sensitive' : '';
+    
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="custom-marker ${colorClass}${sensitiveClass}"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+
+    // Hide precise coordinates for sensitive species
+    let markerLat = spot.lat;
+    let markerLng = spot.lng;
+    if(spot.sensitive) {
+      // Add small offset to hide exact location
+      markerLat += (Math.random() - 0.5) * 0.003;
+      markerLng += (Math.random() - 0.5) * 0.003;
+    }
+
+    const marker = L.marker([markerLat, markerLng], { icon }).addTo(map);
+    marker.on('click', () => showSpotDetail(index));
+  });
+
+  map.on('click', () => {
+    document.getElementById('spotDetail').classList.remove('show');
+  });
+}
+
+function showSpotDetail(index) {
+  const s = spots[index];
+  // Render image with overlay containing name + meta
+  document.getElementById('spotDetailImg').innerHTML = `
+    <img src="${s.img}" alt="${s.name}">
+    <div class="spot-detail-img-overlay">
+      <div class="spot-detail-img-name">${s.name}</div>
+      <div class="spot-detail-img-meta">
+        <span>${s.dist}</span><span>${s.area}</span><span>${formatRecency(s.time)}</span>
+      </div>
+    </div>`;
+  document.getElementById('spotDetailTags').innerHTML = s.birds.map(b => `<span class="bird-tag">${b}</span>`).join('');
+  document.getElementById('spotDetailNews').textContent = s.news;
+
+  // Store current spot index for checkin/nav
+  currentSpotIndex = index;
+
+  // Checkin button state
+  const checkinBtn = document.getElementById('spotDetailCheckin');
+  const checkedSpots = JSON.parse(localStorage.getItem('checkedSpots') || '[]');
+  if (checkedSpots.includes(s.name)) {
+    checkinBtn.className = 'spot-detail-checkin checked';
+    checkinBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 已打卡';
+  } else {
+    checkinBtn.className = 'spot-detail-checkin';
+    checkinBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 打卡';
+  }
+
+  // Nav button
+  const navBtn = document.getElementById('spotDetailNav');
+  const sensDiv = document.getElementById('spotSensitivity');
+
+  if(s.sensitive) {
+    navBtn.className = 'spot-detail-nav disabled';
+    navBtn.textContent = '导航已禁用';
+    sensDiv.innerHTML = `
+      <div class="spot-detail-sensitivity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+        <span>该地点包含敏感物种信息，坐标已隐藏，导航功能已禁用</span>
+      </div>`;
+  } else {
+    navBtn.className = 'spot-detail-nav';
+    navBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> 导航';
+    sensDiv.innerHTML = '';
+  }
+
+  document.getElementById('spotDetail').classList.add('show');
+
+  // Only pan if the marker would be hidden behind the detail panel
+  if (map) {
+    const point = map.latLngToContainerPoint(L.latLng(s.lat, s.lng));
+    const containerH = map.getContainer().clientHeight;
+    const panelTop = containerH * 0.5; // panel starts at ~50% from top
+    if (point.y > panelTop - 20) {
+      // Marker is in the lower half — pan it up to just above the panel
+      const offsetPx = Math.round(point.y - panelTop + 40);
+      map.panBy([0, offsetPx], { animate: true, duration: 0.3 });
+    }
+  }
+}
+
+// ===== SPOT CHECKIN / NAV =====
+let currentSpotIndex = -1;
+
+function checkInSpot() {
+  if (currentSpotIndex < 0) return;
+  var s = spots[currentSpotIndex];
+  var today = new Date().toLocaleDateString('zh-CN');
+  var checkins = JSON.parse(localStorage.getItem('birdcircle_checkins') || '{}');
+  var key = s.name || s.ebirdId || ('spot_' + currentSpotIndex);
+  if (checkins[key] === today) {
+    showToast('今天已经打卡过「' + s.name + '」了');
+    return;
+  }
+  checkins[key] = today;
+  localStorage.setItem('birdcircle_checkins', JSON.stringify(checkins));
+  var total = Object.keys(checkins).length;
+  var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + 5;
+  localStorage.setItem('birdcircle_points', String(points));
+  showToast('打卡成功！' + s.name + ' +5 积分 (累计 ' + points + ' 分)');
+}
+
+function navToSpot() {
+  if (currentSpotIndex < 0) return;
+  const s = spots[currentSpotIndex];
+  if (s.sensitive) {
+    showToast('该地点导航已禁用');
+    return;
+  }
+  showToast('正在为你导航到「' + s.name + '」');
+}
+
+// ===== BIRD DETAIL =====
+const birdData = {
+  kingfisher: {
+    name:'翠鸟', en:'Common Kingfisher', latin:'Alcedo atthis',
+    taxonomy:['佛法僧目','翠鸟科'],
+    photos:[
+      { src:'photos/kingfisher_1.jpg', time:'2026-07-05 06:30', place:'南园湖心岛' },
+      { src:'photos/kingfisher_2.jpg', time:'2026-06-28 07:15', place:'南园西侧水系' },
+      { src:'photos/kingfisher_3.jpg', time:'2026-06-20 06:45', place:'未同步位置' },
+    ]
+  },
+  mandarin: {
+    name:'鸳鸯', en:'Mandarin Duck', latin:'Aix galericulata',
+    taxonomy:['雁形目','鸭科'],
+    photos:[
+      { src:'photos/mandarin_1.jpg', time:'2026-07-04 17:30', place:'北园天境湖' },
+      { src:'photos/mandarin_2.jpg', time:'2026-07-02 06:20', place:'北园天境湖' },
+      { src:'photos/mandarin_3.jpg', time:'2026-06-25 07:00', place:'奥海湿地' },
+    ]
+  },
+  hoopoe: {
+    name:'戴胜', en:'Eurasian Hoopoe', latin:'Upupa epops',
+    taxonomy:['犀鸟目','戴胜科'],
+    photos:[
+      { src:'photos/hoopoe_1.jpg', time:'2026-07-01 08:10', place:'生态廊道桥' },
+      { src:'photos/hoopoe_2.jpg', time:'2026-06-22 07:30', place:'花田野趣' },
+    ]
+  },
+  swallow: {
+    name:'家燕', en:'Barn Swallow', latin:'Hirundo rustica',
+    taxonomy:['雀形目','燕科'],
+    photos:[
+      { src:'photos/swallow_1.jpg', time:'2026-07-03 18:00', place:'花田野趣' },
+      { src:'photos/swallow_2.jpg', time:'2026-06-28 17:30', place:'南园湖心岛' },
+      { src:'photos/swallow_3.jpg', time:'2026-06-15 06:10', place:'花田野趣' },
+    ]
+  },
+  bluethroat: {
+    name:'蓝喉歌鸲', en:'Bluethroat', latin:'Luscinia svecica',
+    taxonomy:['雀形目','鹟科'],
+    photos:[
+      { src:'photos/bluethroat_1.jpg', time:'2026-06-15 06:00', place:'南园西侧水系' },
+      { src:'photos/bluethroat_2.jpg', time:'2026-06-08 06:20', place:'生态廊道桥' },
+      { src:'photos/bluethroat_3.jpg', time:'2026-06-01 06:40', place:'南园西侧水系' },
+    ]
+  },
+  mallard: {
+    name:'绿头鸭', en:'Mallard', latin:'Anas platyrhynchos',
+    taxonomy:['雁形目','鸭科'],
+    photos:[
+      { src:'photos/mallard_1.jpg', time:'2026-07-04 06:30', place:'北园天境湖' },
+      { src:'photos/mallard_2.jpg', time:'2026-06-30 17:00', place:'奥海湿地' },
+      { src:'photos/mallard_3.jpg', time:'2026-06-20 06:50', place:'北园天境湖' },
+    ]
+  },
+  grebe: {
+    name:'小鸊鷉', en:'Little Grebe', latin:'Tachybaptus ruficollis',
+    taxonomy:['鸊鷉目','鸊鷉科'],
+    photos:[
+      { src:'photos/grebe_1.jpg', time:'2026-07-05 06:00', place:'南园西侧水系' },
+      { src:'photos/grebe_2.jpg', time:'2026-06-29 07:10', place:'南园湖心岛' },
+      { src:'photos/grebe_3.jpg', time:'2026-06-22 06:30', place:'南园西侧水系' },
+    ]
+  },
+  crestedgrebe: {
+    name:'凤头鸊鷉', en:'Great Crested Grebe', latin:'Podiceps cristatus',
+    taxonomy:['鸊鷉目','鸊鷉科'],
+    photos:[
+      { src:'photos/crestedgrebe_1.jpg', time:'2026-06-26 06:40', place:'北园天境湖' },
+      { src:'photos/crestedgrebe_2.jpg', time:'2026-06-18 07:00', place:'北园天境湖' },
+    ]
+  },
+  owl: {
+    name:'领角鸮', en:'Collared Owlet', latin:'Glaucidium brodiei',
+    taxonomy:['鸮形目','鸱鸮科'],
+    photos:[
+      { src:'photos/owl_1.jpg', time:'2026-06-20 05:30', place:'未同步位置' },
+      { src:'photos/owl_2.jpg', time:'2026-06-18 21:00', place:'北园东侧林地' },
+    ]
+  },
+};
+
+// ===== ALBUM PHOTO STACK =====
+// Independent swipe state per bird species
+const stackState = {};
+const stackAnimating = {};
+const SWIPE_THRESHOLD = 40;
+
+function getSafeIndex(birdId) {
+  const raw = stackState[birdId];
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : 0;
+}
+function setSafeIndex(birdId, nextIndex, total) {
+  if (!total || total <= 0) { stackState[birdId] = 0; return; }
+  stackState[birdId] = ((Number(nextIndex) || 0) % total + total) % total;
+}
+
+function getStackPhotos(birdId) {
+  const photos = birdData[birdId].photos.map(p => p.src);
+  const idx = getSafeIndex(birdId);
+  const total = photos.length;
+  if (total <= 1) return [photos[0], null, null];
+  if (total === 2) return [photos[idx % 2], photos[(idx + 1) % 2], null];
+  return [
+    photos[idx % total],
+    photos[(idx + 1) % total],
+    photos[(idx + 2) % total]
+  ];
+}
+
+function swipeStack(birdId, direction) {
+  const photos = birdData[birdId].photos;
+  const total = photos.length;
+  if (total <= 1) return;
+  const current = getSafeIndex(birdId);
+  if (direction === 'left') {
+    setSafeIndex(birdId, current + 1, total);
+  } else {
+    setSafeIndex(birdId, current - 1, total);
+  }
+  renderStack(birdId);
+}
+
+function renderStack(birdId) {
+  const stackEl = document.getElementById('stack-' + birdId);
+  if (!stackEl) return;
+  const bird = birdData[birdId];
+  const photos = getStackPhotos(birdId);
+  const count = bird.photos.length;
+
+  let html = '';
+  if (photos[1]) {
+    html += `<div class="bird-stack-layer second"><img src="${photos[1]}" alt=""></div>`;
+  }
+  html += `<div class="bird-stack-layer front">`;
+  html += `<img src="${photos[0]}" alt="">`;
+  html += `<div class="bird-stack-name">${bird.name}</div>`;
+  if (count > 1) {
+    html += `<div class="bird-stack-count">${getSafeIndex(birdId) + 1} / ${count}</div>`;
+  }
+  html += `</div>`;
+  stackEl.innerHTML = html;
+  setupStackTouch(birdId, stackEl);
+}
+
+function setupStackTouch(birdId, el) {
+  let startX = 0, startY = 0, dragging = null;
+  let isTouching = false;
+
+  function resetDrag() {
+    isTouching = false;
+    dragging = null;
+    startX = 0;
+    startY = 0;
+    // Clear any inline transform on front layer
+    const layers = el.querySelectorAll('.bird-stack-layer');
+    const front = layers[layers.length - 1];
+    if (front) {
+      front.style.transition = '';
+      front.style.transform = '';
+    }
+  }
+
+  function onStart(e) {
+    if (stackAnimating[birdId]) return;
+    if (e.pointerId !== undefined) el.setPointerCapture(e.pointerId);
+    const touch = e.touches ? e.touches[0] : e;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    dragging = null;
+    isTouching = true;
+  }
+
+  function onMove(e) {
+    // Block during animation or if not touching
+    if (!isTouching || stackAnimating[birdId]) return;
+    const touch = e.touches ? e.touches[0] : e;
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+
+    if (dragging === null) {
+      if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+      if (Math.abs(dy) > Math.abs(dx)) { dragging = false; return; }
+      dragging = 'swipe';
+    }
+    if (dragging !== 'swipe') return;
+
+    e.preventDefault();
+    const layers = el.querySelectorAll('.bird-stack-layer');
+    const frontLayer = layers[layers.length - 1];
+    if (frontLayer) {
+      frontLayer.style.transition = 'none';
+      frontLayer.style.transform = `translateX(${dx}px) rotate(${dx / 10}deg)`;
+    }
+  }
+
+  function onEnd(e) {
+    if (!isTouching) return;
+
+    // If not swiping, just clean up
+    if (dragging !== 'swipe') {
+      resetDrag();
+      return;
+    }
+
+    const touch = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = touch.clientX - startX;
+    const layers = el.querySelectorAll('.bird-stack-layer');
+    const frontLayer = layers[1]; // DOM order: second[0], front[1]
+    const back1 = layers[0];
+
+    // Release pointer capture
+    if (e.pointerId !== undefined) {
+      try { el.releasePointerCapture(e.pointerId); } catch(_){}
+    }
+
+    // Clear drag state immediately — stop following finger
+    isTouching = false;
+    dragging = null;
+
+    if (!frontLayer) return;
+
+    if (Math.abs(dx) < SWIPE_THRESHOLD) {
+      // Snap back
+      frontLayer.style.transition = 'transform 180ms ease';
+      frontLayer.style.transform = '';
+      return;
+    }
+
+    const dir = dx < 0 ? -1 : 1;
+    stackAnimating[birdId] = true;
+
+    // Step 1: front flies out — animate FROM current inline transform to off-screen
+    // Don't clear inline style (that causes a flash back to rotate(0)).
+    // Instead, set a CSS transition and the final fly-out position directly.
+    frontLayer.style.transition = 'transform 220ms cubic-bezier(.2,.8,.2,1), opacity 220ms, z-index 0s';
+    frontLayer.style.transform = dir < 0
+      ? 'translateX(-120%) rotate(-10deg)'
+      : 'translateX(120%) rotate(10deg)';
+    frontLayer.style.opacity = '0';
+    frontLayer.style.zIndex = '0';
+    frontLayer.classList.remove('front');
+
+    // Step 2: back-1 promotes to front — transition from its current visual state
+    if (back1) {
+      back1.style.transition = 'left 220ms cubic-bezier(.2,.8,.2,1), top 220ms cubic-bezier(.2,.8,.2,1), transform 220ms cubic-bezier(.2,.8,.2,1), opacity 220ms';
+      back1.style.left = '0';
+      back1.style.top = '0';
+      back1.style.transform = 'rotate(0deg)';
+      back1.style.opacity = '1';
+      back1.style.zIndex = '3';
+      back1.classList.remove('second');
+      back1.classList.add('front');
+    }
+
+    // Step 3: after CSS animation ends, silently reset to class-based state
+    setTimeout(() => {
+      const total = birdData[birdId].photos.length;
+      const current = getSafeIndex(birdId);
+      setSafeIndex(birdId, current - dir, total);
+      const photos = getStackPhotos(birdId);
+
+      // Disable ALL transitions to prevent any visual flash
+      layers.forEach(l => { if (l) l.style.transition = 'none'; });
+
+      // Reset layer 0 → second
+      if (layers[0]) {
+        layers[0].className = 'bird-stack-layer second';
+        layers[0].style.cssText = 'transition:none';
+        const img = layers[0].querySelector('img');
+        if (img) img.src = photos[1] || '';
+      }
+      // Reset layer 1 → front (with badges inside)
+      if (layers[1]) {
+        layers[1].className = 'bird-stack-layer front';
+        layers[1].style.cssText = 'transition:none';
+        const img = layers[1].querySelector('img');
+        if (img) img.src = photos[0];
+        const countEl = layers[1].querySelector('.bird-stack-count');
+        if (countEl) countEl.textContent = `${getSafeIndex(birdId) + 1} / ${birdData[birdId].photos.length}`;
+      }
+
+      // Force reflow so 'none' takes effect, then restore transitions
+      void document.body.offsetHeight;
+
+      // Restore base CSS transitions for next interaction
+      layers.forEach(l => {
+        if (l) l.style.transition = 'transform 220ms cubic-bezier(.2,.8,.2,1), opacity 220ms';
+      });
+
+      stackAnimating[birdId] = false;
+    }, 260);
+  }
+
+  // Pointer Events — unified touch + mouse
+  el.addEventListener('pointerdown', onStart);
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onEnd);
+  el.addEventListener('pointercancel', onEnd);
+  el.addEventListener('lostpointercapture', onEnd);
+  // Window blur = app loses focus
+  window.addEventListener('blur', () => resetDrag());
+  // Prevent context menu on long press
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+// Album categories layout
+const albumCategories = [
+  {
+    title: '雀形目 · 燕科',
+    birds: ['swallow']
+  },
+  {
+    title: '雀形目 · 鹟科',
+    birds: ['bluethroat']
+  },
+  {
+    title: '佛法僧目 · 翠鸟科',
+    birds: ['kingfisher']
+  },
+  {
+    title: '雁形目 · 鸭科',
+    birds: ['mandarin', 'mallard']
+  },
+  {
+    title: '鸊鷉目 · 鸊鷉科',
+    birds: ['grebe', 'crestedgrebe']
+  },
+  {
+    title: '鸮形目 · 鸱鸮科',
+    birds: ['owl']
+  },
+  {
+    title: '犀鸟目 · 戴胜科',
+    birds: ['hoopoe']
+  }
+];
+
+function initAlbum() {
+  const container = document.getElementById('albumContainer');
+  let totalPhotos = 0;
+  const totalSpecies = Object.keys(birdData).length;
+
+  Object.values(birdData).forEach(b => { totalPhotos += b.photos.length; });
+  document.getElementById('albumCount').innerHTML = '<span style="color:#ff6b35">' + totalSpecies + '</span> 种 · <span style="color:#ff6b35">' + totalPhotos + '</span> 张';
+
+  // Helper: render a single bird stack
+  function renderStack(birdId) {
+    const bird = birdData[birdId];
+    const photos = getStackPhotos(birdId);
+    let stackHtml = '';
+    if (photos[1]) {
+      stackHtml += `<div class="bird-stack-layer second"><img src="${photos[1]}" alt=""></div>`;
+    }
+    stackHtml += `<div class="bird-stack-layer front"><img src="${photos[0]}" alt="">`;
+    stackHtml += `<div class="bird-stack-name">${bird.name}</div>`;
+    if (bird.photos.length > 1) {
+      stackHtml += `<div class="bird-stack-count">1 / ${bird.photos.length}</div>`;
+    }
+    stackHtml += `</div>`;
+    return `<div class="bird-stack" id="stack-${birdId}" ondblclick="openBirdDetail('${birdId}')">${stackHtml}</div>`;
+  }
+
+  // Expose renderAlbum globally so filter can call it
+  renderAlbumWithCategories = function(categories) {
+    // Separate into single-card and multi-card
+    const singles = [];
+    const multis = [];
+    categories.forEach(cat => {
+      if (cat.birds.length === 1) singles.push(cat);
+      else multis.push(cat);
+    });
+
+    let html = '';
+    const pairedSingles = singles.length % 2 === 0 ? singles : singles.slice(0, -1);
+    const leftover = singles.length % 2 === 1 ? singles[singles.length - 1] : null;
+
+    for (let i = 0; i < pairedSingles.length; i += 2) {
+      html += `<div class="album-pair">`;
+      html += `<div class="album-pair-item">`;
+      html += `<div class="category-title">${pairedSingles[i].title}</div>`;
+      html += renderStack(pairedSingles[i].birds[0]);
+      html += `</div>`;
+      html += `<div class="album-pair-item">`;
+      html += `<div class="category-title">${pairedSingles[i+1].title}</div>`;
+      html += renderStack(pairedSingles[i+1].birds[0]);
+      html += `</div>`;
+      html += `</div>`;
+    }
+
+    multis.forEach(cat => {
+      html += `<div class="album-category">`;
+      html += `<div class="category-title">${cat.title}</div>`;
+      html += `<div class="album-grid">`;
+      cat.birds.forEach(birdId => { html += renderStack(birdId); });
+      html += `</div></div>`;
+    });
+
+    if (leftover) {
+      html += `<div class="album-category">`;
+      html += `<div class="category-title">${leftover.title}</div>`;
+      html += `<div class="album-grid">`;
+      html += renderStack(leftover.birds[0]);
+      html += `</div></div>`;
+    }
+
+    if (!html) html = `<div class="album-empty">没有找到匹配的鸟种</div>`;
+    container.innerHTML = html;
+
+    categories.forEach(cat => {
+      cat.birds.forEach(birdId => {
+        const el = document.getElementById('stack-' + birdId);
+        if (el) setupStackTouch(birdId, el);
+      });
+    });
+  };
+
+  // Initial render
+  renderAlbumWithCategories(albumCategories);
+
+  // Search input — also applies active filters
+  const searchInput = document.getElementById('albumSearchInput');
+  searchInput.addEventListener('input', function() {
+    const keyword = this.value.trim();
+    const hasFilter = albumFilterState.order || albumFilterState.family || albumFilterState.time;
+
+    if (!keyword && !hasFilter) {
+      renderAlbumWithCategories(albumCategories);
+    } else {
+      // Use applyAlbumFilter which combines search + filter
+      applyAlbumFilter();
+    }
+  });
+}
+
+// Initialize album on page load
+initAlbum();
+
+function openBirdDetail(id) {
+  const bird = birdData[id];
+  if(!bird) return;
+  document.getElementById('birdDetailTitle').textContent = bird.name;
+
+  let html = `
+    <div class="bird-detail-info">
+      <div style="font-size:20px;font-weight:700;">${bird.name}</div>
+      <div class="bird-detail-name-en">${bird.en}</div>
+      <div class="bird-detail-latin">${bird.latin}</div>
+      <div class="bird-detail-taxonomy">
+        <span class="taxonomy-tag">鸟纲</span>
+        ${bird.taxonomy.map(t => `<span class="taxonomy-tag">${t}</span>`).join('')}
+      </div>
+    </div>`;
+  
+  bird.photos.forEach(p => {
+    html += `
+      <div class="bird-photo-item">
+        <img src="${p.src}" alt="${bird.name}">
+        <div class="bird-photo-info">
+          <span>${p.time}</span>
+          <span>${p.place}</span>
+        </div>
+      </div>`;
+  });
+  
+  document.getElementById('birdDetailContent').innerHTML = html;
+  document.getElementById('birdDetail').classList.add('show');
+}
+
+function hideBirdDetail() { document.getElementById('birdDetail').classList.remove('show'); }
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Map will init on first tab switch to map page
+// Do not init here because the map container is hidden initially
+</script>
+</body>
+</html>
