@@ -7,7 +7,7 @@
 - **找不到鸟**：观鸟新人不知道附近哪里能看什么鸟，依赖口口相传
 - **不会认鸟**：遇到不认识的鸟种，缺乏便捷的识别工具
 - **照片散乱**：拍了大量鸟类照片，散落在手机相册里，无法按鸟种归档
-- **社区缺失**：国内缺少针对观鸟爱好者的垂直社交与信息共享平台
+- **鸟讯和照片整理割裂**：用户很难把"在哪里看到鸟"和"拍到的鸟照"统一管理
 
 ## 核心链路
 
@@ -62,7 +62,7 @@ export BAIDU_CLIENT_SECRET="xxx"
 python3 proxy.py
 
 # 3. 浏览器访问
-open http://localhost:8080/birdcircle.html
+open http://localhost:8000/birdcircle.html
 ```
 
 ## 鸟类保护机制
@@ -81,8 +81,6 @@ open http://localhost:8080/birdcircle.html
 birdcircle.html     # 主应用（首页、地图、上传、相册、积分）
 proxy.py            # 百度 AI 代理（保护 API Key）
 README.md           # 本文件
-docs/
-  architecture.md   # 技术架构说明
 deferred/
   old-index.html    # 旧版页面（保留参考）
 birds/              # 鸟种示例图片

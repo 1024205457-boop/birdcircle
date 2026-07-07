@@ -1724,6 +1724,7 @@ function finishImport() {
 
   // Refresh album
   renderAlbumWithCategories(albumCategories);
+  updateAlbumCount();
 
   var msg = archivedCount + ' 张照片已归档到相册';
   if (newBirdNames.length > 0) msg += '（新建 ' + newBirdNames.length + ' 个鸟种）';
@@ -1739,11 +1740,7 @@ function finishImport() {
   document.getElementById('importFileInput').value = '';
 }
 
-// 初始化识鸟历史
-function renderAiHistory() {
-  // TODO: 实现 AI 识鸟历史记录渲染
-}
-renderAiHistory();
+
 
 // ===== ALBUM EXPORT =====
 // 使用 img+canvas 读取本地照片（兼容 file:// 协议）-> JSZip 打包下载
@@ -2016,6 +2013,7 @@ function submitBirdReport() {
 
   // 4. 刷新相册显示
   renderAlbumWithCategories(albumCategories);
+  updateAlbumCount();
 }
 
 function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); }
@@ -2160,8 +2158,9 @@ function initMap() {
     else if (spot.nocturnal) fuzzyRadius = 0.005;
     else if (spot.breeding) fuzzyRadius = 0.008;
     if (fuzzyRadius > 0) {
-      markerLat += (Math.random() - 0.5) * fuzzyRadius;
-      markerLng += (Math.random() - 0.5) * fuzzyRadius;
+      var rng = seededRandom((spot.ebirdId || spot.name) + '_fuzzy');
+      markerLat += (rng() - 0.5) * fuzzyRadius;
+      markerLng += (rng() - 0.5) * fuzzyRadius;
     }
 
     const marker = L.marker([markerLat, markerLng], { icon }).addTo(map);
@@ -2743,16 +2742,21 @@ const albumCategories = [
   }
 ];
 
-function initAlbum() {
-  const container = document.getElementById('albumContainer');
+function updateAlbumCount() {
   let totalPhotos = 0;
   const totalSpecies = Object.keys(birdData).length;
+  Object.values(birdData).forEach(function(b) { totalPhotos += b.photos.length; });
+  var el = document.getElementById('albumCount');
+  if (el) el.innerHTML = '<span style="color:#ff6b35">' + totalSpecies + '</span> 种 · <span style="color:#ff6b35">' + totalPhotos + '</span> 张';
+}
 
-  Object.values(birdData).forEach(b => { totalPhotos += b.photos.length; });
-  document.getElementById('albumCount').innerHTML = '<span style="color:#ff6b35">' + totalSpecies + '</span> 种 · <span style="color:#ff6b35">' + totalPhotos + '</span> 张';
+function initAlbum() {
+  const container = document.getElementById('albumContainer');
+  updateAlbumCount();
 
   // Expose renderAlbum globally so filter can call it
   renderAlbumWithCategories = function(categories) {
+    updateAlbumCount();
     // Separate into single-card and multi-card
     const singles = [];
     const multis = [];
