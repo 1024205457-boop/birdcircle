@@ -1704,6 +1704,17 @@ function finishImport() {
       };
       newBirdNames.push(birdName);
       archivedCount++;
+
+      // Add new bird to albumCategories "用户上传" group
+      var userUploadCat = null;
+      for (var c = 0; c < albumCategories.length; c++) {
+        if (albumCategories[c].title === '用户上传') { userUploadCat = albumCategories[c]; break; }
+      }
+      if (userUploadCat) {
+        if (userUploadCat.birds.indexOf(newId) === -1) userUploadCat.birds.unshift(newId);
+      } else {
+        albumCategories.unshift({ title: '用户上传', birds: [newId] });
+      }
     }
   });
 
@@ -1959,7 +1970,7 @@ function submitBirdReport() {
   var birdName = main.name;
   // Use user input or nearest spot name
   var spotName = document.getElementById('uploadSpotNameInput').value.trim();
-  if (!spotName) spotName = '奥森公园 · 南园湖心岛';
+  if (!spotName) spotName = '当前位置（手动输入地点名称）';
 
   // 1. 同步到相册：找到或创建对应的 birdData 条目
   var matchedId = null;
@@ -2549,8 +2560,9 @@ function setupStackTouch(birdId, el) {
     }
 
     const layers = el.querySelectorAll('.bird-stack-layer');
-    const frontLayer = layers[1]; // DOM order: second[0], front[1]
-    const back1 = layers[0];
+    const frontLayer = layers[layers.length - 1]; // topmost
+    const back1 = layers[layers.length - 2];
+    const back2 = layers[layers.length - 3];
 
     state = STATE.RELEASED;
 
@@ -2602,6 +2614,18 @@ function setupStackTouch(birdId, el) {
       back1.classList.add('front');
     }
 
+    // Step 2b: back-2 promotes to back-1
+    if (back2) {
+      back2.style.transition = 'left 220ms cubic-bezier(.2,.8,.2,1), top 220ms cubic-bezier(.2,.8,.2,1), transform 220ms cubic-bezier(.2,.8,.2,1), opacity 220ms';
+      back2.style.left = '8%';
+      back2.style.top = '10px';
+      back2.style.transform = 'rotate(2deg)';
+      back2.style.opacity = '0.88';
+      back2.style.zIndex = '2';
+      back2.classList.remove('third');
+      back2.classList.add('second');
+    }
+
     // Step 3: after CSS animation ends, silently reset to class-based state
     setTimeout(() => {
       const total = birdData[birdId].photos.length;
@@ -2612,20 +2636,27 @@ function setupStackTouch(birdId, el) {
       // Disable ALL transitions to prevent any visual flash
       layers.forEach(l => { if (l) l.style.transition = 'none'; });
 
-      // Reset layer 0 → second
-      if (layers[0]) {
-        layers[0].className = 'bird-stack-layer second';
-        layers[0].style.cssText = 'transition:none';
-        const img = layers[0].querySelector('img');
+      // Reset deepest layer → third
+      if (layers[layers.length - 3]) {
+        layers[layers.length - 3].className = 'bird-stack-layer third';
+        layers[layers.length - 3].style.cssText = 'transition:none';
+        const img = layers[layers.length - 3].querySelector('img');
+        if (img) img.src = photos[2] || '';
+      }
+      // Reset middle layer → second
+      if (layers[layers.length - 2]) {
+        layers[layers.length - 2].className = 'bird-stack-layer second';
+        layers[layers.length - 2].style.cssText = 'transition:none';
+        const img = layers[layers.length - 2].querySelector('img');
         if (img) img.src = photos[1] || '';
       }
-      // Reset layer 1 → front (with badges inside)
-      if (layers[1]) {
-        layers[1].className = 'bird-stack-layer front';
-        layers[1].style.cssText = 'transition:none';
-        const img = layers[1].querySelector('img');
+      // Reset topmost layer → front (with badges inside)
+      if (layers[layers.length - 1]) {
+        layers[layers.length - 1].className = 'bird-stack-layer front';
+        layers[layers.length - 1].style.cssText = 'transition:none';
+        const img = layers[layers.length - 1].querySelector('img');
         if (img) img.src = photos[0];
-        const countEl = layers[1].querySelector('.bird-stack-count');
+        const countEl = layers[layers.length - 1].querySelector('.bird-stack-count');
         if (countEl) countEl.textContent = `${getSafeIndex(birdId) + 1} / ${birdData[birdId].photos.length}`;
       }
 
@@ -2719,23 +2750,6 @@ function initAlbum() {
 
   Object.values(birdData).forEach(b => { totalPhotos += b.photos.length; });
   document.getElementById('albumCount').innerHTML = '<span style="color:#ff6b35">' + totalSpecies + '</span> 种 · <span style="color:#ff6b35">' + totalPhotos + '</span> 张';
-
-  // Helper: render a single bird stack
-  function renderStack(birdId) {
-    const bird = birdData[birdId];
-    const photos = getStackPhotos(birdId);
-    let stackHtml = '';
-    if (photos[1]) {
-      stackHtml += `<div class="bird-stack-layer second"><img src="${photos[1]}" alt=""></div>`;
-    }
-    stackHtml += `<div class="bird-stack-layer front"><img src="${photos[0]}" alt="">`;
-    stackHtml += `<div class="bird-stack-name">${bird.name}</div>`;
-    if (bird.photos.length > 1) {
-      stackHtml += `<div class="bird-stack-count">1 / ${bird.photos.length}</div>`;
-    }
-    stackHtml += `</div>`;
-    return `<div class="bird-stack" id="stack-${birdId}" ondblclick="openBirdDetail('${birdId}')">${stackHtml}</div>`;
-  }
 
   // Expose renderAlbum globally so filter can call it
   renderAlbumWithCategories = function(categories) {
