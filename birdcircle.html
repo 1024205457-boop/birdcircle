@@ -1996,8 +1996,16 @@ function submitBirdReport() {
       photos: [{ src: photo, time: new Date().toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).replace(/\//g,'-') + ' 上传', place: spotName }]
     };
     matchedId = newId;
-    // 添加到相册分类
-    albumCategories.unshift({ title: '用户上传', birds: [newId] });
+    // 添加到相册分类（复用已有“用户上传”分类）
+    var userCat = null;
+    for (var c = 0; c < albumCategories.length; c++) {
+      if (albumCategories[c].title === '用户上传') { userCat = albumCategories[c]; break; }
+    }
+    if (userCat) {
+      if (userCat.birds.indexOf(newId) === -1) userCat.birds.unshift(newId);
+    } else {
+      albumCategories.unshift({ title: '用户上传', birds: [newId] });
+    }
   }
 
   // 2. 更新积分
@@ -2513,6 +2521,7 @@ function setupStackTouch(birdId, el) {
   function onPointerDown(e) {
     if (stackAnimating[birdId]) return;
     if (state !== STATE.IDLE) return;
+    if (!birdData[birdId] || birdData[birdId].photos.length <= 1) return;
 
     el.setPointerCapture(e.pointerId);
     activePointerId = e.pointerId;
