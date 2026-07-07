@@ -307,7 +307,10 @@ html, body {
 }
 
 /* Leaflet overrides */
-.leaflet-container { font-family:inherit; }
+.leaflet-container { font-family: inherit; }
+.spot-tooltip { background:#fff; border:1px solid var(--border); border-radius:10px; padding:8px 12px; box-shadow:0 4px 16px rgba(0,0,0,0.12); }
+.spot-tooltip .leaflet-tooltip-tip { background:#fff; border:1px solid var(--border); }
+.leaflet-tooltip-left.spot-tooltip:before, .leaflet-tooltip-right.spot-tooltip:before { border-left-color: var(--border); border-right-color: var(--border); }
 .leaflet-control-zoom { display:none !important; }
 
 /* Spot Detail Card */
@@ -721,6 +724,20 @@ html, body {
 .import-result-name { font-size:14px; font-weight:600; }
 .import-result-count { font-size:12px; color:var(--text-muted); }
 .import-result-status { font-size:12px; color:var(--green-primary); font-weight:500; }
+
+/* Upload Success Panel */
+.upload-success-panel { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:250; display:none; align-items:center; justify-content:center; padding:20px; }
+.upload-success-panel.show { display:flex; }
+.upload-success-inner { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:340px; text-align:center; animation:slideUp 0.3s ease; }
+.upload-success-icon { font-size:48px; margin-bottom:8px; }
+.upload-success-inner h3 { font-size:18px; font-weight:700; margin-bottom:16px; color:var(--text-primary); }
+.upload-success-steps { text-align:left; }
+.success-step { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+.success-step:last-child { border-bottom:none; }
+.success-step-icon { width:36px; height:36px; background:var(--green-pale); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.success-step-text { flex:1; }
+.success-step-label { font-size:12px; color:var(--text-muted); }
+.success-step-value { font-size:14px; font-weight:600; color:var(--text-primary); margin-top:2px; }
 
 /* Toast */
 .toast {
@@ -1148,7 +1165,46 @@ html, body {
       <span>公开鸟点</span>
       <div class="toggle-switch on"></div>
     </div>
-    <button class="submit-btn" onclick="showToast('鸟点上传成功！+50 积分');hideUploadPage();">提交鸟讯</button>
+    <button class="submit-btn" onclick="submitBirdReport()">提交鸟讯</button>
+  </div>
+</div>
+
+<!-- Upload Success Panel -->
+<div class="upload-success-panel" id="uploadSuccessPanel">
+  <div class="upload-success-inner">
+    <div class="upload-success-icon">🎉</div>
+    <h3>鸟讯发布成功</h3>
+    <div class="upload-success-steps">
+      <div class="success-step">
+        <div class="success-step-icon">🔍</div>
+        <div class="success-step-text">
+          <div class="success-step-label">AI 已识别</div>
+          <div class="success-step-value" id="successBirdName">--</div>
+        </div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon">📷</div>
+        <div class="success-step-text">
+          <div class="success-step-label">已同步到相册</div>
+          <div class="success-step-value" id="successAlbumName">--</div>
+        </div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon">📍</div>
+        <div class="success-step-text">
+          <div class="success-step-label">已贡献鸟讯</div>
+          <div class="success-step-value" id="successSpotName">--</div>
+        </div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon">⭐</div>
+        <div class="success-step-text">
+          <div class="success-step-label">获得积分</div>
+          <div class="success-step-value" id="successPoints">+50</div>
+        </div>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="hideUploadPage();switchTab(0);" style="margin-top:16px;">完成</button>
   </div>
 </div>
 
@@ -1415,7 +1471,7 @@ function handleImportSelect(e) {
   files.forEach(function(file) {
     var reader = new FileReader();
     reader.onload = function(ev) {
-      importSelectedImages.push(ev.target.result);
+      importSelectedImages.push({ data: ev.target.result, name: file.name.toLowerCase(), size: file.size });
       loaded++;
       if (loaded === files.length) {
         showImportPreview();
@@ -1429,10 +1485,10 @@ function showImportPreview() {
   var grid = document.getElementById('importPreviewGrid');
   var count = document.getElementById('importPhotoCount');
   grid.innerHTML = '';
-  importSelectedImages.forEach(function(img) {
+  importSelectedImages.forEach(function(item) {
     var div = document.createElement('div');
     div.style.cssText = 'width:70px;height:70px;border-radius:8px;overflow:hidden;flex-shrink:0;';
-    div.innerHTML = '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;">';
+    div.innerHTML = '<img src="' + item.data + '" style="width:100%;height:100%;object-fit:cover;">';
     grid.appendChild(div);
   });
   count.textContent = importSelectedImages.length;
@@ -1448,7 +1504,9 @@ async function startImportIdentify() {
   btn.textContent = '识别中...';
 
   // 识别第一张照片（批量简化版）
-  var img = importSelectedImages[0];
+  var item = importSelectedImages[0];
+  var img = item.data;
+  var fileName = item.name;
   var result = null;
   var isDemo = false;
 
@@ -1477,7 +1535,7 @@ async function startImportIdentify() {
   } catch(e) {
     console.log('API failed, demo mode:', e.message);
     isDemo = true;
-    result = generateDemoResult();
+    result = generateDemoResult(fileName);
   }
 
   btn.disabled = false;
@@ -1485,23 +1543,60 @@ async function startImportIdentify() {
   renderImportResult(result, isDemo, importSelectedImages.length);
 }
 
-function generateDemoResult() {
-  var birds = [
-    { name:'翠鸟', score:92.3, desc:'翠鸟属佛法僧目翠鸟科，体型小巧，喙长而尖直。常栖息于溪流、湖泊附近，以鱼类为食。' },
-    { name:'白头鹎', score:85.1, desc:'白头鹎属雀形目鹎科，又名白头翁。头顶黑色有白色斑块，是最常见的城市鸟类之一。' },
-    { name:'珠颈斑鸠', score:78.6, desc:'珠颈斑鸠属鸽形目鸠鸽科，颈部有黑白珠状斑纹。常在地面觅食，以种子为食。' },
-    { name:'灰喜鹊', score:72.4, desc:'灰喜鹊属雀形目鸦科，体长约33-40cm。头和后颈黑色，其余蓝灰色。聪明好动。' },
-    { name:'麻雀', score:65.2, desc:'麻雀属雀形目雀科，体型小。褐色羽毛，脸颊有白色斑块。适应人类环境能力极强。' }
+function generateDemoResult(fileName) {
+  // Extended bird database with keyword mappings
+  var birdDB = [
+    { name:'翠鸟', score:92.3, keywords:['kingfisher','cui','翠','钓鱼','蓝','river','water'], desc:'翠鸟属佛法僧目翠鸟科，体型小巧，喙长而尖直。常栖息于溪流、湖泊附近，以鱼类为食。' },
+    { name:'白头鹎', score:85.1, keywords:['bulbul','baitou','白头','鹎','树','城市'], desc:'白头鹎属雀形目鹎科，又名白头翁。头顶黑色有白色斑块，是最常见的城市鸟类之一。' },
+    { name:'珠颈斑鸠', score:78.6, keywords:['spotted','zhujing','珠颈','斑鸠','鸠','地面'], desc:'珠颈斑鸠属鸽形目鸠鸽科，颈部有黑白珠状斑纹。常在地面觅食，以种子为食。' },
+    { name:'灰喜鹊', score:72.4, keywords:['azure','huixique','灰喜鹊','喜鹊','鸦','聪明'], desc:'灰喜鹊属雀形目鸦科，体长约33-40cm。头和后颈黑色，其余蓝灰色。聪明好动。' },
+    { name:'麻雀', score:65.2, keywords:['sparrow','maque','麻雀','雀','urban','街道'], desc:'麻雀属雀形目雀科，体型小。褐色羽毛，脸颊有白色斑块。适应人类环境能力极强。' },
+    { name:'鸳鸯', score:88.5, keywords:['mandarin','yuanyang','鸳鸯','鸭','水','彩色'], desc:'鸳鸯属雁形目鸭科，雄鸟羽色艳丽，有橙红色帆状饰羽。常成对活动于湖泊河流。' },
+    { name:'戴胜', score:81.2, keywords:['hoopoe','daisheng','戴胜','冠','啄','草地'], desc:'戴胜属犀鸟目戴胜科，头顶有扇形羽冠，喙细长弯曲。以昆虫为食。' },
+    { name:'绿头鸭', score:76.8, keywords:['mallard','lvtou','绿头','鸭','野','池塘'], desc:'绿头鸭属雁形目鸭科，雄鸟头绿色，颈有白色环带。常见于城市公园水域。' },
+    { name:'小䴙䴘', score:74.5, keywords:['grebe','piti','䴙䴘','水','潜','游'], desc:'小䴙䴘属鸊鷉目鸊鷉科，体型小，善潜水。常在水面快速游动后突然潜入水中。' },
+    { name:'苍鹭', score:79.3, keywords:['heron','canglu','苍鹭','鹭','长脚','浅水'], desc:'苍鹭属鹈形目鹭科，体型大，颈长脚长。常站立于浅水处静候鱼类。' }
   ];
-  var main = birds[Math.floor(Math.random() * 3)];
-  var candidates = [{ name: main.name, score: main.score }];
-  var used = [main.name];
-  while (candidates.length < 5) {
-    var b = birds[Math.floor(Math.random() * birds.length)];
-    if (!used.includes(b.name)) {
-      used.push(b.name);
-      candidates.push({ name: b.name, score: Math.max(10, b.score - Math.random() * 30 - 10) });
+
+  // Try to match by filename keywords
+  var matched = null;
+  if (fileName) {
+    for (var i = 0; i < birdDB.length; i++) {
+      for (var j = 0; j < birdDB[i].keywords.length; j++) {
+        if (fileName.indexOf(birdDB[i].keywords[j]) !== -1) {
+          matched = birdDB[i];
+          break;
+        }
+      }
+      if (matched) break;
     }
+  }
+
+  // If no filename match, use hash-based deterministic selection for consistency
+  if (!matched) {
+    var hash = 0;
+    if (fileName) {
+      for (var k = 0; k < fileName.length; k++) hash = ((hash << 5) - hash) + fileName.charCodeAt(k);
+    }
+    var idx = Math.abs(hash) % birdDB.length;
+    matched = birdDB[idx];
+  }
+
+  // Build candidates: main + 4 related birds
+  var candidates = [{ name: matched.name, score: matched.score, desc: matched.desc }];
+  var used = [matched.name];
+  var relatedIndices = [];
+  for (var r = 0; r < birdDB.length && relatedIndices.length < 4; r++) {
+    if (birdDB[r].name !== matched.name) relatedIndices.push(r);
+  }
+  // Shuffle related indices deterministically based on filename
+  relatedIndices.sort(function(a, b) {
+    return ((hash + a * 31) % 7) - ((hash + b * 31) % 7);
+  });
+  for (var c = 0; c < Math.min(4, relatedIndices.length); c++) {
+    var b = birdDB[relatedIndices[c]];
+    var scoreDrop = 5 + (c * 8) + Math.abs((hash + c) % 5);
+    candidates.push({ name: b.name, score: Math.max(30, Math.round((matched.score - scoreDrop) * 10) / 10), desc: b.desc });
   }
   return candidates;
 }
@@ -1668,8 +1763,11 @@ function exportAlbum() {
 }
 
 // ===== UPLOAD / IMPORT =====
+let lastUploadResult = null;
+let lastUploadPhoto = null;
+
 function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); }
-function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); }
+function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); }
 
 async function handleUploadSpotPhoto(e) {
   var file = e.target.files[0];
@@ -1680,6 +1778,7 @@ async function handleUploadSpotPhoto(e) {
     // Show preview
     var area = document.getElementById('uploadSpotPhotoArea');
     area.innerHTML = '<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;"><img src="' + imgData + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+    lastUploadPhoto = imgData;
     // Show loading
     document.getElementById('uploadAiLoading').style.display = 'block';
     // AI identify
@@ -1710,9 +1809,10 @@ async function handleUploadSpotPhoto(e) {
     } catch(err) {
       console.log('API failed, demo mode:', err.message);
       isDemo = true;
-      result = generateDemoResult();
+      result = generateDemoResult(file ? file.name.toLowerCase() : '');
     }
     document.getElementById('uploadAiLoading').style.display = 'none';
+    lastUploadResult = result;
     // Render result
     var main = result[0];
     var desc = main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '';
@@ -1735,6 +1835,63 @@ async function handleUploadSpotPhoto(e) {
     document.getElementById('uploadSpotBirdList').innerHTML = html;
   };
   reader.readAsDataURL(file);
+}
+
+function submitBirdReport() {
+  var result = lastUploadResult;
+  var photo = lastUploadPhoto;
+  if (!result || !photo) {
+    showToast('请先上传照片并等待 AI 识别');
+    return;
+  }
+  var main = result[0];
+  var birdName = main.name;
+  var spotName = '奥森公园 · 南园湖心岛';
+
+  // 1. 同步到相册：找到或创建对应的 birdData 条目
+  var matchedId = null;
+  var matchedBird = null;
+  for (var id in birdData) {
+    if (birdData[id].name === birdName) {
+      matchedId = id;
+      matchedBird = birdData[id];
+      break;
+    }
+  }
+  if (matchedBird) {
+    matchedBird.photos.unshift({
+      src: photo,
+      time: new Date().toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).replace(/\//g,'-') + ' 上传',
+      place: spotName
+    });
+  } else {
+    // 创建新鸟种条目
+    var newId = 'user_' + Date.now();
+    birdData[newId] = {
+      name: birdName,
+      en: 'Unknown',
+      latin: 'Unknown',
+      taxonomy: ['未知目','未知科'],
+      photos: [{ src: photo, time: new Date().toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).replace(/\//g,'-') + ' 上传', place: spotName }]
+    };
+    matchedId = newId;
+    // 添加到相册分类
+    albumCategories.unshift({ title: '用户上传', birds: [newId] });
+  }
+
+  // 2. 更新积分
+  var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + 50;
+  localStorage.setItem('birdcircle_points', String(points));
+
+  // 3. 显示成功面板
+  document.getElementById('successBirdName').textContent = birdName;
+  document.getElementById('successAlbumName').textContent = matchedBird ? matchedBird.name + ' 相册' : birdName + ' 相册（新建）';
+  document.getElementById('successSpotName').textContent = spotName;
+  document.getElementById('successPoints').textContent = '+50（累计 ' + points + ' 分）';
+  document.getElementById('uploadSuccessPanel').classList.add('show');
+
+  // 4. 刷新相册显示
+  renderAlbumWithCategories(albumCategories);
 }
 
 function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); }
@@ -1873,6 +2030,14 @@ function initMap() {
     }
 
     const marker = L.marker([markerLat, markerLng], { icon }).addTo(map);
+    const r = generateSpotReports(spot);
+    const recentLabel = r.hoursAgo <= 2 ? '近2小时有记录' : '最新 ' + r.lastConfirmed;
+    marker.bindTooltip(
+      '<div style="font-size:13px;font-weight:600;margin-bottom:4px;">' + spot.name + '</div>' +
+      '<div style="font-size:11px;color:#666;">' + recentLabel + '</div>' +
+      '<div style="font-size:11px;color:#888;margin-top:2px;">公开 ' + r.publicCount + ' 条 · 用户 ' + r.userCount + ' 条 · ' + r.confirmedBy + '人确认</div>',
+      { direction: 'top', offset: [0, -10], className: 'spot-tooltip' }
+    );
     marker.on('click', () => showSpotDetail(index));
   });
 
@@ -1881,19 +2046,46 @@ function initMap() {
   });
 }
 
+// Generate realistic report stats for a spot
+function generateSpotReports(spot) {
+  var seed = spot.numSpecies || 100;
+  var publicCount = Math.max(3, Math.floor(seed * 0.03 + Math.random() * 8));
+  var userCount = Math.max(1, Math.floor(publicCount * 0.25 + Math.random() * 3));
+  var confirmedBy = Math.max(2, Math.floor(publicCount * 0.4 + Math.random() * 4));
+  var recent = Math.random() > 0.6;
+  var hoursAgo = recent ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 24) + 4;
+  var lastConfirmed = recent ? hoursAgo + '小时前' : (hoursAgo > 24 ? Math.floor(hoursAgo/24) + '天前' : hoursAgo + '小时前');
+  var hotLevel = spot.numSpecies > 200 ? '高活跃' : (spot.numSpecies > 100 ? '活跃' : '一般');
+  return { publicCount, userCount, confirmedBy, lastConfirmed, hoursAgo, hotLevel };
+}
+
 function showSpotDetail(index) {
   const s = spots[index];
+  const r = generateSpotReports(s);
+  const isRecent = r.hoursAgo <= 2;
+  const recentBadge = isRecent ? '<span style="font-size:11px;color:#fff;background:#ff6b35;padding:2px 8px;border-radius:10px;margin-left:8px;">近2小时</span>' : '';
   // Render image with overlay containing name + meta
   document.getElementById('spotDetailImg').innerHTML = `
     <img src="${s.img}" alt="${s.name}">
     <div class="spot-detail-img-overlay">
-      <div class="spot-detail-img-name">${s.name}</div>
+      <div class="spot-detail-img-name">${s.name}${recentBadge}</div>
       <div class="spot-detail-img-meta">
         <span>${s.dist}</span><span>${s.area}</span><span>${formatRecency(s.time)}</span>
       </div>
     </div>`;
   document.getElementById('spotDetailTags').innerHTML = s.birds.map(b => `<span class="bird-tag">${b}</span>`).join('');
-  document.getElementById('spotDetailNews').textContent = s.news;
+  // Build rich news with report source breakdown
+  var newsHtml = '<div style="margin-bottom:8px;">' + s.news + '</div>';
+  newsHtml += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
+  newsHtml += '<span style="font-size:11px;color:var(--text-muted);background:var(--green-pale);padding:3px 8px;border-radius:8px;">🔥 ' + r.hotLevel + '</span>';
+  newsHtml += '<span style="font-size:11px;color:var(--text-muted);background:#f0f0f0;padding:3px 8px;border-radius:8px;">🕐 最新确认 ' + r.lastConfirmed + '</span>';
+  newsHtml += '<span style="font-size:11px;color:var(--text-muted);background:#f0f0f0;padding:3px 8px;border-radius:8px;">✅ ' + r.confirmedBy + '人确认</span>';
+  newsHtml += '</div>';
+  newsHtml += '<div style="font-size:12px;color:var(--text-secondary);background:var(--card-bg);padding:8px 10px;border-radius:8px;border:1px solid var(--border);">';
+  newsHtml += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>公开鸟讯</span><span style="font-weight:600;">' + r.publicCount + ' 条</span></div>';
+  newsHtml += '<div style="display:flex;justify-content:space-between;"><span>用户上传</span><span style="font-weight:600;color:var(--green-primary);">' + r.userCount + ' 条</span></div>';
+  newsHtml += '</div>';
+  document.getElementById('spotDetailNews').innerHTML = newsHtml;
 
   // Store current spot index for checkin/nav
   currentSpotIndex = index;
