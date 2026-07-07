@@ -213,7 +213,6 @@ html, body {
 .feed-tag.news { background:#e3f2fd; color:#1565c0; }
 .feed-tag.event { background:#fff3e0; color:#e65100; }
 .feed-tag.help { background:#fce4ec; color:#c2185b; }
-.feed-more { text-align:center; padding:10px; font-size:12px; color:var(--text-muted); cursor:pointer; }
 
 /* Location Picker */
 .location-picker-overlay {
@@ -750,19 +749,6 @@ html, body {
 }
 .toast.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
 
-/* ===== GUIDE BANNER ===== */
-.guide-banner {
-  display:flex; align-items:center; gap:10px; padding:12px 14px;
-  background:linear-gradient(135deg, #ff6b35, #ff8f00); color:#fff;
-  border-radius:var(--radius); margin-bottom:14px; font-size:13px;
-}
-.guide-text { flex:1; }
-.guide-close {
-  padding:6px 14px; border-radius:20px; border:none;
-  background:rgba(255,255,255,0.3); color:#fff; font-size:12px;
-  cursor:pointer; white-space:nowrap;
-}
-
 .ai-identify-btn {
   width:100%; padding:14px; border:none; border-radius:var(--radius);
   background:var(--green-primary); color:#fff; font-size:15px; font-weight:600;
@@ -778,10 +764,6 @@ html, body {
 <div class="app">
   <!-- ===== HOME ===== -->
   <div class="page home active" id="page-home">
-    <div class="guide-banner" id="guideBanner">
-      <div class="guide-text">欢迎使用鸟有圈！拍照识鸟 → 发现鸟点 → 记录分享</div>
-      <button class="guide-close" onclick="dismissGuide()">知道了</button>
-    </div>
     <div class="location-bar">
       <div class="location-info" onclick="openLocationPicker()">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -939,7 +921,6 @@ html, body {
         <span style="font-size:12px;color:var(--text-muted)">已报名 7 人</span>
       </div>
     </div>
-    <div class="feed-more" onclick="showToast('社区模块已保留，后续接入')">查看更多 ›</div>
   </div>
 
   <!-- ===== MAP ===== -->
@@ -1635,16 +1616,6 @@ function finishImport() {
   document.getElementById('importFileInput').value = '';
 }
 
-// ===== GUIDE BANNER =====
-function dismissGuide() {
-  document.getElementById('guideBanner').style.display = 'none';
-  localStorage.setItem('birdcircle_guided', '1');
-}
-// 首次访问隐藏引导横幅
-if (localStorage.getItem('birdcircle_guided')) {
-  var gb = document.getElementById('guideBanner');
-  if (gb) gb.style.display = 'none';
-}
 // 初始化识鸟历史
 function renderAiHistory() {
   // TODO: 实现 AI 识鸟历史记录渲染
@@ -1902,8 +1873,8 @@ function hideImportPage() {
 const spots = [
   // === eBird API 真实热点 (2026-07-06) + 权威来源补充 ===
 
-  { ebirdId:'L2394169', name:'沙河水库', lat:40.1313, lng:116.3080, type:'wetland', dist:'47.6km', area:'海淀区', time:'2026-07-05', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'357 种 · 4893 清单', numSpecies:357, img:'photos/spot_wetland.jpg', sensitive:false },
-  { ebirdId:'L4427370', name:'温榆河', lat:39.9395, lng:116.6430, type:'wetland', dist:'52.1km', area:'朝阳区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'306 种 · 596 清单', numSpecies:306, img:'photos/spot_wetland.jpg', sensitive:false },
+  { ebirdId:'L2394169', name:'沙河水库', lat:40.1313, lng:116.3080, type:'wetland', dist:'47.6km', area:'海淀区', time:'2026-07-05', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'357 种 · 4893 清单', numSpecies:357, img:'photos/spot_wetland.jpg', sensitive:false, nocturnal:true },
+  { ebirdId:'L4427370', name:'温榆河', lat:39.9395, lng:116.6430, type:'wetland', dist:'52.1km', area:'朝阳区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'306 种 · 596 清单', numSpecies:306, img:'photos/spot_wetland.jpg', sensitive:false, nocturnal:true },
   { ebirdId:'L16224709', name:'大宁水库及其东部永定河废弃河道', lat:39.8290, lng:116.2171, type:'wetland', dist:'57.1km', area:'海淀区', time:'2026-07-04', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'290 种 · 686 清单', numSpecies:290, img:'photos/spot_wetland.jpg', sensitive:false },
   { ebirdId:'L1168475', name:'颐和园', lat:39.9927, lng:116.2723, type:'park', dist:'32.1km', area:'海淀区', time:'2026-07-04', birds:['麻雀','珠颈斑鸠','白头鹎','灰喜鹊','大斑啄木鸟'], news:'270 种 · 1489 清单', numSpecies:270, img:'photos/spot_mirror_lake.jpg', sensitive:false },
   { ebirdId:'L7516823', name:'奥林匹克森林公园南园', lat:40.0174, lng:116.3938, type:'forest', dist:'18.3km', area:'朝阳区', time:'2026-07-05', birds:['灰头绿啄木鸟','黑头鳾','沼泽山雀','金翅雀'], news:'268 种 · 2322 清单', numSpecies:268, img:'photos/spot_forest_path.jpg', sensitive:false },
@@ -1963,10 +1934,10 @@ const spots = [
   { ebirdId:'L69726090', name:'五一渠生态滨河公园', lat:40.0525, lng:116.2453, type:'wetland', dist:'43.9km', area:'海淀区', time:'2026-07-02', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'42 种 · 21 清单', numSpecies:42, img:'photos/spot_wetland.jpg', sensitive:false },
 
   // === 权威来源补充（不在 eBird 30天内活跃热点中） ===
-  { name:'翠湖国家城市湿地公园', lat:40.0860, lng:116.1750, type:'wetland', dist:'--', area:'海淀区', time:'2026-04-15', birds:['鸿雁','灰雁','震旦鸦雀','黄胸鹀'], news:'200 种（海淀观鸟地图）', numSpecies:200, img:'photos/spot_wetland.jpg', sensitive:false },
+  { name:'翠湖国家城市湿地公园', lat:40.0860, lng:116.1750, type:'wetland', dist:'--', area:'海淀区', time:'2026-04-15', birds:['鸿雁','灰雁','震旦鸦雀','黄胸鹀'], news:'200 种（海淀观鸟地图）', numSpecies:200, img:'photos/spot_wetland.jpg', sensitive:false, breeding:true },
   { name:'上庄水库', lat:40.0970, lng:116.1890, type:'wetland', dist:'--', area:'海淀区', time:'2025-03-12', birds:['翠鸟','绿头鸭','苍鹭','白鹭'], news:'150 种（海淀观鸟地图）', numSpecies:150, img:'photos/spot_wetland.jpg', sensitive:false },
-  { name:'北坞公园', lat:39.9900, lng:116.2620, type:'park', dist:'--', area:'海淀区', time:'2024-10-20', birds:['游隼','红嘴蓝鹊','红隼','黑水鸡'], news:'80 种（海淀观鸟地图）', numSpecies:80, img:'photos/spot_meadow.jpg', sensitive:false },
-  { name:'温榆河公园（朝阳段）', lat:40.0250, lng:116.5580, type:'wetland', dist:'--', area:'朝阳区', time:'2026-05-10', birds:['棕背伯劳','文须雀','鹊鸭','短耳鸮'], news:'180 种（朝阳区政府发布）', numSpecies:180, img:'photos/spot_wetland.jpg', sensitive:false },
+  { name:'北坞公园', lat:39.9900, lng:116.2620, type:'park', dist:'--', area:'海淀区', time:'2024-10-20', birds:['游隼','红嘴蓝鹊','红隼','黑水鸡'], news:'80 种（海淀观鸟地图）', numSpecies:80, img:'photos/spot_meadow.jpg', sensitive:false, breeding:true },
+  { name:'温榆河公园（朝阳段）', lat:40.0250, lng:116.5580, type:'wetland', dist:'--', area:'朝阳区', time:'2026-05-10', birds:['棕背伯劳','文须雀','鹊鸭','短耳鸮'], news:'180 种（朝阳区政府发布）', numSpecies:180, img:'photos/spot_wetland.jpg', sensitive:false, nocturnal:true },
   { name:'元大都城垣遗址公园', lat:39.9640, lng:116.3830, type:'park', dist:'--', area:'朝阳区', time:'2026-05-28', birds:['小太平鸟','大斑啄木鸟','红尾鸲'], news:'100 种（豆瓣2026版）', numSpecies:100, img:'photos/spot_meadow.jpg', sensitive:false },
 ];
 
@@ -2018,20 +1989,27 @@ function initMap() {
       iconAnchor: [12, 12],
     });
 
-    // Hide precise coordinates for sensitive species
+    // Hide precise coordinates for sensitive / nocturnal / breeding spots
     let markerLat = spot.lat;
     let markerLng = spot.lng;
-    if(spot.sensitive) {
-      // Add small offset to hide exact location
-      markerLat += (Math.random() - 0.5) * 0.003;
-      markerLng += (Math.random() - 0.5) * 0.003;
+    let fuzzyRadius = 0;
+    if (spot.sensitive) fuzzyRadius = 0.003;
+    else if (spot.nocturnal) fuzzyRadius = 0.005;
+    else if (spot.breeding) fuzzyRadius = 0.008;
+    if (fuzzyRadius > 0) {
+      markerLat += (Math.random() - 0.5) * fuzzyRadius;
+      markerLng += (Math.random() - 0.5) * fuzzyRadius;
     }
 
     const marker = L.marker([markerLat, markerLng], { icon }).addTo(map);
     const r = generateSpotReports(spot);
     const recentLabel = r.hoursAgo <= 2 ? '近2小时有记录' : '最新 ' + r.lastConfirmed;
+    var protectBadge = '';
+    if (spot.sensitive) protectBadge = '<span style="font-size:10px;color:#ff6b35;background:#fff2ee;padding:1px 5px;border-radius:6px;margin-left:4px;">保护</span>';
+    else if (spot.nocturnal) protectBadge = '<span style="font-size:10px;color:#7c3aed;background:#f3e8ff;padding:1px 5px;border-radius:6px;margin-left:4px;">夜行</span>';
+    else if (spot.breeding) protectBadge = '<span style="font-size:10px;color:#059669;background:#d1fae5;padding:1px 5px;border-radius:6px;margin-left:4px;">繁殖</span>';
     marker.bindTooltip(
-      '<div style="font-size:13px;font-weight:600;margin-bottom:4px;">' + spot.name + '</div>' +
+      '<div style="font-size:13px;font-weight:600;margin-bottom:4px;">' + spot.name + protectBadge + '</div>' +
       '<div style="font-size:11px;color:#666;">' + recentLabel + '</div>' +
       '<div style="font-size:11px;color:#888;margin-top:2px;">公开 ' + r.publicCount + ' 条 · 用户 ' + r.userCount + ' 条 · ' + r.confirmedBy + '人确认</div>',
       { direction: 'top', offset: [0, -10], className: 'spot-tooltip' }
@@ -2103,13 +2081,25 @@ function showSpotDetail(index) {
   const navBtn = document.getElementById('spotDetailNav');
   const sensDiv = document.getElementById('spotSensitivity');
 
-  if(s.sensitive) {
+  if (s.sensitive || s.nocturnal || s.breeding) {
     navBtn.className = 'spot-detail-nav disabled';
     navBtn.textContent = '导航已禁用';
+    var protectMsg = '';
+    var protectIcon = '';
+    if (s.sensitive) {
+      protectMsg = '该地点包含敏感物种信息，坐标已隐藏，导航功能已禁用';
+      protectIcon = '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/>';
+    } else if (s.nocturnal) {
+      protectMsg = '该区域记录有夜行性鸟类（如鸮类），为避免惊扰，夜间观鸟请勿靠近，导航已禁用';
+      protectIcon = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    } else if (s.breeding) {
+      protectMsg = '该区域为鸟类繁殖/育雏地，仅展示模糊区域，请勿靠近巢区，导航已禁用';
+      protectIcon = '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>';
+    }
     sensDiv.innerHTML = `
       <div class="spot-detail-sensitivity">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
-        <span>该地点包含敏感物种信息，坐标已隐藏，导航功能已禁用</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0">` + protectIcon + `</svg>
+        <span>` + protectMsg + `</span>
       </div>`;
   } else {
     navBtn.className = 'spot-detail-nav';
@@ -2156,8 +2146,8 @@ function checkInSpot() {
 function navToSpot() {
   if (currentSpotIndex < 0) return;
   const s = spots[currentSpotIndex];
-  if (s.sensitive) {
-    showToast('该地点导航已禁用');
+  if (s.sensitive || s.nocturnal || s.breeding) {
+    showToast('该地点导航已禁用（鸟类保护）');
     return;
   }
   showToast('正在为你导航到「' + s.name + '」');
@@ -2310,14 +2300,18 @@ function renderStack(birdId) {
 }
 
 function setupStackTouch(birdId, el) {
-  let startX = 0, startY = 0, dragging = null;
-  let isTouching = false;
+  const STATE = { IDLE: 'IDLE', DRAGGING: 'DRAGGING', RELEASED: 'RELEASED' };
+  let state = STATE.IDLE;
+  let activePointerId = null;
+  let startX = 0, startY = 0;
+  let isSwipe = false;
 
   function resetDrag() {
-    isTouching = false;
-    dragging = null;
+    state = STATE.IDLE;
+    activePointerId = null;
     startX = 0;
     startY = 0;
+    isSwipe = false;
     // Clear any inline transform on front layer
     const layers = el.querySelectorAll('.bird-stack-layer');
     const front = layers[layers.length - 1];
@@ -2327,29 +2321,37 @@ function setupStackTouch(birdId, el) {
     }
   }
 
-  function onStart(e) {
+  function onPointerDown(e) {
     if (stackAnimating[birdId]) return;
-    if (e.pointerId !== undefined) el.setPointerCapture(e.pointerId);
-    const touch = e.touches ? e.touches[0] : e;
-    startX = touch.clientX;
-    startY = touch.clientY;
-    dragging = null;
-    isTouching = true;
+    if (state !== STATE.IDLE) return;
+
+    el.setPointerCapture(e.pointerId);
+    activePointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    isSwipe = false;
+    state = STATE.DRAGGING;
   }
 
-  function onMove(e) {
-    // Block during animation or if not touching
-    if (!isTouching || stackAnimating[birdId]) return;
-    const touch = e.touches ? e.touches[0] : e;
-    const dx = touch.clientX - startX;
-    const dy = touch.clientY - startY;
+  function onPointerMove(e) {
+    // Block during animation, wrong pointer, or not dragging
+    if (state !== STATE.DRAGGING) return;
+    if (e.pointerId !== activePointerId) return;
+    if (stackAnimating[birdId]) return;
 
-    if (dragging === null) {
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (!isSwipe) {
       if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-      if (Math.abs(dy) > Math.abs(dx)) { dragging = false; return; }
-      dragging = 'swipe';
+      if (Math.abs(dy) > Math.abs(dx)) {
+        // Vertical scroll — abort and release capture
+        try { el.releasePointerCapture(e.pointerId); } catch(_) {}
+        resetDrag();
+        return;
+      }
+      isSwipe = true;
     }
-    if (dragging !== 'swipe') return;
 
     e.preventDefault();
     const layers = el.querySelectorAll('.bird-stack-layer');
@@ -2360,36 +2362,38 @@ function setupStackTouch(birdId, el) {
     }
   }
 
-  function onEnd(e) {
-    if (!isTouching) return;
-
+  function finishSwipe(dx) {
     // If not swiping, just clean up
-    if (dragging !== 'swipe') {
+    if (!isSwipe) {
       resetDrag();
       return;
     }
 
-    const touch = e.changedTouches ? e.changedTouches[0] : e;
-    const dx = touch.clientX - startX;
     const layers = el.querySelectorAll('.bird-stack-layer');
     const frontLayer = layers[1]; // DOM order: second[0], front[1]
     const back1 = layers[0];
 
-    // Release pointer capture
-    if (e.pointerId !== undefined) {
-      try { el.releasePointerCapture(e.pointerId); } catch(_){}
+    state = STATE.RELEASED;
+
+    if (!frontLayer) {
+      resetDrag();
+      return;
     }
-
-    // Clear drag state immediately — stop following finger
-    isTouching = false;
-    dragging = null;
-
-    if (!frontLayer) return;
 
     if (Math.abs(dx) < SWIPE_THRESHOLD) {
       // Snap back
       frontLayer.style.transition = 'transform 180ms ease';
       frontLayer.style.transform = '';
+      // Return to IDLE after snap animation finishes
+      const onSnapEnd = () => {
+        frontLayer.removeEventListener('transitionend', onSnapEnd);
+        resetDrag();
+      };
+      frontLayer.addEventListener('transitionend', onSnapEnd);
+      setTimeout(() => {
+        frontLayer.removeEventListener('transitionend', onSnapEnd);
+        resetDrag();
+      }, 200);
       return;
     }
 
@@ -2455,15 +2459,42 @@ function setupStackTouch(birdId, el) {
       });
 
       stackAnimating[birdId] = false;
+      resetDrag();
     }, 260);
   }
 
+  function onPointerUp(e) {
+    if (state !== STATE.DRAGGING) return;
+    if (e.pointerId !== activePointerId) return;
+
+    try { el.releasePointerCapture(e.pointerId); } catch(_) {}
+    finishSwipe(e.clientX - startX);
+  }
+
+  function onPointerCancel(e) {
+    if (state !== STATE.DRAGGING) return;
+    if (e.pointerId !== activePointerId) return;
+
+    try { el.releasePointerCapture(e.pointerId); } catch(_) {}
+    finishSwipe(0); // Cancelled — snap back
+  }
+
+  function onLostPointerCapture(e) {
+    if (e.pointerId !== activePointerId) return;
+    // If we are still DRAGGING here, it means capture was lost unexpectedly
+    // (e.g. browser intervention). pointerup/pointercancel already handled
+    // the normal path and transitioned to RELEASED before releasing capture.
+    if (state === STATE.DRAGGING) {
+      finishSwipe(isSwipe ? e.clientX - startX : 0);
+    }
+  }
+
   // Pointer Events — unified touch + mouse
-  el.addEventListener('pointerdown', onStart);
-  el.addEventListener('pointermove', onMove);
-  el.addEventListener('pointerup', onEnd);
-  el.addEventListener('pointercancel', onEnd);
-  el.addEventListener('lostpointercapture', onEnd);
+  el.addEventListener('pointerdown', onPointerDown);
+  el.addEventListener('pointermove', onPointerMove);
+  el.addEventListener('pointerup', onPointerUp);
+  el.addEventListener('pointercancel', onPointerCancel);
+  el.addEventListener('lostpointercapture', onLostPointerCapture);
   // Window blur = app loses focus
   window.addEventListener('blur', () => resetDrag());
   // Prevent context menu on long press
