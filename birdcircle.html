@@ -307,6 +307,12 @@ html, body {
 
 /* Leaflet overrides */
 .leaflet-container { font-family: inherit; }
+.map-protect-bar {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 14px; margin-bottom:4px;
+  background:#d1fae5; color:#065f46; font-size:11px; border-radius:8px;
+  line-height:1.4;
+}
 .spot-tooltip { background:#fff; border:1px solid var(--border); border-radius:10px; padding:8px 12px; box-shadow:0 4px 16px rgba(0,0,0,0.12); }
 .spot-tooltip .leaflet-tooltip-tip { background:#fff; border:1px solid var(--border); }
 .leaflet-tooltip-left.spot-tooltip:before, .leaflet-tooltip-right.spot-tooltip:before { border-left-color: var(--border); border-right-color: var(--border); }
@@ -561,6 +567,13 @@ html, body {
   width:88%; height:155px;
   z-index:2; opacity:0.88;
   transform:rotate(2deg);
+}
+/* Back-2 (deepest) */
+.bird-stack-layer.third {
+  left:16%; top:20px;
+  width:88%; height:155px;
+  z-index:1; opacity:0.7;
+  transform:rotate(-3deg);
 }
 /* Swipe out */
 .bird-stack-layer.swipe-out-left {
@@ -1103,14 +1116,15 @@ html, body {
   <div class="page-body">
     <div class="form-section">
       <span class="form-label">定位信息</span>
-      <div class="form-row">
+      <div class="form-row" id="uploadLocationRow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-        <span>奥森公园 · 南园湖心岛</span>
+        <span id="uploadLocationText">定位中...</span>
       </div>
+      <button style="font-size:11px;color:var(--green-primary);background:none;border:none;padding:4px 0;cursor:pointer;margin-top:4px;" onclick="locateMe()">刷新定位</button>
     </div>
     <div class="form-section">
       <span class="form-label">地点名称</span>
-      <div class="form-row"><input type="text" placeholder="输入或使用当前位置"></div>
+      <div class="form-row"><input type="text" id="uploadSpotNameInput" placeholder="输入或使用当前位置" value=""></div>
     </div>
     <div class="form-section">
       <span class="form-label">观测时间</span>
@@ -1476,50 +1490,68 @@ function showImportPreview() {
   document.getElementById('importResults').classList.remove('show');
 }
 
+// Store last import identification result for finishImport to use
+let lastImportResult = null;
+let lastImportIsDemo = false;
+
 async function startImportIdentify() {
   if (importSelectedImages.length === 0) return;
   var btn = document.getElementById('importIdentifyBtn');
   btn.disabled = true;
-  btn.textContent = '识别中...';
+  btn.textContent = '识别中 0/' + importSelectedImages.length;
 
-  // 识别第一张照片（批量简化版）
-  var item = importSelectedImages[0];
-  var img = item.data;
-  var fileName = item.name;
-  var result = null;
-  var isDemo = false;
+  lastImportResult = [];
+  lastImportIsDemo = false;
+  var apiFailed = false;
 
-  try {
-    if (!aiAccessToken) {
-      var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
-      if (tokenRes.ok) {
-        var tokenData = await tokenRes.json();
-        if (tokenData.access_token) aiAccessToken = tokenData.access_token;
-        else throw new Error('token failed');
-      } else throw new Error('token fetch failed');
+  // 逐张识别
+  for (var i = 0; i < importSelectedImages.length; i++) {
+    var item = importSelectedImages[i];
+    var img = item.data;
+    var fileName = item.name;
+    var result = null;
+    var isDemo = false;
+
+    btn.textContent = '识别中 ' + (i + 1) + '/' + importSelectedImages.length;
+
+    try {
+      if (!aiAccessToken) {
+        var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
+        if (tokenRes.ok) {
+          var tokenData = await tokenRes.json();
+          if (tokenData.access_token) aiAccessToken = tokenData.access_token;
+          else throw new Error('token failed');
+        } else throw new Error('token fetch failed');
+      }
+      var base64Data = img.split(',')[1];
+      var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
+      var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      });
+      if (classifyRes.ok) {
+        var classifyData = await classifyRes.json();
+        if (classifyData.result && classifyData.result.length > 0) {
+          result = classifyData.result;
+        } else throw new Error('no result');
+      } else throw new Error('classify fetch failed');
+    } catch(e) {
+      console.log('API failed, photo ' + (i+1) + ' demo mode:', e.message);
+      apiFailed = true;
+      isDemo = true;
+      result = generateDemoResult(fileName);
     }
-    var base64Data = img.split(',')[1];
-    var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
-    var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData
-    });
-    if (classifyRes.ok) {
-      var classifyData = await classifyRes.json();
-      if (classifyData.result && classifyData.result.length > 0) {
-        result = classifyData.result;
-      } else throw new Error('no result');
-    } else throw new Error('classify fetch failed');
-  } catch(e) {
-    console.log('API failed, demo mode:', e.message);
-    isDemo = true;
-    result = generateDemoResult(fileName);
+
+    lastImportResult.push({ photo: img, result: result, isDemo: isDemo });
+    if (apiFailed) lastImportIsDemo = true;
+    // Small delay between requests to avoid throttling
+    if (i < importSelectedImages.length - 1) await new Promise(r => setTimeout(r, 300));
   }
 
   btn.disabled = false;
   btn.textContent = 'AI 识别鸟种';
-  renderImportResult(result, isDemo, importSelectedImages.length);
+  renderImportBatchResult(lastImportResult);
 }
 
 function generateDemoResult(fileName) {
@@ -1580,35 +1612,115 @@ function generateDemoResult(fileName) {
   return candidates;
 }
 
-function renderImportResult(results, isDemo, photoCount) {
-  var main = results[0];
-  var desc = main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '';
-  if (!desc) desc = main.name + '是一种常见的鸟类，广泛分布于城市公园和湿地环境中。';
-
-  var html = '';
-  html += '<div class="import-result-item" style="background:var(--green-pale);border-radius:8px;padding:12px;margin-bottom:12px;">';
-  html += '<div style="font-size:12px;color:var(--green-primary);font-weight:600;margin-bottom:6px;">' + (isDemo ? '演示模式' : 'AI 识别') + '</div>';
-  html += '<div style="font-size:18px;font-weight:700;margin-bottom:4px;">' + main.name + '</div>';
-  html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">置信度 ' + main.score.toFixed(1) + '% · ' + photoCount + ' 张照片</div>';
-  html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + desc + '</div>';
-  html += '</div>';
-
-  // 候选列表
-  html += '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">其他候选</div>';
-  results.slice(0, 5).forEach(function(c) {
-    var s = typeof c.score === 'number' ? c.score.toFixed(1) : c.score;
-    html += '<div class="import-result-item"><div class="import-result-info"><div class="import-result-name">' + c.name + '</div></div><div style="font-size:12px;color:var(--text-muted);">' + s + '%</div></div>';
+function renderImportBatchResult(batchResults) {
+  // Group results by bird name
+  var grouped = {};
+  batchResults.forEach(function(item, idx) {
+    var main = item.result[0];
+    var name = main.name;
+    if (!grouped[name]) grouped[name] = { name: name, photos: [], score: main.score, desc: main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '' };
+    grouped[name].photos.push(item.photo);
+    if (!grouped[name].desc) grouped[name].desc = name + '是一种常见的鸟类，广泛分布于城市公园和湿地环境中。';
   });
+
+  var keys = Object.keys(grouped);
+  var html = '';
+
+  // Show first result prominently
+  if (keys.length > 0) {
+    var first = grouped[keys[0]];
+    html += '<div class="import-result-item" style="background:var(--green-pale);border-radius:8px;padding:12px;margin-bottom:12px;">';
+    html += '<div style="font-size:12px;color:var(--green-primary);font-weight:600;margin-bottom:6px;">' + (lastImportIsDemo ? '演示模式' : 'AI 识别') + ' · 共 ' + batchResults.length + ' 张</div>';
+    html += '<div style="font-size:18px;font-weight:700;margin-bottom:4px;">' + keys[0] + '</div>';
+    html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">置信度 ' + first.score.toFixed(1) + '% · ' + first.photos.length + ' 张照片归入</div>';
+    html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + first.desc + '</div>';
+    html += '</div>';
+  }
+
+  // Show other bird groups
+  for (var i = 1; i < keys.length; i++) {
+    var g = grouped[keys[i]];
+    html += '<div class="import-result-item" style="background:var(--card-bg);border-radius:8px;padding:10px;margin-bottom:8px;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<div style="width:32px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;"><img src="' + g.photos[0] + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+    html += '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + g.name + '</div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);">' + g.photos.length + ' 张 · ' + g.score.toFixed(1) + '%</div></div>';
+    html += '</div></div>';
+  }
+
+  // Summary
+  html += '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">';
+  html += keys.length + ' 种鸟 · ' + batchResults.length + ' 张照片将归入对应相册</div>';
 
   document.getElementById('importResultList').innerHTML = html;
   document.getElementById('importPreviewArea').style.display = 'none';
   document.getElementById('importResults').classList.add('show');
 }
 
+function renderImportResult(results, isDemo, photoCount) {
+  // Legacy single-result renderer (kept for compatibility)
+  renderImportBatchResult([{ photo: importSelectedImages[0] ? importSelectedImages[0].data : '', result: results }]);
+}
+
 function finishImport() {
-  showToast('照片已归档到相册');
+  if (!lastImportResult || lastImportResult.length === 0) {
+    showToast('没有可归档的照片');
+    hideImportPage();
+    return;
+  }
+
+  var archivedCount = 0;
+  var newBirdNames = [];
+
+  lastImportResult.forEach(function(item) {
+    var main = item.result[0];
+    var birdName = main.name;
+    var photo = item.photo;
+
+    // Find matching birdData entry by name
+    var matchedId = null;
+    for (var id in birdData) {
+      if (birdData[id].name === birdName) {
+        matchedId = id;
+        break;
+      }
+    }
+
+    var now = new Date();
+    var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+    if (matchedId) {
+      birdData[matchedId].photos.unshift({ src: photo, time: timeStr + ' AI导入', place: 'AI 相册导入' });
+      archivedCount++;
+    } else {
+      // Create new bird entry
+      var newId = 'user_import_' + Date.now() + '_' + archivedCount;
+      birdData[newId] = {
+        name: birdName,
+        en: '',
+        latin: '',
+        taxonomy: ['未知目', '未知科'],
+        photos: [{ src: photo, time: timeStr + ' AI导入', place: 'AI 相册导入' }]
+      };
+      newBirdNames.push(birdName);
+      archivedCount++;
+    }
+  });
+
+  // Add积分
+  var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + archivedCount * 10;
+  localStorage.setItem('birdcircle_points', String(points));
+
+  // Refresh album
+  renderAlbumWithCategories(albumCategories);
+
+  var msg = archivedCount + ' 张照片已归档到相册';
+  if (newBirdNames.length > 0) msg += '（新建 ' + newBirdNames.length + ' 个鸟种）';
+  msg += ' +' + (archivedCount * 10) + ' 积分';
+  showToast(msg);
+
   hideImportPage();
-  // Reset
+  lastImportResult = null;
   importSelectedImages = [];
   document.getElementById('importGuide').style.display = '';
   document.getElementById('importPreviewArea').style.display = 'none';
@@ -1735,8 +1847,38 @@ function exportAlbum() {
 let lastUploadResult = null;
 let lastUploadPhoto = null;
 
-function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); }
+function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); locateMe(); }
 function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); }
+
+function locateMe() {
+  var locText = document.getElementById('uploadLocationText');
+  var nameInput = document.getElementById('uploadSpotNameInput');
+  locText.textContent = '定位中...';
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      // Find nearest spot within 5km
+      var nearest = null;
+      var minDist = Infinity;
+      spots.forEach(function(s) {
+        var d = Math.sqrt(Math.pow(s.lat - lat, 2) + Math.pow(s.lng - lng, 2));
+        if (d < minDist) { minDist = d; nearest = s; }
+      });
+      locText.textContent = lat.toFixed(4) + ', ' + lng.toFixed(4);
+      if (nearest && minDist < 0.05 && !nameInput.value) {
+        nameInput.value = nearest.name;
+      }
+    }, function() {
+      // Geolocation denied or unavailable - use default
+      locText.textContent = '40.0136, 116.4073（奥森公园）';
+      if (!nameInput.value) nameInput.value = '奥森公园';
+    });
+  } else {
+    locText.textContent = '40.0136, 116.4073（奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
+  }
+}
 
 async function handleUploadSpotPhoto(e) {
   var file = e.target.files[0];
@@ -1815,7 +1957,9 @@ function submitBirdReport() {
   }
   var main = result[0];
   var birdName = main.name;
-  var spotName = '奥森公园 · 南园湖心岛';
+  // Use user input or nearest spot name
+  var spotName = document.getElementById('uploadSpotNameInput').value.trim();
+  if (!spotName) spotName = '奥森公园 · 南园湖心岛';
 
   // 1. 同步到相册：找到或创建对应的 birdData 条目
   var matchedId = null;
@@ -1871,7 +2015,7 @@ function hideImportPage() {
 }
 // ===== LEAFLET MAP =====
 const spots = [
-  // === eBird API 真实热点 (2026-07-06) + 权威来源补充 ===
+  // === 基于 eBird 热点数据整理的 Demo 数据 + 公开资料补充 ===
 
   { ebirdId:'L2394169', name:'沙河水库', lat:40.1313, lng:116.3080, type:'wetland', dist:'47.6km', area:'海淀区', time:'2026-07-05', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'357 种 · 4893 清单', numSpecies:357, img:'photos/spot_wetland.jpg', sensitive:false, nocturnal:true },
   { ebirdId:'L4427370', name:'温榆河', lat:39.9395, lng:116.6430, type:'wetland', dist:'52.1km', area:'朝阳区', time:'2026-06-17', birds:['苍鹭','白鹭','绿头鸭','黑水鸡','小䴙䴘'], news:'306 种 · 596 清单', numSpecies:306, img:'photos/spot_wetland.jpg', sensitive:false, nocturnal:true },
@@ -1976,7 +2120,15 @@ function initMap() {
 
   L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {
     maxZoom: 19,
+    attribution: '地图底图：高德地图 | 鸟讯数据：基于 eBird 热点数据整理的 Demo 数据 + 公开资料补充'
   }).addTo(map);
+
+  // 添加鸟类保护说明到地图页面
+  var mapPage = document.getElementById('page-map');
+  var protectBar = document.createElement('div');
+  protectBar.className = 'map-protect-bar';
+  protectBar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>鸟类保护：敏感物种隐藏坐标 · 繁殖地禁用导航 · 夜行鸟类请勿靠近</span>';
+  mapPage.insertBefore(protectBar, mapPage.firstChild);
 
   spots.forEach((spot, index) => {
     const colorClass = getRecencyColor(spot.time);
@@ -2022,17 +2174,35 @@ function initMap() {
   });
 }
 
-// Generate realistic report stats for a spot
+// Deterministic pseudo-random based on string seed
+function seededRandom(seed) {
+  var hash = 0;
+  for (var i = 0; i < seed.length; i++) hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+  hash = Math.abs(hash);
+  return function() {
+    hash = (hash * 16807 + 12345) % 2147483647;
+    return (hash % 10000) / 10000;
+  };
+}
+
+// Generate consistent report stats for a spot (same spot always gets same stats)
+var _spotReportCache = {};
 function generateSpotReports(spot) {
+  var cacheKey = spot.ebirdId || spot.name;
+  if (_spotReportCache[cacheKey]) return _spotReportCache[cacheKey];
+
+  var rng = seededRandom(cacheKey);
   var seed = spot.numSpecies || 100;
-  var publicCount = Math.max(3, Math.floor(seed * 0.03 + Math.random() * 8));
-  var userCount = Math.max(1, Math.floor(publicCount * 0.25 + Math.random() * 3));
-  var confirmedBy = Math.max(2, Math.floor(publicCount * 0.4 + Math.random() * 4));
-  var recent = Math.random() > 0.6;
-  var hoursAgo = recent ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 24) + 4;
-  var lastConfirmed = recent ? hoursAgo + '小时前' : (hoursAgo > 24 ? Math.floor(hoursAgo/24) + '天前' : hoursAgo + '小时前');
-  var hotLevel = spot.numSpecies > 200 ? '高活跃' : (spot.numSpecies > 100 ? '活跃' : '一般');
-  return { publicCount, userCount, confirmedBy, lastConfirmed, hoursAgo, hotLevel };
+  var publicCount = Math.max(3, Math.floor(seed * 0.03 + rng() * 8));
+  var userCount = Math.max(1, Math.floor(publicCount * 0.25 + rng() * 3));
+  var confirmedBy = Math.max(2, Math.floor(publicCount * 0.4 + rng() * 4));
+  var hoursAgo = rng() > 0.6 ? Math.floor(rng() * 3) + 1 : Math.floor(rng() * 24) + 4;
+  var lastConfirmed = hoursAgo <= 24 ? hoursAgo + '小时前' : Math.floor(hoursAgo/24) + '天前';
+  var hotLevel = seed > 200 ? '高活跃' : (seed > 100 ? '活跃' : '一般');
+
+  var result = { publicCount: publicCount, userCount: userCount, confirmedBy: confirmedBy, lastConfirmed: lastConfirmed, hoursAgo: hoursAgo, hotLevel: hotLevel };
+  _spotReportCache[cacheKey] = result;
+  return result;
 }
 
 function showSpotDetail(index) {
@@ -2285,21 +2455,30 @@ function renderStack(birdId) {
   const count = bird.photos.length;
 
   let html = '';
+  // Third layer (deepest)
+  if (photos[2]) {
+    html += '<div class="bird-stack-layer third"><img src="' + photos[2] + '" alt=""></div>';
+  }
+  // Second layer (middle)
   if (photos[1]) {
-    html += `<div class="bird-stack-layer second"><img src="${photos[1]}" alt=""></div>`;
+    html += '<div class="bird-stack-layer second"><img src="' + photos[1] + '" alt=""></div>';
   }
-  html += `<div class="bird-stack-layer front">`;
-  html += `<img src="${photos[0]}" alt="">`;
-  html += `<div class="bird-stack-name">${bird.name}</div>`;
+  // Front layer (top)
+  html += '<div class="bird-stack-layer front">';
+  html += '<img src="' + photos[0] + '" alt="">';
+  html += '<div class="bird-stack-name">' + bird.name + '</div>';
   if (count > 1) {
-    html += `<div class="bird-stack-count">${getSafeIndex(birdId) + 1} / ${count}</div>`;
+    html += '<div class="bird-stack-count">' + (getSafeIndex(birdId) + 1) + ' / ' + count + '</div>';
   }
-  html += `</div>`;
+  html += '</div>';
   stackEl.innerHTML = html;
   setupStackTouch(birdId, stackEl);
 }
 
 function setupStackTouch(birdId, el) {
+  if (el.dataset.bound === '1') return;
+  el.dataset.bound = '1';
+
   const STATE = { IDLE: 'IDLE', DRAGGING: 'DRAGGING', RELEASED: 'RELEASED' };
   let state = STATE.IDLE;
   let activePointerId = null;
