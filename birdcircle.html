@@ -1130,7 +1130,7 @@ html, body {
       <span class="form-label">观测时间</span>
       <div class="form-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>2026年7月5日 06:30</span>
+        <span id="uploadTimeText"></span>
       </div>
     </div>
     <div class="form-section">
@@ -1866,15 +1866,20 @@ function exportAlbum() {
 let lastUploadResult = null;
 let lastUploadPhoto = null;
 
-function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); locateMe(); }
+function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); document.getElementById('uploadTimeText').textContent = new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); locateMe(); }
 function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); document.getElementById('tabBar').style.display = ''; }
 
 function locateMe() {
   var locText = document.getElementById('uploadLocationText');
   var nameInput = document.getElementById('uploadSpotNameInput');
   locText.textContent = '定位中...';
+  var locateTimeout = setTimeout(function() {
+    locText.textContent = '40.0136, 116.4073（奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
+  }, 3000);
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(pos) {
+      clearTimeout(locateTimeout);
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
       // Find nearest spot within 5km
@@ -1889,6 +1894,7 @@ function locateMe() {
         nameInput.value = nearest.name;
       }
     }, function() {
+      clearTimeout(locateTimeout);
       // Geolocation denied or unavailable - use default
       locText.textContent = '40.0136, 116.4073（奥森公园）';
       if (!nameInput.value) nameInput.value = '奥森公园';
