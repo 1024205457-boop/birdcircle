@@ -2245,9 +2245,8 @@ function showSpotDetail(index) {
   newsHtml += '<span style="font-size:11px;color:var(--text-muted);background:#f0f0f0;padding:3px 8px;border-radius:8px;">🕐 最新确认 ' + r.lastConfirmed + '</span>';
   newsHtml += '<span style="font-size:11px;color:var(--text-muted);background:#f0f0f0;padding:3px 8px;border-radius:8px;">✅ ' + r.confirmedBy + '人确认</span>';
   newsHtml += '</div>';
-  newsHtml += '<div style="font-size:12px;color:var(--text-secondary);background:var(--card-bg);padding:8px 10px;border-radius:8px;border:1px solid var(--border);">';
-  newsHtml += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>公开鸟讯</span><span style="font-weight:600;">' + r.publicCount + ' 条</span></div>';
-  newsHtml += '<div style="display:flex;justify-content:space-between;"><span>用户上传</span><span style="font-weight:600;color:var(--green-primary);">' + r.userCount + ' 条</span></div>';
+  newsHtml += '<div style="font-size:12px;color:var(--text-secondary);background:var(--card-bg);padding:6px 10px;border-radius:8px;border:1px solid var(--border);display:flex;justify-content:space-between;">';
+  newsHtml += '<span>公开 ' + r.publicCount + ' 条</span><span style="color:var(--green-primary);">用户 ' + r.userCount + ' 条</span>';
   newsHtml += '</div>';
   document.getElementById('spotDetailNews').innerHTML = newsHtml;
 
