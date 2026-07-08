@@ -980,7 +980,7 @@ html, body {
   <div class="page points-page" id="page-points">
     <div class="points-card">
       <div class="points-label">我的观鸟积分</div>
-      <div class="points-value">2,680</div>
+      <div class="points-value" id="myPointsValue">2,680</div>
       <div class="points-upload-btn" onclick="showUploadPage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         上传鸟点
@@ -1267,6 +1267,15 @@ function switchTab(index) {
   }
   if(index !== 1) document.getElementById('spotDetail').classList.remove('show');
 }
+
+// ===== POINTS DISPLAY =====
+function refreshPointsDisplay() {
+  var pts = parseInt(localStorage.getItem('birdcircle_points') || '2680');
+  var el = document.getElementById('myPointsValue');
+  if (el) el.textContent = pts.toLocaleString();
+}
+// Initialize on load
+refreshPointsDisplay();
 
 // ===== PUBLISH MODAL =====
 function showPublishModal() {
@@ -1722,6 +1731,7 @@ function finishImport() {
   // Add积分
   var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + archivedCount * 10;
   localStorage.setItem('birdcircle_points', String(points));
+  refreshPointsDisplay();
 
   // Refresh album
   renderAlbumWithCategories(albumCategories);
@@ -2012,6 +2022,7 @@ function submitBirdReport() {
   // 2. 更新积分
   var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + 50;
   localStorage.setItem('birdcircle_points', String(points));
+  refreshPointsDisplay();
 
   // 3. 显示成功面板
   document.getElementById('successBirdName').textContent = birdName;
@@ -2326,6 +2337,7 @@ function checkInSpot() {
   var total = Object.keys(checkins).length;
   var points = parseInt(localStorage.getItem('birdcircle_points') || '0') + 5;
   localStorage.setItem('birdcircle_points', String(points));
+  refreshPointsDisplay();
   showToast('打卡成功！' + s.name + ' +5 积分 (累计 ' + points + ' 分)');
 }
 
