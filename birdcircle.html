@@ -1466,6 +1466,44 @@ var AI_CONFIG = {
   classifyUrl: '/api/baidu/animal'
 };
 
+async function identifyBirdImage(imgData, fileName) {
+  var isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+  if (!isHttp) {
+    return generateDemoResult(fileName || '');
+  }
+  try {
+    if (!aiAccessToken) {
+      var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
+      if (tokenRes.ok) {
+        var tokenData = await tokenRes.json();
+        if (tokenData.access_token) aiAccessToken = tokenData.access_token;
+        else throw new Error('token failed');
+      } else throw new Error('token fetch failed');
+    }
+    var base64Data = imgData.split(',')[1];
+    var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
+    var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+    if (classifyRes.ok) {
+      var classifyData = await classifyRes.json();
+      if (classifyData.result && classifyData.result.length > 0) {
+        return classifyData.result;
+      } else throw new Error('no result');
+    } else throw new Error('classify fetch failed');
+  } catch(e) {
+    console.log('API failed, fallback to demo:', e.message);
+    return generateDemoResult(fileName || '');
+  }
+}
+
+function scoreText(score) {
+  var n = Number(score);
+  return Number.isFinite(n) ? n.toFixed(1) : '80.0';
+}
+
 function handleImportSelect(e) {
   var files = Array.from(e.target.files);
   if (files.length === 0) return;
@@ -1512,50 +1550,12 @@ async function startImportIdentify() {
 
   lastImportResult = [];
   lastImportIsDemo = false;
-  var apiFailed = false;
 
-  // 逐张识别
   for (var i = 0; i < importSelectedImages.length; i++) {
     var item = importSelectedImages[i];
-    var img = item.data;
-    var fileName = item.name;
-    var result = null;
-    var isDemo = false;
-
     btn.textContent = '识别中 ' + (i + 1) + '/' + importSelectedImages.length;
-
-    try {
-      if (!aiAccessToken) {
-        var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
-        if (tokenRes.ok) {
-          var tokenData = await tokenRes.json();
-          if (tokenData.access_token) aiAccessToken = tokenData.access_token;
-          else throw new Error('token failed');
-        } else throw new Error('token fetch failed');
-      }
-      var base64Data = img.split(',')[1];
-      var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
-      var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-      if (classifyRes.ok) {
-        var classifyData = await classifyRes.json();
-        if (classifyData.result && classifyData.result.length > 0) {
-          result = classifyData.result;
-        } else throw new Error('no result');
-      } else throw new Error('classify fetch failed');
-    } catch(e) {
-      console.log('API failed, photo ' + (i+1) + ' demo mode:', e.message);
-      apiFailed = true;
-      isDemo = true;
-      result = generateDemoResult(fileName);
-    }
-
-    lastImportResult.push({ photo: img, result: result, isDemo: isDemo });
-    if (apiFailed) lastImportIsDemo = true;
-    // Small delay between requests to avoid throttling
+    var result = await identifyBirdImage(item.data, item.name);
+    lastImportResult.push({ photo: item.data, result: result });
     if (i < importSelectedImages.length - 1) await new Promise(r => setTimeout(r, 300));
   }
 
@@ -1642,7 +1642,7 @@ function renderImportBatchResult(batchResults) {
     html += '<div class="import-result-item" style="background:var(--green-pale);border-radius:8px;padding:12px;margin-bottom:12px;">';
     html += '<div style="font-size:12px;color:var(--green-primary);font-weight:600;margin-bottom:6px;">' + (lastImportIsDemo ? '演示模式' : 'AI 识别') + ' · 共 ' + batchResults.length + ' 张</div>';
     html += '<div style="font-size:18px;font-weight:700;margin-bottom:4px;">' + keys[0] + '</div>';
-    html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">置信度 ' + first.score.toFixed(1) + '% · ' + first.photos.length + ' 张照片归入</div>';
+    html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">置信度 ' + scoreText(first.score) + '% · ' + first.photos.length + ' 张照片归入</div>';
     html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + first.desc + '</div>';
     html += '</div>';
   }
@@ -1654,7 +1654,7 @@ function renderImportBatchResult(batchResults) {
     html += '<div style="display:flex;align-items:center;gap:8px;">';
     html += '<div style="width:32px;height:32px;border-radius:6px;overflow:hidden;flex-shrink:0;"><img src="' + g.photos[0] + '" style="width:100%;height:100%;object-fit:cover;"></div>';
     html += '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + g.name + '</div>';
-    html += '<div style="font-size:11px;color:var(--text-muted);">' + g.photos.length + ' 张 · ' + g.score.toFixed(1) + '%</div></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);">' + g.photos.length + ' 张 · ' + scoreText(g.score) + '%</div></div>';
     html += '</div></div>';
   }
 
@@ -1908,83 +1908,59 @@ function locateMe() {
 async function handleUploadSpotPhoto(e) {
   var file = e.target.files[0];
   if (!file) return;
-  var reader = new FileReader();
+  var reader = new FileReader;
   reader.onload = async function(ev) {
-    var imgData = ev.target.result;
-    // Show preview
+    var photo = ev.target.result;
+    lastUploadPhoto = photo;
+    // 显示预览
     var area = document.getElementById('uploadSpotPhotoArea');
-    area.innerHTML = '<div style="width:80px;height:80px;border-radius:8px;overflow:hidden;"><img src="' + imgData + '" style="width:100%;height:100%;object-fit:cover;"></div>';
-    lastUploadPhoto = imgData;
-    // Show loading
+    area.innerHTML = '<div class="photo-upload-slot" style="border:none;"><img src="' + photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>';
+    // 开始识别
     document.getElementById('uploadAiLoading').style.display = 'block';
-    // AI identify
-    var result = null;
-    var isDemo = false;
+    document.getElementById('uploadSpotBirdList').innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">正在识别中...</div>';
     try {
-      if (!aiAccessToken) {
-        var tokenRes = await fetch(AI_CONFIG.tokenUrl, { method: 'POST' });
-        if (tokenRes.ok) {
-          var tokenData = await tokenRes.json();
-          if (tokenData.access_token) aiAccessToken = tokenData.access_token;
-          else throw new Error('token failed');
-        } else throw new Error('token fetch failed');
+      var result = await identifyBirdImage(photo, file.name);
+      lastUploadResult = result;
+      // 显示识别结果
+      var main = result[0];
+      var html = '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;">';
+      html += '<div style="flex:1;"><div style="font-size:16px;font-weight:600;">' + main.name + '</div>';
+      html += '<div style="font-size:12px;color:var(--text-muted);">置信度 ' + scoreText(main.score) + '%</div></div>';
+      html += '<span style="font-size:11px;color:var(--green-primary);background:var(--green-pale);padding:3px 8px;border-radius:8px;">AI 已识别</span></div>';
+      // 候选列表
+      if (result.length > 1) {
+        html += '<div style="margin-top:4px;">';
+        for (var i = 1; i < Math.min(4, result.length); i++) {
+          html += '<div style="font-size:12px;color:var(--text-muted);padding:2px 0;">' + result[i].name + ' · ' + scoreText(result[i].score) + '%</div>';
+        }
+        html += '</div>';
       }
-      var base64Data = imgData.split(',')[1];
-      var formData = 'image=' + encodeURIComponent(base64Data) + '&baike_num=3&access_token=' + encodeURIComponent(aiAccessToken);
-      var classifyRes = await fetch(AI_CONFIG.classifyUrl + '?access_token=' + encodeURIComponent(aiAccessToken), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-      if (classifyRes.ok) {
-        var classifyData = await classifyRes.json();
-        if (classifyData.result && classifyData.result.length > 0) {
-          result = classifyData.result;
-        } else throw new Error('no result');
-      } else throw new Error('classify fetch failed');
+      document.getElementById('uploadSpotBirdList').innerHTML = html;
     } catch(err) {
-      console.log('API failed, demo mode:', err.message);
-      isDemo = true;
-      result = generateDemoResult(file ? file.name.toLowerCase() : '');
+      lastUploadResult = generateDemoResult(file.name);
+      document.getElementById('uploadSpotBirdList').innerHTML = '<div style="font-size:13px;padding:8px 0;">识别超时，已使用默认结果</div>';
     }
     document.getElementById('uploadAiLoading').style.display = 'none';
-    lastUploadResult = result;
-    // Render result
-    var main = result[0];
-    var desc = main.baike_info && main.baike_info.description ? main.baike_info.description : main.desc || '';
-    if (!desc) desc = main.name + '是一种常见的鸟类。';
-    var badge = isDemo ? '<span style="font-size:11px;color:#e65100;background:#fff3e0;padding:2px 8px;border-radius:10px;margin-left:8px;">演示</span>' : '<span style="font-size:11px;color:#2e7d32;background:#e8f5e9;padding:2px 8px;border-radius:10px;margin-left:8px;">AI</span>';
-    var html = '<div class="bird-select-item" style="background:var(--green-pale);border-radius:8px;">';
-    html += '<div style="padding:12px;">';
-    html += '<div style="font-size:15px;font-weight:600;margin-bottom:4px;">' + main.name + badge + '</div>';
-    html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">置信度 ' + main.score.toFixed(1) + '%</div>';
-    html += '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">' + desc + '</div>';
-    html += '</div></div>';
-    // Candidates
-    if (result.length > 1) {
-      html += '<div style="font-size:12px;color:var(--text-muted);margin:8px 0 4px;">其他候选</div>';
-      result.slice(1, 4).forEach(function(c) {
-        var s = typeof c.score === 'number' ? c.score.toFixed(1) : c.score;
-        html += '<div class="bird-select-item"><div><div class="bird-select-name">' + c.name + '</div></div><div style="font-size:12px;color:var(--text-muted);">' + s + '%</div></div>';
-      });
-    }
-    document.getElementById('uploadSpotBirdList').innerHTML = html;
   };
   reader.readAsDataURL(file);
 }
 
 function submitBirdReport() {
-  var result = lastUploadResult;
   var photo = lastUploadPhoto;
-  if (!result || !photo) {
-    showToast('请先上传照片并等待 AI 识别');
+  if (!photo) {
+    showToast('请先上传照片');
     return;
   }
+  // 确保 result 非空
+  if (!lastUploadResult || !lastUploadResult.length) {
+    lastUploadResult = generateDemoResult('');
+  }
+  var result = lastUploadResult;
   var main = result[0];
-  var birdName = main.name;
+  var birdName = main.name || '待确认鸟种';
   // Use user input or nearest spot name
   var spotName = document.getElementById('uploadSpotNameInput').value.trim();
-  if (!spotName) spotName = '当前位置（手动输入地点名称）';
+  if (!spotName) spotName = '奥森公园';
 
   // 1. 同步到相册：找到或创建对应的 birdData 条目
   var matchedId = null;
