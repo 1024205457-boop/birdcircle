@@ -1856,7 +1856,7 @@ let lastUploadResult = null;
 let lastUploadPhoto = null;
 
 function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); locateMe(); }
-function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); }
+function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); document.getElementById('tabBar').style.display = ''; }
 
 function locateMe() {
   var locText = document.getElementById('uploadLocationText');
