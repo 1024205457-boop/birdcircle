@@ -2461,23 +2461,19 @@ function swipeStack(birdId, direction) {
   renderStack(birdId);
 }
 
-function renderStack(birdId) {
-  const stackEl = document.getElementById('stack-' + birdId);
-  if (!stackEl) return;
+function renderStackHtml(birdId) {
   const bird = birdData[birdId];
+  if (!bird) return '';
   const photos = getStackPhotos(birdId);
   const count = bird.photos.length;
 
   let html = '';
-  // Third layer (deepest)
   if (photos[2]) {
     html += '<div class="bird-stack-layer third"><img src="' + photos[2] + '" alt=""></div>';
   }
-  // Second layer (middle)
   if (photos[1]) {
     html += '<div class="bird-stack-layer second"><img src="' + photos[1] + '" alt=""></div>';
   }
-  // Front layer (top)
   html += '<div class="bird-stack-layer front">';
   html += '<img src="' + photos[0] + '" alt="">';
   html += '<div class="bird-stack-name">' + bird.name + '</div>';
@@ -2485,7 +2481,13 @@ function renderStack(birdId) {
     html += '<div class="bird-stack-count">' + (getSafeIndex(birdId) + 1) + ' / ' + count + '</div>';
   }
   html += '</div>';
-  stackEl.innerHTML = html;
+  return '<div class="bird-stack" id="stack-' + birdId + '" ondblclick="openBirdDetail(\'' + birdId + '\')">' + html + '</div>';
+}
+
+function renderStack(birdId) {
+  const stackEl = document.getElementById('stack-' + birdId);
+  if (!stackEl) return;
+  stackEl.innerHTML = renderStackHtml(birdId).replace(/^<div[^>]*>/, '').replace(/<\/div>$/, '');
   setupStackTouch(birdId, stackEl);
 }
 
@@ -2778,11 +2780,11 @@ function initAlbum() {
       html += `<div class="album-pair">`;
       html += `<div class="album-pair-item">`;
       html += `<div class="category-title">${pairedSingles[i].title}</div>`;
-      html += renderStack(pairedSingles[i].birds[0]);
+      html += renderStackHtml(pairedSingles[i].birds[0]);
       html += `</div>`;
       html += `<div class="album-pair-item">`;
       html += `<div class="category-title">${pairedSingles[i+1].title}</div>`;
-      html += renderStack(pairedSingles[i+1].birds[0]);
+      html += renderStackHtml(pairedSingles[i+1].birds[0]);
       html += `</div>`;
       html += `</div>`;
     }
@@ -2791,7 +2793,7 @@ function initAlbum() {
       html += `<div class="album-category">`;
       html += `<div class="category-title">${cat.title}</div>`;
       html += `<div class="album-grid">`;
-      cat.birds.forEach(birdId => { html += renderStack(birdId); });
+      cat.birds.forEach(birdId => { html += renderStackHtml(birdId); });
       html += `</div></div>`;
     });
 
@@ -2799,7 +2801,7 @@ function initAlbum() {
       html += `<div class="album-category">`;
       html += `<div class="category-title">${leftover.title}</div>`;
       html += `<div class="album-grid">`;
-      html += renderStack(leftover.birds[0]);
+      html += renderStackHtml(leftover.birds[0]);
       html += `</div></div>`;
     }
 
