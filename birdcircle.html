@@ -1255,6 +1255,7 @@ let mapInitialized = false;
 // Tab index to tabItems index mapping: page 0→0, 1→1, 3→2, 4→3
 const tabIndexMap = {0:0, 1:1, 3:2, 4:3};
 function switchTab(index) {
+  document.getElementById('tabBar').style.display = '';
   pages.forEach((p,i) => { if(p) document.getElementById(p).classList.remove('active'); });
   tabItems.forEach(t => t.classList.remove('active'));
   if(pages[index]) document.getElementById(pages[index]).classList.add('active');
@@ -2029,6 +2030,7 @@ function hideImportPage() {
   document.getElementById('importPage').classList.remove('show');
   document.getElementById('importGuide').style.display = 'block';
   document.getElementById('importResults').classList.remove('show');
+  document.getElementById('tabBar').style.display = '';
 }
 // ===== LEAFLET MAP =====
 const spots = [
