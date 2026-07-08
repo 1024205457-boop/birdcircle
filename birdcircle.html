@@ -438,6 +438,19 @@ html, body {
 .shop-item-body { padding:6px 10px 8px; }
 .shop-item-desc { font-size:10px; color:var(--text-muted); }
 .shop-item-price { font-size:13px; font-weight:700; color:var(--green-primary); margin-top:2px; }
+.shop-item-img div { width:100%; height:100%; }
+.task-item { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.task-item:last-child { border-bottom:none; }
+.task-info { display:flex; align-items:center; gap:10px; flex:1; }
+.task-icon { width:36px; height:36px; border-radius:10px; background:var(--green-pale); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.task-text { flex:1; }
+.task-name { font-size:14px; font-weight:600; color:var(--text-primary); }
+.task-desc { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.task-reward { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.task-points { font-size:14px; font-weight:700; color:var(--green-primary); }
+.task-done { font-size:11px; color:#10b981; }
+.task-progress { font-size:11px; color:#f59e0b; }
+.task-status { font-size:11px; color:var(--text-muted); }
 
 /* ===== ALBUM ===== */
 .album-page { padding:0 16px 10px; }
@@ -887,17 +900,31 @@ html, body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           积分任务
         </h4>
-        <div class="task-item">
-          <span class="task-info">上传观鸟点</span>
-          <span class="task-points">+50</span>
-        </div>
-        <div class="task-item">
-          <span class="task-info">补充鸟种照片</span>
-          <span class="task-points">+20</span>
-        </div>
-        <div class="task-item" onclick="showToast('已为你加入朝阳同城观鸟群')">
-          <span class="task-info">加入同城观鸟群</span>
-          <span class="task-points">+10</span>
+        <div class="points-tasks">
+          <div class="task-item" onclick="showToast('已完成')">
+            <div class="task-info"><div class="task-icon">📷</div><div class="task-text"><div class="task-name">上传第一张鸟照</div><div class="task-desc">拍摄并上传你观察到的鸟类</div></div></div>
+            <div class="task-reward"><span class="task-points">+50</span><span class="task-done">已完成</span></div>
+          </div>
+          <div class="task-item" onclick="showToast('已完成')">
+            <div class="task-info"><div class="task-icon">🗺️</div><div class="task-text"><div class="task-name">打卡第一个鸟点</div><div class="task-desc">在地图上打卡附近的观鸟点</div></div></div>
+            <div class="task-reward"><span class="task-points">+5</span><span class="task-done">已完成</span></div>
+          </div>
+          <div class="task-item" onclick="showToast('已完成')">
+            <div class="task-info"><div class="task-icon">📂</div><div class="task-text"><div class="task-name">导入相册照片</div><div class="task-desc">导入手机中的鸟类照片并AI归档</div></div></div>
+            <div class="task-reward"><span class="task-points">+10</span><span class="task-done">已完成</span></div>
+          </div>
+          <div class="task-item" onclick="showToast('进行中')">
+            <div class="task-info"><div class="task-icon">🔄</div><div class="task-text"><div class="task-name">连续7天打卡</div><div class="task-desc">每天至少打卡一个鸟点，坚持一周</div></div></div>
+            <div class="task-reward"><span class="task-points">+100</span><span class="task-progress">3/7</span></div>
+          </div>
+          <div class="task-item" onclick="showToast('进行中')">
+            <div class="task-info"><div class="task-icon">🎯</div><div class="task-text"><div class="task-name">累计记录10种鸟</div><div class="task-desc">在相册中收集10种不同的鸟类</div></div></div>
+            <div class="task-reward"><span class="task-points">+80</span><span class="task-progress">6/10</span></div>
+          </div>
+          <div class="task-item" onclick="showToast('未完成')">
+            <div class="task-info"><div class="task-icon">🌟</div><div class="task-text"><div class="task-name">发现稀有鸟种</div><div class="task-desc">上传并记录国家保护鸟类</div></div></div>
+            <div class="task-reward"><span class="task-points">+200</span><span class="task-status">未完成</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1001,6 +1028,10 @@ html, body {
       <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cap.jpg" alt="遮阳帽" onerror="this.style.display='none';this.parentNode.textContent='🧢'"><div class="item-name-overlay">Columbia 速干遮阳帽</div></div><div class="shop-item-body"><div class="shop-item-desc">UPF50+ · 防晒透气</div><div class="shop-item-price">1,200 积分</div></div></div>
       <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cleaning.jpg" alt="清洁套装" onerror="this.style.display='none';this.parentNode.textContent='🧴'"><div class="item-name-overlay">VSGO 镜头清洁套装</div></div><div class="shop-item-body"><div class="shop-item-desc">镜头笔 + 气吹 + 无绒纸</div><div class="shop-item-price">800 积分</div></div></div>
       <div class="shop-item"><div class="shop-item-img"><img src="photos/products/bag.jpg" alt="腰包" onerror="this.style.display='none';this.parentNode.textContent='🎒'"><div class="item-name-overlay">Lowepro 摄影腰包</div></div><div class="shop-item-body"><div class="shop-item-desc">防水面料 · 多功能分区</div><div class="shop-item-price">1,500 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#f0f7ff;">📖</div><div class="item-name-overlay">中国鸟类野外手册</div></div><div class="shop-item-body"><div class="shop-item-desc">刘阳/陈自著 · 便携权威图鉴</div><div class="shop-item-price">3,200 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#f5f0ff;">🧲</div><div class="item-name-overlay">SWAROVSKI CL Companion 8x30</div></div><div class="shop-item-body"><div class="shop-item-desc">奥地利施华洛世奇 · 轻便观鸟镜</div><div class="shop-item-price">12,000 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#fff5f0;">🪶</div><div class="item-name-overlay">羽毛书签礼盒</div></div><div class="shop-item-body"><div class="shop-item-desc">手工羽毛书签 · 含8种珍稀鸟羽</div><div class="shop-item-price">600 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#f0fff5;">🧢</div><div class="item-name-overlay">KAILAS 户外速干帽</div></div><div class="shop-item-body"><div class="shop-item-desc">凯乐石 · UPF50+ 防晒透气</div><div class="shop-item-price">1,800 积分</div></div></div>
     </div>
   </div>
 
