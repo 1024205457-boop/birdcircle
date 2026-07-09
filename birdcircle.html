@@ -1886,7 +1886,7 @@ function exportAlbum() {
 let lastUploadResult = null;
 let lastUploadPhoto = null;
 
-function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); document.getElementById('uploadTimeText').textContent = new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); locateMe(); }
+function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); document.getElementById('uploadTimeText').textContent = new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); document.getElementById('tabBar').style.display = 'none'; locateMe(); }
 function hideUploadPage() {
   document.getElementById('uploadPage').classList.remove('show');
   document.getElementById('uploadSuccessPanel').classList.remove('show');
@@ -2059,7 +2059,7 @@ function submitBirdReport() {
   updateAlbumCount();
 }
 
-function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); }
+function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); document.getElementById('tabBar').style.display = 'none'; }
 function hideImportPage() {
   document.getElementById('importPage').classList.remove('show');
   document.getElementById('importGuide').style.display = 'block';
