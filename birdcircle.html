@@ -751,7 +751,7 @@ html, body {
 .import-result-status { font-size:12px; color:var(--green-primary); font-weight:500; }
 
 /* Upload Success Panel */
-.upload-success-panel { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:250; display:none; align-items:center; justify-content:center; padding:20px; }
+.upload-success-panel { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
 .upload-success-panel.show { display:flex; }
 .upload-success-inner { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:340px; text-align:center; animation:slideUp 0.3s ease; }
 .upload-success-icon { font-size:48px; margin-bottom:8px; }
@@ -1887,7 +1887,17 @@ let lastUploadResult = null;
 let lastUploadPhoto = null;
 
 function showUploadPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('uploadPage').classList.add('show'); document.getElementById('uploadTimeText').textContent = new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); locateMe(); }
-function hideUploadPage() { document.getElementById('uploadPage').classList.remove('show'); document.getElementById('uploadSuccessPanel').classList.remove('show'); document.getElementById('tabBar').style.display = ''; }
+function hideUploadPage() {
+  document.getElementById('uploadPage').classList.remove('show');
+  document.getElementById('uploadSuccessPanel').classList.remove('show');
+  document.getElementById('tabBar').style.display = '';
+  lastUploadResult = null;
+  lastUploadPhoto = null;
+  var fileInput = document.getElementById('uploadSpotFileInput');
+  if (fileInput) fileInput.value = '';
+  var btn = document.querySelector('#uploadPage .submit-btn');
+  if (btn) { btn.disabled = false; btn.textContent = '提交鸟讯'; }
+}
 
 function locateMe() {
   var locText = document.getElementById('uploadLocationText');
@@ -1972,9 +1982,13 @@ async function handleUploadSpotPhoto(e) {
 }
 
 function submitBirdReport() {
+  var btn = document.querySelector('#uploadPage .submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '提交中...'; }
+
   var photo = lastUploadPhoto;
   if (!photo) {
     showToast('请先上传照片');
+    if (btn) { btn.disabled = false; btn.textContent = '提交鸟讯'; }
     return;
   }
   // 确保 result 非空
@@ -2038,6 +2052,7 @@ function submitBirdReport() {
   document.getElementById('successSpotName').textContent = spotName;
   document.getElementById('successPoints').textContent = '+50（累计 ' + points + ' 分）';
   document.getElementById('uploadSuccessPanel').classList.add('show');
+  if (btn) { btn.disabled = false; btn.textContent = '提交鸟讯'; }
 
   // 4. 刷新相册显示
   renderAlbumWithCategories(albumCategories);
