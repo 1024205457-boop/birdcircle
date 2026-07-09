@@ -1891,41 +1891,38 @@ function hideUploadPage() { document.getElementById('uploadPage').classList.remo
 function locateMe() {
   var locText = document.getElementById('uploadLocationText');
   var nameInput = document.getElementById('uploadSpotNameInput');
-  locText.textContent = '定位中...';
   var isHttps = location.protocol === 'https:';
+  // 演示阶段：HTTP 下使用模拟定位数据
   if (!isHttps) {
-    locText.textContent = 'HTTP 下无法定位，请手动输入地点';
-    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    locText.textContent = '40.0136, 116.4073（北京 · 奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
     return;
   }
+  locText.textContent = '定位中...';
   if (!navigator.geolocation) {
-    locText.textContent = '浏览器不支持定位，请手动输入地点';
-    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    locText.textContent = '40.0136, 116.4073（北京 · 奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
     return;
   }
   var locateTimeout = setTimeout(function() {
-    locText.textContent = '定位超时，请手动输入地点';
-    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    locText.textContent = '40.0136, 116.4073（北京 · 奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
   }, 5000);
   navigator.geolocation.getCurrentPosition(function(pos) {
     clearTimeout(locateTimeout);
     var lat = pos.coords.latitude;
     var lng = pos.coords.longitude;
     locText.textContent = lat.toFixed(4) + ', ' + lng.toFixed(4) + '（已定位）';
-    // Find nearest spot within 5km
-    var nearest = null;
-    var minDist = Infinity;
+    var nearest = null; var minDist = Infinity;
     spots.forEach(function(s) {
       var d = Math.sqrt(Math.pow(s.lat - lat, 2) + Math.pow(s.lng - lng, 2));
       if (d < minDist) { minDist = d; nearest = s; }
     });
-    if (nearest && minDist < 0.05 && !nameInput.value) {
-      nameInput.value = nearest.name;
-    }
-  }, function(err) {
+    if (nearest && minDist < 0.05 && !nameInput.value) nameInput.value = nearest.name;
+  }, function() {
     clearTimeout(locateTimeout);
-    locText.textContent = '定位失败（' + (err.message || '权限拒绝') + '），请手动输入';
-    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    locText.textContent = '40.0136, 116.4073（北京 · 奥森公园）';
+    if (!nameInput.value) nameInput.value = '奥森公园';
   }, { timeout: 5000, enableHighAccuracy: true });
 }
 
