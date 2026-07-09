@@ -1892,36 +1892,41 @@ function locateMe() {
   var locText = document.getElementById('uploadLocationText');
   var nameInput = document.getElementById('uploadSpotNameInput');
   locText.textContent = '定位中...';
-  var locateTimeout = setTimeout(function() {
-    locText.textContent = '40.0136, 116.4073（奥森公园）';
-    if (!nameInput.value) nameInput.value = '奥森公园';
-  }, 3000);
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      clearTimeout(locateTimeout);
-      var lat = pos.coords.latitude;
-      var lng = pos.coords.longitude;
-      // Find nearest spot within 5km
-      var nearest = null;
-      var minDist = Infinity;
-      spots.forEach(function(s) {
-        var d = Math.sqrt(Math.pow(s.lat - lat, 2) + Math.pow(s.lng - lng, 2));
-        if (d < minDist) { minDist = d; nearest = s; }
-      });
-      locText.textContent = lat.toFixed(4) + ', ' + lng.toFixed(4);
-      if (nearest && minDist < 0.05 && !nameInput.value) {
-        nameInput.value = nearest.name;
-      }
-    }, function() {
-      clearTimeout(locateTimeout);
-      // Geolocation denied or unavailable - use default
-      locText.textContent = '40.0136, 116.4073（奥森公园）';
-      if (!nameInput.value) nameInput.value = '奥森公园';
-    });
-  } else {
-    locText.textContent = '40.0136, 116.4073（奥森公园）';
-    if (!nameInput.value) nameInput.value = '奥森公园';
+  var isHttps = location.protocol === 'https:';
+  if (!isHttps) {
+    locText.textContent = 'HTTP 下无法定位，请手动输入地点';
+    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    return;
   }
+  if (!navigator.geolocation) {
+    locText.textContent = '浏览器不支持定位，请手动输入地点';
+    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+    return;
+  }
+  var locateTimeout = setTimeout(function() {
+    locText.textContent = '定位超时，请手动输入地点';
+    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+  }, 5000);
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    clearTimeout(locateTimeout);
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    locText.textContent = lat.toFixed(4) + ', ' + lng.toFixed(4) + '（已定位）';
+    // Find nearest spot within 5km
+    var nearest = null;
+    var minDist = Infinity;
+    spots.forEach(function(s) {
+      var d = Math.sqrt(Math.pow(s.lat - lat, 2) + Math.pow(s.lng - lng, 2));
+      if (d < minDist) { minDist = d; nearest = s; }
+    });
+    if (nearest && minDist < 0.05 && !nameInput.value) {
+      nameInput.value = nearest.name;
+    }
+  }, function(err) {
+    clearTimeout(locateTimeout);
+    locText.textContent = '定位失败（' + (err.message || '权限拒绝') + '），请手动输入';
+    if (!nameInput.value) nameInput.placeholder = '请输入观鸟地点名称';
+  }, { timeout: 5000, enableHighAccuracy: true });
 }
 
 async function handleUploadSpotPhoto(e) {
@@ -1979,7 +1984,7 @@ function submitBirdReport() {
   var birdName = main.name || '待确认鸟种';
   // Use user input or nearest spot name
   var spotName = document.getElementById('uploadSpotNameInput').value.trim();
-  if (!spotName) spotName = '奥森公园';
+  if (!spotName) spotName = '未指定地点';
 
   // 1. 同步到相册：找到或创建对应的 birdData 条目
   var matchedId = null;
