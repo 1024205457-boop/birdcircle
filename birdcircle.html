@@ -785,6 +785,25 @@ html, body {
 .ai-identify-btn:disabled { opacity:0.5; cursor:not-allowed; }
 @keyframes spin { to { transform:rotate(360deg); } }
 </style>
+<script>
+// 设备 ID（用于后端区分用户）
+var deviceId = (function() {
+  var id = localStorage.getItem('birdcircle_device_id');
+  if (!id) {
+    id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('birdcircle_device_id', id);
+  }
+  return id;
+})();
+
+// 后端可用性检测（不阻塞）
+var backendReady = false;
+(function checkBackend() {
+  fetch('/api/health', { method: 'GET', signal: AbortSignal.timeout(2000) })
+    .then(function(r) { if (r.ok) backendReady = true; })
+    .catch(function() {});
+})();
+</script>
 </head>
 <body>
 
@@ -2058,6 +2077,35 @@ function submitBirdReport() {
   // 4. 刷新相册显示
   renderAlbumWithCategories(albumCategories);
   updateAlbumCount();
+
+  // 5. 同步到后端（如果可用）
+  if (backendReady) {
+    fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        device_id: deviceId,
+        bird_name: birdName,
+        confidence: main.score || 0,
+        spot_name: spotName,
+        lat: 40.0136,
+        lng: 116.4073,
+        description: ''
+      })
+    }).then(function(r) {
+      if (r.ok) return r.json();
+      throw new Error('report failed');
+    }).then(function(data) {
+      if (data && data.id && photo) {
+        // 上传照片
+        var formData = new FormData();
+        var blob = new Blob([photo], { type: 'image/jpeg' });
+        formData.append('photo', blob, birdName + '.jpg');
+        fetch('/api/report/' + data.id + '/photo', { method: 'POST', body: formData })
+          .catch(function() {});
+      }
+    }).catch(function() {});
+  }
 }
 
 function showImportPage() { document.getElementById('publishModal').classList.remove('show'); document.getElementById('importPage').classList.add('show'); document.getElementById('tabBar').style.display = 'none'; }
@@ -2363,6 +2411,26 @@ function checkInSpot() {
   localStorage.setItem('birdcircle_points', String(points));
   refreshPointsDisplay();
   showToast('打卡成功！' + s.name + ' +5 积分 (累计 ' + points + ' 分)');
+
+  // 同步打卡到后端
+  if (backendReady) {
+    fetch('/api/checkin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        device_id: deviceId,
+        spot_name: s.name,
+        lat: s.lat,
+        lng: s.lng
+      })
+    }).then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.streak) {
+          console.log('打卡连续天数:', data.streak);
+        }
+      })
+      .catch(function() {});
+  }
 }
 
 function navToSpot() {
