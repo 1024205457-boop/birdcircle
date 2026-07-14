@@ -175,6 +175,7 @@ html, body {
   width:160px; height:120px; overflow:hidden; position:relative;
 }
 .spot-card-img img { width:100%; height:100%; object-fit:cover; }
+.page-home img { background:var(--border); }
 .spot-card-overlay {
   position:absolute; bottom:0; left:0; right:0;
   background:linear-gradient(transparent, rgba(0,0,0,0.55));
@@ -831,7 +832,7 @@ html, body {
     <div class="spot-scroll">
       <div class="spot-card" onclick="switchTab(1)">
         <div class="spot-card-img">
-          <img src="photos/spot_lake_island.jpg" alt="奥林匹克森林公园南园">
+          <img src="photos/spot_lake_island.jpg" alt="奥林匹克森林公园南园" loading="lazy">
           <div class="spot-card-overlay">
             <div class="spot-card-overlay-name">奥林匹克森林公园南园</div>
             <div class="spot-card-overlay-meta">距你 1.2km · 朝阳区</div>
@@ -840,7 +841,7 @@ html, body {
       </div>
       <div class="spot-card" onclick="switchTab(1)">
         <div class="spot-card-img">
-          <img src="photos/spot_mirror_lake.jpg" alt="元大都城垣遗址公园">
+          <img src="photos/spot_mirror_lake.jpg" alt="元大都城垣遗址公园" loading="lazy">
           <div class="spot-card-overlay">
             <div class="spot-card-overlay-name">元大都城垣遗址公园</div>
             <div class="spot-card-overlay-meta">距你 800m · 朝阳区</div>
@@ -849,7 +850,7 @@ html, body {
       </div>
       <div class="spot-card" onclick="switchTab(1)">
         <div class="spot-card-img">
-          <img src="photos/spot_wetland.jpg" alt="朝阳公园">
+          <img src="photos/spot_wetland.jpg" alt="朝阳公园" loading="lazy">
           <div class="spot-card-overlay">
             <div class="spot-card-overlay-name">朝阳公园</div>
             <div class="spot-card-overlay-meta">距你 6.8km · 朝阳区</div>
@@ -858,7 +859,7 @@ html, body {
       </div>
       <div class="spot-card" onclick="switchTab(1)">
         <div class="spot-card-img">
-          <img src="photos/spot_meadow.jpg" alt="玉渊潭公园">
+          <img src="photos/spot_meadow.jpg" alt="玉渊潭公园" loading="lazy">
           <div class="spot-card-overlay">
             <div class="spot-card-overlay-name">玉渊潭公园</div>
             <div class="spot-card-overlay-meta">距你 5.8km · 海淀区</div>
@@ -867,7 +868,7 @@ html, body {
       </div>
       <div class="spot-card" onclick="switchTab(1)">
         <div class="spot-card-img">
-          <img src="photos/spot_forest_path.jpg" alt="颐和园">
+          <img src="photos/spot_forest_path.jpg" alt="颐和园" loading="lazy">
           <div class="spot-card-overlay">
             <div class="spot-card-overlay-name">颐和园</div>
             <div class="spot-card-overlay-meta">距你 8.5km · 海淀区</div>
@@ -883,15 +884,15 @@ html, body {
           当季明星
         </h4>
         <div class="star-item" onclick="openBirdDetail('kingfisher')">
-          <div class="star-img"><img src="photos/kingfisher_1.jpg" alt="翠鸟"></div>
+          <div class="star-img"><img src="photos/kingfisher_1.jpg" alt="翠鸟" loading="lazy"></div>
           <div><div class="star-name">翠鸟</div><div class="star-sub">3 张照片</div></div>
         </div>
         <div class="star-item" onclick="openBirdDetail('mandarin')">
-          <div class="star-img"><img src="photos/mandarin_1.jpg" alt="鸳鸯"></div>
+          <div class="star-img"><img src="photos/mandarin_1.jpg" alt="鸳鸯" loading="lazy"></div>
           <div><div class="star-name">鸳鸯</div><div class="star-sub">5 张照片</div></div>
         </div>
         <div class="star-item" onclick="openBirdDetail('hoopoe')">
-          <div class="star-img"><img src="photos/hoopoe_1.jpg" alt="戴胜"></div>
+          <div class="star-img"><img src="photos/hoopoe_1.jpg" alt="戴胜" loading="lazy"></div>
           <div><div class="star-name">戴胜</div><div class="star-sub">2 张照片</div></div>
         </div>
       </div>
@@ -927,7 +928,7 @@ html, body {
         <div><div class="feed-user">北坞新手</div><div class="feed-meta">1小时前 · 北坞公园</div></div>
       </div>
       <div class="feed-content">今天拍到这只鸟，头部有红色斑纹，体型比麻雀大一圈，请问是什么鸟？</div>
-      <div class="feed-photo"><img src="photos/bird_help.jpg" alt="求助辨鸟"></div>
+      <div class="feed-photo"><img src="photos/bird_help.jpg" alt="求助辨鸟" loading="lazy"></div>
       <div class="feed-footer"><span class="feed-tag help">辨鸟</span><span style="font-size:12px;color:var(--text-muted)">12 人回复</span></div>
     </div>
     <div class="feed-item">
@@ -1012,10 +1013,10 @@ html, body {
     <div class="points-hint">积分来源：上传观鸟点 +50，补充鸟种照片 +20，加入同城观鸟群 +10</div>
     <div class="shop-title">积分兑换</div>
     <div class="shop-grid">
-      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/binoculars.jpg" alt="双筒望远镜" onerror="this.style.display='none';this.parentNode.textContent='🔭'"><div class="item-name-overlay">蔡司 Terra ED 8x42</div></div><div class="shop-item-body"><div class="shop-item-desc">德国进口 · 适合湿地林地观鸟</div><div class="shop-item-price">9,800 积分</div></div></div>
-      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cap.jpg" alt="遮阳帽" onerror="this.style.display='none';this.parentNode.textContent='🧢'"><div class="item-name-overlay">Columbia 速干遮阳帽</div></div><div class="shop-item-body"><div class="shop-item-desc">UPF50+ · 防晒透气</div><div class="shop-item-price">1,200 积分</div></div></div>
-      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cleaning.jpg" alt="清洁套装" onerror="this.style.display='none';this.parentNode.textContent='🧴'"><div class="item-name-overlay">VSGO 镜头清洁套装</div></div><div class="shop-item-body"><div class="shop-item-desc">镜头笔 + 气吹 + 无绒纸</div><div class="shop-item-price">800 积分</div></div></div>
-      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/bag.jpg" alt="腰包" onerror="this.style.display='none';this.parentNode.textContent='🎒'"><div class="item-name-overlay">Lowepro 摄影腰包</div></div><div class="shop-item-body"><div class="shop-item-desc">防水面料 · 多功能分区</div><div class="shop-item-price">1,500 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/binoculars.jpg" alt="双筒望远镜" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='🔭'"><div class="item-name-overlay">蔡司 Terra ED 8x42</div></div><div class="shop-item-body"><div class="shop-item-desc">德国进口 · 适合湿地林地观鸟</div><div class="shop-item-price">9,800 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cap.jpg" alt="遮阳帽" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='🧢'"><div class="item-name-overlay">Columbia 速干遮阳帽</div></div><div class="shop-item-body"><div class="shop-item-desc">UPF50+ · 防晒透气</div><div class="shop-item-price">1,200 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/cleaning.jpg" alt="清洁套装" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='🧴'"><div class="item-name-overlay">VSGO 镜头清洁套装</div></div><div class="shop-item-body"><div class="shop-item-desc">镜头笔 + 气吹 + 无绒纸</div><div class="shop-item-price">800 积分</div></div></div>
+      <div class="shop-item"><div class="shop-item-img"><img src="photos/products/bag.jpg" alt="腰包" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='🎒'"><div class="item-name-overlay">Lowepro 摄影腰包</div></div><div class="shop-item-body"><div class="shop-item-desc">防水面料 · 多功能分区</div><div class="shop-item-price">1,500 积分</div></div></div>
       <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#f0f7ff;">📖</div><div class="item-name-overlay">中国鸟类野外手册</div></div><div class="shop-item-body"><div class="shop-item-desc">刘阳/陈自著 · 便携权威图鉴</div><div class="shop-item-price">3,200 积分</div></div></div>
       <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#f5f0ff;">🧲</div><div class="item-name-overlay">SWAROVSKI CL Companion 8x30</div></div><div class="shop-item-body"><div class="shop-item-desc">奥地利施华洛世奇 · 轻便观鸟镜</div><div class="shop-item-price">12,000 积分</div></div></div>
       <div class="shop-item"><div class="shop-item-img"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#fff5f0;">🪶</div><div class="item-name-overlay">羽毛书签礼盒</div></div><div class="shop-item-body"><div class="shop-item-desc">手工羽毛书签 · 含8种珍稀鸟羽</div><div class="shop-item-price">600 积分</div></div></div>
