@@ -1755,15 +1755,16 @@ function finishImport() {
       newBirdNames.push(birdName);
       archivedCount++;
 
-      // Add new bird to albumCategories "用户上传" group
-      var userUploadCat = null;
+      // 按鸟种名称创建独立分类
+      var catTitle = birdName + ' 相册';
+      var existCat = null;
       for (var c = 0; c < albumCategories.length; c++) {
-        if (albumCategories[c].title === '用户上传') { userUploadCat = albumCategories[c]; break; }
+        if (albumCategories[c].title === catTitle) { existCat = albumCategories[c]; break; }
       }
-      if (userUploadCat) {
-        if (userUploadCat.birds.indexOf(newId) === -1) userUploadCat.birds.unshift(newId);
+      if (existCat) {
+        if (existCat.birds.indexOf(newId) === -1) existCat.birds.unshift(newId);
       } else {
-        albumCategories.unshift({ title: '用户上传', birds: [newId] });
+        albumCategories.unshift({ title: catTitle, birds: [newId] });
       }
     }
   });
@@ -2050,15 +2051,16 @@ function submitBirdReport() {
       photos: [{ src: photo, time: new Date().toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).replace(/\//g,'-') + ' 上传', place: spotName }]
     };
     matchedId = newId;
-    // 添加到相册分类（复用已有“用户上传”分类）
-    var userCat = null;
+    // 按鸟种名称创建独立分类
+    var catTitle = birdName + ' 相册';
+    var existCat = null;
     for (var c = 0; c < albumCategories.length; c++) {
-      if (albumCategories[c].title === '用户上传') { userCat = albumCategories[c]; break; }
+      if (albumCategories[c].title === catTitle) { existCat = albumCategories[c]; break; }
     }
-    if (userCat) {
-      if (userCat.birds.indexOf(newId) === -1) userCat.birds.unshift(newId);
+    if (existCat) {
+      if (existCat.birds.indexOf(newId) === -1) existCat.birds.unshift(newId);
     } else {
-      albumCategories.unshift({ title: '用户上传', birds: [newId] });
+      albumCategories.unshift({ title: catTitle, birds: [newId] });
     }
   }
 
@@ -2865,17 +2867,19 @@ function restoreUserData() {
       for (var id in saved.birdData) { birdData[id] = saved.birdData[id]; }
     }
     if (saved.userCatBirds && saved.userCatBirds.length) {
-      var userCat = null;
-      for (var c = 0; c < albumCategories.length; c++) {
-        if (albumCategories[c].title === '用户上传') { userCat = albumCategories[c]; break; }
-      }
-      if (userCat) {
-        saved.userCatBirds.forEach(function(birdId) {
-          if (userCat.birds.indexOf(birdId) === -1) userCat.birds.push(birdId);
-        });
-      } else {
-        albumCategories.unshift({ title: '用户上传', birds: saved.userCatBirds });
-      }
+      saved.userCatBirds.forEach(function(cat) {
+        var existCat = null;
+        for (var c = 0; c < albumCategories.length; c++) {
+          if (albumCategories[c].title === cat.title) { existCat = albumCategories[c]; break; }
+        }
+        if (existCat) {
+          cat.birds.forEach(function(birdId) {
+            if (existCat.birds.indexOf(birdId) === -1) existCat.birds.push(birdId);
+          });
+        } else {
+          albumCategories.unshift(cat);
+        }
+      });
     }
   } catch(e) { console.log('restore failed', e); }
 }
@@ -2889,11 +2893,10 @@ function saveUserData() {
         saved.birdData[id] = birdData[id];
       }
     }
-    // 保存"用户上传"分类
+    // 保存用户创建的分类（不以"目"开头且以"相册"结尾的分类）
     for (var c = 0; c < albumCategories.length; c++) {
-      if (albumCategories[c].title === '用户上传') {
-        saved.userCatBirds = albumCategories[c].birds;
-        break;
+      if (albumCategories[c].title.indexOf('目') === -1 && albumCategories[c].title.indexOf('相册') !== -1) {
+        saved.userCatBirds.push({ title: albumCategories[c].title, birds: albumCategories[c].birds });
       }
     }
     localStorage.setItem('birdcircle_user_data', JSON.stringify(saved));
