@@ -901,15 +901,15 @@ html, body {
           积分任务
         </h4>
         <div class="points-tasks">
-          <div class="task-item" onclick="showToast('已完成')">
+          <div class="task-item" onclick="document.getElementById('publishModal').classList.add('show');document.getElementById('tabBar').style.display='none';">
             <div class="task-info"><div class="task-icon">📷</div><div class="task-text"><div class="task-name">上传第一张鸟照</div><div class="task-desc">拍摄并上传你观察到的鸟类</div></div></div>
             <div class="task-reward"><span class="task-points">+50</span><span class="task-done">已完成</span></div>
           </div>
-          <div class="task-item" onclick="showToast('进行中')">
+          <div class="task-item" onclick="switchTab(1)">
             <div class="task-info"><div class="task-icon">🔄</div><div class="task-text"><div class="task-name">连续7天打卡</div><div class="task-desc">每天至少打卡一个鸟点，坚持一周</div></div></div>
             <div class="task-reward"><span class="task-points">+100</span><span class="task-progress">3/7</span></div>
           </div>
-          <div class="task-item" onclick="showToast('未完成')">
+          <div class="task-item" onclick="document.getElementById('publishModal').classList.add('show');document.getElementById('tabBar').style.display='none';">
             <div class="task-info"><div class="task-icon">🌟</div><div class="task-text"><div class="task-name">发现稀有鸟种</div><div class="task-desc">上传并记录国家保护鸟类</div></div></div>
             <div class="task-reward"><span class="task-points">+200</span><span class="task-status">未完成</span></div>
           </div>
